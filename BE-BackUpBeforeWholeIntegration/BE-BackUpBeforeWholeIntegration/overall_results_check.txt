@@ -1,0 +1,12 @@
+=== CHECKING OVERALL RESULTS DATA ===
+
+Total FYP Terms: 2
+
+Term: Fall-2025 (ID: 6974bf42c7f9673d95fad93b)
+  ❌ No evaluations exist for this term
+
+Term: 231-1 (ID: 69750270f01fb5bf751ba495)
+  ✓ Evaluations found
+  Exams in evaluation: 1
+    - Proposal Defense: 1 groups, 3 students
+  ⚠️ Missing Part I exams: Proposal, Attendance-I, Mid-I, Final-I

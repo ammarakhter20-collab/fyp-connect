@@ -1,0 +1,135 @@
+[2026-01-25T16:39:32.175Z] Create Exam Schedule Cont called
+[2026-01-25T16:39:32.176Z] Payload: {"panel":"697511ebf01fb5bf751baa9d","ExamDate":"2026-01-25","ExamTime":"22:39","Venue":"m 2","CreatedExam":"69752dc6be0768a8903adfea","coordinatorId":"69750e2bf01fb5bf751ba680"}
+[2026-01-25T16:39:32.218Z] Error: Coordinator details are missing or incomplete
+[2026-01-25T16:40:16.573Z] Create Exam Schedule Cont called
+[2026-01-25T16:40:16.574Z] Payload: {"panel":"697511ebf01fb5bf751baa9d","ExamDate":"2026-01-25","ExamTime":"22:40","Venue":"m 4","CreatedExam":"69752dc6be0768a8903adfea","coordinatorId":"69750e2bf01fb5bf751ba680"}
+[2026-01-25T16:40:16.584Z] Error: Coordinator details are missing or incomplete
+[2026-01-25T16:41:44.729Z] Create Exam Schedule Cont called
+[2026-01-25T16:41:44.746Z] Payload: {"panel":"697511ebf01fb5bf751baa9d","ExamDate":"2026-01-25","ExamTime":"22:41","Venue":"Main hall","CreatedExam":"69752dc6be0768a8903adfea","coordinatorId":"69750e2bf01fb5bf751ba680"}
+[2026-01-25T16:41:44.759Z] Error: Coordinator details are missing or incomplete
+[2026-01-25T16:51:19.116Z] Create Exam Schedule Cont called
+[2026-01-25T16:51:19.117Z] Payload: {"panel":"697511ebf01fb5bf751baa9d","ExamDate":"2026-01-25","ExamTime":"22:51","Venue":"m 3","CreatedExam":"69752dc6be0768a8903adfea","coordinatorId":"69750e2bf01fb5bf751ba680"}
+[2026-01-25T16:51:19.194Z] Skipping email notification (no transporter)
+[2026-01-25T17:04:12.174Z] Create Exam Schedule Cont called
+[2026-01-25T17:04:12.176Z] Payload: {"panel":"697511ebf01fb5bf751baa9d","ExamDate":"2026-01-25","ExamTime":"22:05","Venue":"m 9","CreatedExam":"69752dc6be0768a8903adfea","coordinatorId":"69750e2bf01fb5bf751ba680"}
+[2026-01-25T17:04:12.215Z] Skipping email notification (no transporter)
+[2026-01-25T17:19:20.498Z] Create Exam Schedule Cont called
+[2026-01-25T17:19:20.499Z] Payload: {"panel":"697511ebf01fb5bf751baa9d","ExamDate":"2026-01-25","ExamTime":"22:19","Venue":"m 8","CreatedExam":"69752dc6be0768a8903adfea","coordinatorId":"69750e2bf01fb5bf751ba680"}
+[2026-01-25T17:19:20.552Z] Skipping email notification (no transporter)
+[2026-01-25T17:28:44.496Z] Create Exam Schedule Cont called
+[2026-01-25T17:28:44.496Z] Payload: {"panel":"697511ebf01fb5bf751baa9d","ExamDate":"2026-01-25","ExamTime":"22:29","Venue":"m 7","CreatedExam":"69752dc6be0768a8903adfea","coordinatorId":"69750e2bf01fb5bf751ba680"}
+[2026-01-25T17:28:44.555Z] Skipping email notification (no transporter)
+[2026-01-25T17:32:47.499Z] Create Exam Schedule Cont called
+[2026-01-25T17:32:47.499Z] Payload: {"panel":"697511ebf01fb5bf751baa9d","ExamDate":"2026-01-25","ExamTime":"22:33","Venue":"m 8","CreatedExam":"69752dc6be0768a8903adfea","coordinatorId":"69750e2bf01fb5bf751ba680"}
+[2026-01-25T17:32:47.546Z] Skipping email notification (no transporter)
+[2026-01-25T18:27:48.434Z] Create Exam Schedule Cont called
+[2026-01-25T18:27:48.435Z] Payload: {"panel":"697511ebf01fb5bf751baa9d","ExamDate":"2026-01-25","ExamTime":"23:27","Venue":"mk","CreatedExam":"69752dc6be0768a8903adfea","coordinatorId":"69750e2bf01fb5bf751ba680"}
+[2026-01-25T18:27:48.460Z] Skipping email notification (no transporter)
+[2026-01-26T16:55:31.371Z] Create Exam Schedule Cont called
+[2026-01-26T16:55:31.399Z] Payload: {"panel":"697511ebf01fb5bf751baa9d","ExamDate":"2026-01-26","ExamTime":"21:55","Venue":"m3","CreatedExam":"69779c3cb3178af82919e90b","coordinatorId":"69750e2bf01fb5bf751ba680"}
+[2026-01-26T16:55:31.489Z] Skipping email notification (no transporter)
+[2026-01-26T16:56:42.984Z] Create Exam Schedule Cont called
+[2026-01-26T16:56:42.986Z] Payload: {"panel":"697511ebf01fb5bf751baa9d","ExamDate":"2026-01-26","ExamTime":"21:56","Venue":"m k","CreatedExam":"69779c66b3178af82919e963","coordinatorId":"69750e2bf01fb5bf751ba680"}
+[2026-01-26T16:56:43.021Z] Skipping email notification (no transporter)
+[2026-01-26T16:59:06.888Z] Create Exam Schedule Cont called
+[2026-01-26T16:59:06.889Z] Payload: {"panel":"697511ebf01fb5bf751baa9d","ExamDate":"2026-01-26","ExamTime":"21:59","Venue":"m 2","CreatedExam":"69779c3cb3178af82919e90b","coordinatorId":"69750e2bf01fb5bf751ba680"}
+[2026-01-26T16:59:06.926Z] Skipping email notification (no transporter)
+[2026-01-29T14:18:21.186Z] Create Exam Schedule Cont called
+[2026-01-29T14:18:21.190Z] Payload: {"panel":"697b6aed56273c082e9ec09b","ExamDate":"2026-01-29","ExamTime":"19:20","Venue":"m3","CreatedExam":"697b6be656273c082e9ec275","coordinatorId":"697b65de56273c082e9ebad4"}
+[2026-01-29T14:18:21.221Z] Skipping email notification (no transporter)
+[2026-01-29T14:32:45.927Z] Create Exam Schedule Cont called
+[2026-01-29T14:32:45.930Z] Payload: {"panel":"697b6aed56273c082e9ec09b","ExamDate":"2026-01-29","ExamTime":"19:33","Venue":"m 7","CreatedExam":"697b6be656273c082e9ec275","coordinatorId":"697b65de56273c082e9ebad4"}
+[2026-01-29T14:32:46.091Z] Skipping email notification (no transporter)
+[2026-01-29T14:36:24.290Z] Create Exam Schedule Cont called
+[2026-01-29T14:36:24.292Z] Payload: {"panel":"697b6aed56273c082e9ec09b","ExamDate":"2026-01-29","ExamTime":"19:36","Venue":"m 8","CreatedExam":"697b704ef366e4ad97008e6b","coordinatorId":"697b65de56273c082e9ebad4"}
+[2026-01-29T14:36:24.331Z] Skipping email notification (no transporter)
+[2026-01-29T17:52:17.892Z] Create Exam Schedule Cont called
+[2026-01-29T17:52:17.898Z] Payload: {"panel":"697b6aed56273c082e9ec09b","ExamDate":"2026-01-29","ExamTime":"22:53","Venue":"m 1","CreatedExam":"697b9e33ccb014f2eb4548fa","coordinatorId":"697b65de56273c082e9ebad4"}
+[2026-01-29T17:52:17.952Z] Skipping email notification (no transporter)
+[2026-01-29T17:55:13.877Z] Create Exam Schedule Cont called
+[2026-01-29T17:55:13.878Z] Payload: {"panel":"697b6aed56273c082e9ec09b","ExamDate":"2026-01-29","ExamTime":"22:56","Venue":"m k","CreatedExam":"697b9ee3ccb014f2eb454cd6","coordinatorId":"697b65de56273c082e9ebad4"}
+[2026-01-29T17:55:13.899Z] Skipping email notification (no transporter)
+[2026-01-29T18:11:40.884Z] Create Exam Schedule Cont called
+[2026-01-29T18:11:40.889Z] Payload: {"panel":"697b6aed56273c082e9ec09b","ExamDate":"2026-01-29","ExamTime":"23:12","Venue":"5","CreatedExam":"697ba27200a5b543e2cc311b","coordinatorId":"697b65de56273c082e9ebad4"}
+[2026-01-29T18:11:40.927Z] Skipping email notification (no transporter)
+[2026-01-29T18:42:48.428Z] Create Exam Schedule Cont called
+[2026-01-29T18:42:48.435Z] Payload: {"panel":"697b6aed56273c082e9ec09b","ExamDate":"2026-01-29","ExamTime":"23:43","Venue":"m 3","CreatedExam":"697ba97034ac6c6aa08ad7c9","coordinatorId":"697b65de56273c082e9ebad4"}
+[2026-01-29T18:42:48.462Z] Skipping email notification (no transporter)
+[2026-01-29T19:43:23.420Z] Create Exam Schedule Cont called
+[2026-01-29T19:43:23.422Z] Payload: {"panel":"697b6aed56273c082e9ec09b","ExamDate":"2026-01-30","ExamTime":"00:44","Venue":"mk","CreatedExam":"697bb842bf8bb9eb50adef6d","coordinatorId":"697b65de56273c082e9ebad4"}
+[2026-01-29T19:43:23.471Z] Skipping email notification (no transporter)
+[2026-01-29T19:48:23.730Z] Create Exam Schedule Cont called
+[2026-01-29T19:48:23.730Z] Payload: {"panel":"697b6aed56273c082e9ec09b","ExamDate":"2026-01-30","ExamTime":"00:50","Venue":"mk","CreatedExam":"697bb938bf8bb9eb50adf38b","coordinatorId":"697b65de56273c082e9ebad4"}
+[2026-01-29T19:48:23.752Z] Skipping email notification (no transporter)
+[2026-01-29T20:29:10.850Z] Create Exam Schedule Cont called
+[2026-01-29T20:29:10.851Z] Payload: {"panel":"697b6aed56273c082e9ec09b","ExamDate":"2026-01-30","ExamTime":"01:30","Venue":"mk","CreatedExam":"697bc148a77ec0bcb5735528","coordinatorId":"697b65de56273c082e9ebad4"}
+[2026-01-29T20:29:10.889Z] Skipping email notification (no transporter)
+[2026-01-29T20:31:45.995Z] Create Exam Schedule Cont called
+[2026-01-29T20:31:45.996Z] Payload: {"panel":"697b6aed56273c082e9ec09b","ExamDate":"2026-01-30","ExamTime":"01:32","Venue":"mk","CreatedExam":"697bc39a79dde20f64041f4b","coordinatorId":"697b65de56273c082e9ebad4"}
+[2026-01-29T20:31:46.019Z] Skipping email notification (no transporter)
+[2026-01-29T21:15:57.737Z] Create Exam Schedule Cont called
+[2026-01-29T21:15:57.742Z] Payload: {"panel":"697b6aed56273c082e9ec09b","ExamDate":"2026-01-30","ExamTime":"02:16","Venue":"mk","CreatedExam":"697bccfefef079ae2cd3060c","coordinatorId":"697b65de56273c082e9ebad4"}
+[2026-01-29T21:15:57.792Z] Skipping email notification (no transporter)
+[2026-04-30T04:11:41.305Z] Create Exam Schedule Cont called
+[2026-04-30T04:11:41.309Z] Payload: {"panel":"69f2d642363f87152ed48b67","ExamDate":"2026-04-29","ExamTime":"21:12","Venue":"2","CreatedExam":"69f2abba6aef9ad387f86f16","coordinatorId":"69f22c3754a0107c1f55402d"}
+[2026-04-30T04:11:41.376Z] Skipping email notification (no transporter)
+[2026-05-01T18:43:44.925Z] Create Exam Schedule Cont called
+[2026-05-01T18:43:44.933Z] Payload: {"panel":"69f4f44043ba5aff71cc5b64","ExamDate":"2026-05-01","ExamTime":"11:43","Venue":"2","CreatedExam":"69f4f41643ba5aff71cc5b0e","coordinatorId":"69f31b869844ed73a59825c6"}
+[2026-05-01T18:43:45.188Z] Skipping email notification (no transporter)
+[2026-05-01T19:47:50.177Z] Create Exam Schedule Cont called
+[2026-05-01T19:47:50.183Z] Payload: {"panel":"69f4f44043ba5aff71cc5b64","ExamDate":"2026-05-01","ExamTime":"12:47","Venue":"e5","CreatedExam":"69f503404cc118ccc853ba1d","coordinatorId":"69f31b869844ed73a59825c6"}
+[2026-05-01T19:47:50.223Z] Skipping email notification (no transporter)
+[2026-05-02T10:29:07.602Z] Create Exam Schedule Cont called
+[2026-05-02T10:29:07.618Z] Payload: {"panel":"69f4f44043ba5aff71cc5b64","ExamDate":"2026-05-02","ExamTime":"03:30","Venue":"v3","CreatedExam":"69f5d1493257b1306a0bcd3d","coordinatorId":"69f31b869844ed73a59825c6"}
+[2026-05-02T10:29:07.699Z] Skipping email notification (no transporter)
+[2026-05-02T17:34:20.024Z] Create Exam Schedule Cont called
+[2026-05-02T17:34:20.028Z] Payload: {"panel":"69f4f44043ba5aff71cc5b64","ExamDate":"2026-05-02","ExamTime":"10:35","Venue":"b5","CreatedExam":"69f5d4673257b1306a0bd5c2","coordinatorId":"69f31b869844ed73a59825c6"}
+[2026-05-02T17:34:20.150Z] Skipping email notification (no transporter)
+[2026-05-02T18:04:19.295Z] Create Exam Schedule Cont called
+[2026-05-02T18:04:19.298Z] Payload: {"panel":"69f4f44043ba5aff71cc5b64","ExamDate":"2026-05-02","ExamTime":"11:04","Venue":"h3","CreatedExam":"69f636c38c5eebc12a8757c3","coordinatorId":"69f31b869844ed73a59825c6"}
+[2026-05-02T18:04:19.358Z] Skipping email notification (no transporter)
+[2026-05-03T11:54:23.686Z] Create Exam Schedule Cont called
+[2026-05-03T11:54:23.691Z] Payload: {"panel":"69f73740dd9475ae2217d12b","ExamDate":"2026-05-03","ExamTime":"17:54","Venue":"h7","CreatedExam":"69f7319bdd9475ae2217cccb","coordinatorId":"69f725e2dd9475ae2217c563"}
+[2026-05-03T11:54:23.775Z] Skipping email notification (no transporter)
+[2026-05-03T12:15:57.120Z] Create Exam Schedule Cont called
+[2026-05-03T12:15:57.122Z] Payload: {"panel":"69f73740dd9475ae2217d12b","ExamDate":"2026-05-03","ExamTime":"17:16","Venue":"h7","CreatedExam":"69f73bdc59f2ebae689416e3","coordinatorId":"69f725e2dd9475ae2217c563"}
+[2026-05-03T12:15:57.159Z] Skipping email notification (no transporter)
+[2026-05-03T12:26:28.192Z] Create Exam Schedule Cont called
+[2026-05-03T12:26:28.193Z] Payload: {"panel":"69f73740dd9475ae2217d12b","ExamDate":"2026-05-03","ExamTime":"05:27","Venue":"e5","CreatedExam":"69f73e4659f2ebae689420af","coordinatorId":"69f725e2dd9475ae2217c563"}
+[2026-05-03T12:26:28.212Z] Skipping email notification (no transporter)
+[2026-05-03T12:35:29.540Z] Create Exam Schedule Cont called
+[2026-05-03T12:35:29.541Z] Payload: {"panel":"69f73740dd9475ae2217d12b","ExamDate":"2026-05-03","ExamTime":"05:35","Venue":"67","CreatedExam":"69f740a759f2ebae68943b87","coordinatorId":"69f725e2dd9475ae2217c563"}
+[2026-05-03T12:35:29.562Z] Skipping email notification (no transporter)
+[2026-05-03T12:39:56.838Z] Create Exam Schedule Cont called
+[2026-05-03T12:39:56.839Z] Payload: {"panel":"69f73740dd9475ae2217d12b","ExamDate":"2026-05-03","ExamTime":"05:39","Venue":"m 5","CreatedExam":"69f741b259f2ebae68944832","coordinatorId":"69f725e2dd9475ae2217c563"}
+[2026-05-03T12:39:56.855Z] Skipping email notification (no transporter)
+[2026-05-03T12:48:47.038Z] Create Exam Schedule Cont called
+[2026-05-03T12:48:47.043Z] Payload: {"panel":"69f73740dd9475ae2217d12b","ExamDate":"2026-05-03","ExamTime":"05:48","Venue":"j9","CreatedExam":"69f7441259f2ebae689475e8","coordinatorId":"69f725e2dd9475ae2217c563"}
+[2026-05-03T12:48:47.059Z] Skipping email notification (no transporter)
+[2026-05-06T20:13:52.129Z] Create Exam Schedule Cont called
+[2026-05-06T20:13:52.133Z] Payload: {"panel":"69fba0dd321dd2c23a23c817","ExamDate":"2026-05-06","ExamTime":"14:13","Venue":"h4","CreatedExam":"69fba096321dd2c23a23c747","coordinatorId":"69f725e2dd9475ae2217c563"}
+[2026-05-06T20:13:52.168Z] Skipping email notification (no transporter)
+[2026-05-06T21:07:19.263Z] Create Exam Schedule Cont called
+[2026-05-06T21:07:19.264Z] Payload: {"panel":"69fba0dd321dd2c23a23c817","ExamDate":"2026-05-06","ExamTime":"14:08","Venue":"b4","CreatedExam":"69fbad6d321dd2c23a242836","coordinatorId":"69f725e2dd9475ae2217c563"}
+[2026-05-06T21:07:19.294Z] Skipping email notification (no transporter)
+[2026-05-06T21:23:31.970Z] Create Exam Schedule Cont called
+[2026-05-06T21:23:31.973Z] Payload: {"panel":"69fba0dd321dd2c23a23c817","ExamDate":"2026-05-06","ExamTime":"14:24","Venue":"h8","CreatedExam":"69fbb090321dd2c23a24793f","coordinatorId":"69f725e2dd9475ae2217c563"}
+[2026-05-06T21:23:31.999Z] Skipping email notification (no transporter)
+[2026-05-13T16:49:34.399Z] Create Exam Schedule Cont called
+[2026-05-13T16:49:34.401Z] Payload: {"panel":"69fba0dd321dd2c23a23c817","ExamDate":"2026-05-13","ExamTime":"09:49","Venue":"b9","CreatedExam":"6a03fb4872a84f0d0c17fc08","coordinatorId":"69f725e2dd9475ae2217c563"}
+[2026-05-13T16:49:34.451Z] Skipping email notification (no transporter)
+[2026-05-13T17:42:53.473Z] Create Exam Schedule Cont called
+[2026-05-13T17:42:53.508Z] Payload: {"panel":"69fba0dd321dd2c23a23c817","ExamDate":"2026-05-13","ExamTime":"10:44","Venue":"b6","CreatedExam":"6a04b803fa0cb68d445fbe9f","coordinatorId":"69f725e2dd9475ae2217c563"}
+[2026-05-13T17:42:53.567Z] Skipping email notification (no transporter)
+[2026-05-14T10:08:02.366Z] Create Exam Schedule Cont called
+[2026-05-14T10:08:02.374Z] Payload: {"panel":"6a059eb0781bb71c5a6acee7","ExamDate":"2026-05-14","ExamTime":"04:15","Venue":"h7","CreatedExam":"6a059e7a781bb71c5a6ace56","coordinatorId":"69f725e2dd9475ae2217c563"}
+[2026-05-14T10:08:02.420Z] Skipping email notification (no transporter)
+[2026-05-14T10:18:36.613Z] Create Exam Schedule Cont called
+[2026-05-14T10:18:36.614Z] Payload: {"panel":"6a059eb0781bb71c5a6acee7","ExamDate":"2026-05-14","ExamTime":"03:18","Venue":"v3","CreatedExam":"6a05a160781bb71c5a6b4579","coordinatorId":"69f725e2dd9475ae2217c563"}
+[2026-05-14T10:18:36.646Z] Skipping email notification (no transporter)
+[2026-05-14T10:30:48.406Z] Create Exam Schedule Cont called
+[2026-05-14T10:30:48.407Z] Payload: {"panel":"6a059eb0781bb71c5a6acee7","ExamDate":"2026-05-14","ExamTime":"03:31","Venue":"e5","CreatedExam":"6a05a43f781bb71c5a6be0fe","coordinatorId":"69f725e2dd9475ae2217c563"}
+[2026-05-14T10:30:48.435Z] Skipping email notification (no transporter)
+[2026-05-14T12:59:16.622Z] Create Exam Schedule Cont called
+[2026-05-14T12:59:16.643Z] Payload: {"panel":"6a05c6d4781bb71c5a6c1ab2","ExamDate":"2026-05-14","ExamTime":"05:00","Venue":"2","CreatedExam":"6a05c66c781bb71c5a6c1a0f","coordinatorId":"6a05c2be781bb71c5a6c161d"}
+[2026-05-14T12:59:16.687Z] Skipping email notification (no transporter)

@@ -1,0 +1,24 @@
+✅ Connected to MongoDB for Part II Fast Forward
+⚠️  Term 231-2 not found. Creating it...
+❌ Error: FYPTerm validation failed: endDate: Path `endDate` is required., startDate: Path `startDate` is required.
+ValidationError: FYPTerm validation failed: endDate: Path `endDate` is required., startDate: Path `startDate` is required.
+    at Document.invalidate (D:\FYP\FYP PORTAL CODE\BE-BackUpBeforeWholeIntegration\BE-BackUpBeforeWholeIntegration\node_modules\mongoose\lib\document.js:3289:32)
+    at D:\FYP\FYP PORTAL CODE\BE-BackUpBeforeWholeIntegration\BE-BackUpBeforeWholeIntegration\node_modules\mongoose\lib\document.js:3050:17
+    at D:\FYP\FYP PORTAL CODE\BE-BackUpBeforeWholeIntegration\BE-BackUpBeforeWholeIntegration\node_modules\mongoose\lib\schemaType.js:1388:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:84:11)
+✅ Connected to MongoDB for Part II Fast Forward
+⚠️  Term 231-2 not found. Creating it...
+❌ Error: FYPTerm validation failed: endDate: Path `endDate` is required., startDate: Path `startDate` is required.
+ValidationError: FYPTerm validation failed: endDate: Path `endDate` is required., startDate: Path `startDate` is required.
+    at Document.invalidate (D:\FYP\FYP PORTAL CODE\BE-BackUpBeforeWholeIntegration\BE-BackUpBeforeWholeIntegration\node_modules\mongoose\lib\document.js:3289:32)
+    at D:\FYP\FYP PORTAL CODE\BE-BackUpBeforeWholeIntegration\BE-BackUpBeforeWholeIntegration\node_modules\mongoose\lib\document.js:3050:17
+    at D:\FYP\FYP PORTAL CODE\BE-BackUpBeforeWholeIntegration\BE-BackUpBeforeWholeIntegration\node_modules\mongoose\lib\schemaType.js:1388:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:84:11)
+✅ Connected to MongoDB for Part II Fast Forward
+⚠️  Term 231-2 not found. Creating it...
+❌ Error: FYPTerm validation failed: endDate: Path `endDate` is required., startDate: Path `startDate` is required.
+ValidationError: FYPTerm validation failed: endDate: Path `endDate` is required., startDate: Path `startDate` is required.
+    at Document.invalidate (D:\FYP\FYP PORTAL CODE\BE-BackUpBeforeWholeIntegration\BE-BackUpBeforeWholeIntegration\node_modules\mongoose\lib\document.js:3289:32)
+    at D:\FYP\FYP PORTAL CODE\BE-BackUpBeforeWholeIntegration\BE-BackUpBeforeWholeIntegration\node_modules\mongoose\lib\document.js:3050:17
+    at D:\FYP\FYP PORTAL CODE\BE-BackUpBeforeWholeIntegration\BE-BackUpBeforeWholeIntegration\node_modules\mongoose\lib\schemaType.js:1388:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:84:11)

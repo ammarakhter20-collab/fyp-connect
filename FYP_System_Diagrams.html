@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FYP Portal - Enterprise Architect Professional View</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #a0aec0; padding: 50px; margin: 0; }
+        
+        .ea-canvas { 
+            background: white; 
+            width: 1050px; 
+            margin: 0 auto 80px auto; 
+            padding: 50px; 
+            box-shadow: 12px 12px 0px rgba(0,0,0,0.1); 
+            border: 1px solid #777;
+            position: relative;
+            min-height: 900px;
+        }
+
+        /* EA Diagram Tab (Top Left) */
+        .ea-tab {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #fff;
+            border-right: 1px solid #777;
+            border-bottom: 1px solid #777;
+            padding: 3px 15px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        .ea-tab::after {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #eee;
+            margin-left: 10px;
+            border: 1px solid #999;
+        }
+
+        /* EA Note Box (Top Right) */
+        .ea-note {
+            position: absolute;
+            top: 60px;
+            right: 40px;
+            width: 200px;
+            background: #ffffcc;
+            border: 1px solid #c0c0c0;
+            padding: 15px;
+            font-size: 11px;
+            box-shadow: 2px 2px 2px rgba(0,0,0,0.1);
+        }
+        .ea-note::before {
+            content: '●';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            color: #999;
+            font-size: 20px;
+        }
+
+        h1 { font-size: 18px; color: #333; margin-top: 20px; margin-bottom: 30px; font-weight: normal; }
+
+        /* Mermaid EA Specific Styling */
+        .mermaid { display: flex; justify-content: center; }
+        
+        /* CSS Injections for Enterprise Architect look */
+        svg { border: none !important; }
+        
+        /* Class Box Gradient (Beige to White) */
+        .node rect, .classTitle { 
+            fill: url(#eaGradient) !important; 
+            stroke: #000 !important; 
+            stroke-width: 0.8px !important; 
+        }
+        
+        /* Use Case Oval (Pale Blue) */
+        .node ellipse { 
+            fill: #E1F5FE !important; 
+            stroke: #01579B !important; 
+            stroke-width: 1px !important;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.1));
+        }
+
+        /* System Boundary Box */
+        .cluster rect { 
+            fill: #ffffff !important; 
+            stroke: #888888 !important; 
+            stroke-width: 1px !important; 
+        }
+
+        .label { font-size: 12px !important; }
+    </style>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                fontFamily: 'Segoe UI, Arial',
+                fontSize: '12px',
+                classFill: '#f4ecd8',
+                classBorder: '#000000',
+                lineColor: '#444'
+            }
+        });
+    </script>
+</head>
+<body>
+
+    <!-- SVG Gradient Definition for Mermaid to use -->
+    <svg width="0" height="0" style="position:absolute">
+        <defs>
+            <linearGradient id="eaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#f4ecd8;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#ffffff;stop-opacity:1" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <!-- 1. ADMIN DIAGRAM -->
+    <div class="ea-canvas">
+        <div class="ea-tab">uc Admin Operations</div>
+        <div class="ea-note">
+            Admin functions allow for the configuration of core organizational entities and the seeding of departmental data.
+        </div>
+        <h1>System Use Case View: Administration</h1>
+        <div class="mermaid">
+        graph LR
+            Admin((Admin))
+            subgraph "FYP Portal System"
+                UC1([Manage Departments])
+                UC2([Manage Programs])
+                UC3([Manage Terms])
+                UC4([Import Student Data])
+                UC5([Import Faculty Data])
+            end
+            Admin --- UC1
+            Admin --- UC2
+            Admin --- UC3
+            Admin --- UC4
+            Admin --- UC5
+        </div>
+        
+        <h1 style="margin-top:100px;">Logical Class View: Administration</h1>
+        <div class="mermaid">
+        classDiagram
+            class Admin {
+                +importUsers()
+                +configureSystem()
+            }
+            class Department {
+                +String name
+                +String code
+            }
+            class Program {
+                +String title
+                +String shortCode
+            }
+            Admin "1" -- "*" Department : +manages
+            Department "1" -- "*" Program : +offers
+        </div>
+    </div>
+
+    <!-- 2. STUDENT DIAGRAM -->
+    <div class="ea-canvas">
+        <div class="ea-tab">uc Student Lifecycle</div>
+        <div class="ea-note">
+            The student lifecycle covers the journey from initial group formation to the final submission of project deliverables.
+        </div>
+        <h1>System Use Case View: Student Services</h1>
+        <div class="mermaid">
+        graph LR
+            Student((Student))
+            subgraph "FYP Portal System"
+                UC1([Register FYP Group])
+                UC2([Browse Offered Topics])
+                UC3([Request Topic Change])
+                UC4([Submit Midterm Report])
+                UC5([View Announcements])
+            end
+            Student --- UC1
+            Student --- UC2
+            Student --- UC3
+            Student --- UC4
+            Student --- UC5
+        </div>
+
+        <h1 style="margin-top:100px;">Logical Class View: Student Domain</h1>
+        <div class="mermaid">
+        classDiagram
+            class Student {
+                +String regNo
+                +Float cgpa
+                +submitProposal()
+            }
+            class FYPGroup {
+                +String groupID
+                +String status
+            }
+            class ProjectTopic {
+                +String title
+                +String area
+            }
+            Student "1..3" -- "1" FYPGroup : +belongs to
+            FYPGroup "1" -- "1" ProjectTopic : +selects
+        </div>
+    </div>
+
+    <!-- 3. COORDINATOR DIAGRAM -->
+    <div class="ea-canvas">
+        <div class="ea-tab">uc Coordinator Management</div>
+        <div class="ea-note">
+            Coordinators orchestrate the academic timeline and ensure that project groups are promoted across terms based on eligibility.
+        </div>
+        <h1>System Use Case View: Academic Coordination</h1>
+        <div class="mermaid">
+        graph LR
+            Coord((Coordinator))
+            subgraph "FYP Portal System"
+                UC1([Set Registration Deadlines])
+                UC2([Update Due Dates])
+                UC3([Promote Groups to Part-II])
+                UC4([Broadcast Term Alerts])
+            end
+            Coord --- UC1
+            Coord --- UC2
+            Coord --- UC3
+            Coord --- UC4
+        </div>
+
+        <h1 style="margin-top:100px;">Logical Class View: Coordination Domain</h1>
+        <div class="mermaid">
+        classDiagram
+            class Coordinator {
+                +setDeadlines()
+                +promoteGroups()
+            }
+            class RegistrationDeadline {
+                +DateTime dueDate
+                +String announcement
+            }
+            Coordinator "1" -- "*" RegistrationDeadline : +defines
+        </div>
+    </div>
+
+    <!-- 4. SUPERVISOR DIAGRAM -->
+    <div class="ea-canvas">
+        <div class="ea-tab">uc Supervisor Oversight</div>
+        <div class="ea-note">
+            Supervisors manage the research direction and provide evaluation through weekly feedback and attendance marking.
+        </div>
+        <h1>System Use Case View: Supervision & Grading</h1>
+        <div class="mermaid">
+        graph LR
+            Sup((Supervisor))
+            subgraph "FYP Portal System"
+                UC1([Propose Project Topics])
+                UC2([Review Group Requests])
+                UC3([Mark Weekly Attendance])
+                UC4([Provide Evaluation Feedback])
+            end
+            Sup --- UC1
+            Sup --- UC2
+            Sup --- UC3
+            Sup --- UC4
+        </div>
+
+        <h1 style="margin-top:100px;">Logical Class View: Supervisor Domain</h1>
+        <div class="mermaid">
+        classDiagram
+            class Supervisor {
+                +proposeTopic()
+                +markAttendance()
+            }
+            class TopicProposal {
+                +String title
+                +String difficulty
+            }
+            Supervisor "1" -- "*" TopicProposal : +authors
+        </div>
+    </div>
+
+    <!-- 5. HOD DIAGRAM -->
+    <div class="ea-canvas">
+        <div class="ea-tab">uc HoD Oversight</div>
+        <div class="ea-note">
+            The Head of Department provides final authorization for projects and monitors faculty workload and departmental statistics.
+        </div>
+        <h1>System Use Case View: Executive Oversight</h1>
+        <div class="mermaid">
+        graph LR
+            HoD((HoD Actor))
+            subgraph "FYP Portal System"
+                UC1([View Department Stats])
+                UC2([Approve Final Projects])
+                UC3([Audit Faculty Load])
+            end
+            HoD --- UC1
+            HoD --- UC2
+            HoD --- UC3
+        </div>
+
+        <h1 style="margin-top:100px;">Logical Class View: Executive Domain</h1>
+        <div class="mermaid">
+        classDiagram
+            class HoD {
+                +approveProject()
+                +reviewStats()
+            }
+            class DeptStats {
+                +Int activeGroups
+                +Int completed
+            }
+            HoD "1" -- "1" DeptStats : +monitors
+        </div>
+    </div>
+
+</body>
+</html>

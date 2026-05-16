@@ -1,0 +1,17 @@
+# netlify.toml
+
+[build]
+  # The command to run your build
+  command = "go clean -modcache && npm run build" # Adjust based on your actual build command
+  # Directory to publish (typically for frontend projects, this is 'build' or 'dist')
+  publish = "build"
+
+  # If you need to set environment variables, you can add them here
+  environment = {
+    # Example environment variables
+    NODE_ENV = "production"
+  }
+
+[context.production.environment]
+  # Add environment variables specific to the production context here
+  NODE_ENV = "production"

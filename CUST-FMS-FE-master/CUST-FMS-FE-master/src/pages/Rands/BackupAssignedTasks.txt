@@ -1,0 +1,79 @@
+import React, { useEffect, useState } from 'react';
+import { initFlowbite } from 'flowbite';
+import * as Data from '../SupAttendance/SupAttendanceData';
+import SupActiveGroups from './SupActiveGroups';
+import SupAddTask from './SupAddTask';
+import SupUploadedTasks from './SupUploadedTasks';
+
+
+const SupAssignedTasks = () => {
+  const [showActiveGroups, setShowActiveGroups] = useState(true);
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [showUploadedTask, setShowUploadedTask] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [showViewAssignedTasks, setShowViewAssignedTasks] = useState(null);
+  const [addedTasks, setAddedTasks] = useState([]);
+
+  const ViewMarksClick = () => {
+  }
+  const ViewTaskClick = () => {
+    setShowUploadedTask(true);
+    setShowActiveGroups(false);
+  }
+  const AddTaskClick = (fypTitle) => {
+    const Group = Data.examGroupData.find(group => (group.fypTitle === fypTitle))
+    setSelectedGroup(Group);
+    setShowAddTask(true);
+    
+  }
+  const handleAddedTasks = (data) => {
+    const updatedTasks = [...addedTasks, data];
+    setAddedTasks(updatedTasks);
+    console.log('outputting the data',addedTasks);
+    handleAddTaskClose();
+    setShowActiveGroups(true);
+    
+  }
+  const handleAddTaskClose = () => {
+    setShowAddTask(false);
+
+  }
+  const handleViewDetailsClickUploadeTasks = () => {
+    console.log('View Details Click');
+    
+  } 
+
+
+  useEffect(() => {
+    initFlowbite();
+    const indicator = document.getElementById('scroll-indicator');
+    if (indicator) {
+      const tabName = 'SupAssignedTasks';
+      const selectedTab = document.querySelector(`[data-tab="${tabName}"]`);
+      const topOffset = selectedTab.offsetTop;
+      indicator.style.top = `${topOffset}px`;
+    }
+  }, []);
+  return (
+    <>
+      <div className='bg-slate-100 w-full h-full'>
+        <div className=" mx-10 pt-12 flex flex-col gap-3 ">
+          {showActiveGroups && (<div>
+            <SupActiveGroups groupData={Data.examGroupData} accordionId={1} AddTaskClick={AddTaskClick} ViewTaskClick={ViewTaskClick} ViewMarksClick={ViewMarksClick} />
+          </div>)}
+          {showAddTask && (<div className='fixed top-5 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-30'>
+            <SupAddTask selectedGroup={Data.examGroupData} onclose={handleAddTaskClose} handleAddTasks={handleAddedTasks} />
+          </div>)}
+          {showUploadedTask && (<div className='relative top-0 left-0 w-full h-full  justify-center items-center '>
+            <SupUploadedTasks selectedGroup= {selectedGroup} taskData = {addedTasks} groupData={addedTasks} accordionId={2} viewDetailsClick = {handleViewDetailsClickUploadeTasks} />
+          </div>)}
+          {showViewAssignedTasks &&(<div className="relative top-0 left-0 w-full h-full  justify-center items-center ">
+
+          </div>)}
+        </div>
+      </div>
+    </>
+  )
+}
+
+export default SupAssignedTasks
