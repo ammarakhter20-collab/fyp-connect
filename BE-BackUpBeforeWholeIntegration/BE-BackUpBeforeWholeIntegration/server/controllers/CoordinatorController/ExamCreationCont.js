@@ -27,21 +27,22 @@ const createExam = async (req, res) => {
       return res.status(400).json({ error: "partStatus and portalCategory are required" });
     }
 
-    // --- RESOURCE ALLOCATION VALIDATION (TEMPORARILY DISABLED) ---
-    // if (CATEGORY_CAPACITIES[portalCategory]) {
-    //   const maxWeight = CATEGORY_CAPACITIES[portalCategory];
-    //   const existingExamsInCategory = await CreateExam.find({ 
-    //     Term: Term, 
-    //     partStatus: partStatus, 
-    //     portalCategory: portalCategory 
-    //   });
-    //   const currentAllocatedWeight = existingExamsInCategory.reduce((sum, e) => sum + e.ExamWeightage, 0);
-    //   if (currentAllocatedWeight + Number(ExamWeightage) > maxWeight) {
-    //     return res.status(400).json({ 
-    //       error: `Resource Overload! ${portalCategory} category in ${partStatus} only has ${maxWeight - currentAllocatedWeight}% space remaining.` 
-    //     });
-    //   }
-    // }
+    // --- PART STATUS WEIGHTAGE VALIDATION ---
+    const existingExamsInPart = await CreateExam.find({ 
+      Term: Term, 
+      partStatus: partStatus 
+    });
+    
+    const currentTotalWeight = existingExamsInPart.reduce((sum, e) => sum + Number(e.ExamWeightage || 0), 0);
+    const requestedWeight = Number(ExamWeightage);
+    const remainingWeight = 100 - currentTotalWeight;
+
+    if (requestedWeight > remainingWeight) {
+      return res.status(400).json({ 
+        error: `Weightage limit exceeded! The maximum weightage left for ${partStatus} is ${remainingWeight}%. You tried to assign ${requestedWeight}%.`
+      });
+    }
+
     console.log(`[DEBUG] Attempting to create exam: Term=${Term}, Type=${ExamType}, Part=${partStatus}, Cat=${portalCategory}`);
 
     // Check if there is already an exam for the given term and type
@@ -49,7 +50,7 @@ const createExam = async (req, res) => {
 
     if (existingExam) {
       console.log(`Exam already exists for this term and type.`);
-      return res.status(400).json({ error: "An exam of this type has already been created for this term." });
+      return res.status(400).json({ error: "This exam has already been created for this term and you cannot create another one." });
     }
 
     // Create a new exam object
@@ -151,11 +152,13 @@ const getSpecificExam = async (req, res) => {
       .populate("ExamType");
 
     // Filter exams based on ExamType's examTypeFor field
-    const filteredExams = exams.filter(
-      (exam) =>
-        exam.ExamType.examTypeFor === "All" ||
-        exam.ExamType.examTypeFor === role
-    );
+    const filteredExams = exams.filter((exam) => {
+      if (!exam.ExamType) return false;
+      if (role?.toLowerCase() === "coordinator") {
+        return exam.ExamType.examTypeFor?.toLowerCase() === "coordinator";
+      }
+      return exam.ExamType.examTypeFor === "All" || exam.ExamType.examTypeFor === role;
+    });
 
     if (filteredExams.length === 0) {
       return res
@@ -226,14 +229,18 @@ const getSpecificCreatedExam = async (req, res) => {
 
     console.log("All fetched exams:", exams);
 
-    const filteredExams = exams.filter(
-      (exam) => {
-        const termMatch = exam.Term && exam.Term._id.toString() === termId;
-        const roleMatch = exam.ExamType && (exam.ExamType.examTypeFor === "All" || exam.ExamType.examTypeFor === role);
-        console.log(`DEBUG: Exam: ${exam.ExamType?.examName}, TargetRole: ${exam.ExamType?.examTypeFor}, UserRole: ${role}, TermMatch: ${termMatch}, RoleMatch: ${roleMatch}`);
-        return termMatch && roleMatch;
+    const filteredExams = exams.filter((exam) => {
+      const termMatch = exam.Term && exam.Term._id.toString() === termId;
+      let roleMatch = false;
+      if (exam.ExamType) {
+        if (role?.toLowerCase() === "coordinator") {
+          roleMatch = exam.ExamType.examTypeFor?.toLowerCase() === "coordinator";
+        } else {
+          roleMatch = exam.ExamType.examTypeFor === "All" || exam.ExamType.examTypeFor === role;
+        }
       }
-    );
+      return termMatch && roleMatch;
+    });
 
     if (filteredExams.length === 0) {
       console.log(`DEBUG: No matches for Term: ${termId}, Role: ${role}`);
@@ -290,10 +297,15 @@ const getSpecificCreatedExamOreient = async (req, res) => {
 
     console.log("All fetched exams:", exams);
 
-    const filteredExams = exams.filter(
-      (exam) =>
-        exam.ExamType && (exam.ExamType.examTypeFor === "All" || exam.ExamType.examTypeFor === role)
-    );
+    const filteredExams = exams.filter((exam) => {
+      if (!exam.ExamType) return false;
+      // If the role is Coordinator, strictly require the exam to be for the Coordinator.
+      if (role?.toLowerCase() === "coordinator") {
+        return exam.ExamType.examTypeFor?.toLowerCase() === "coordinator";
+      }
+      // Otherwise, 'All' applies to them.
+      return exam.ExamType.examTypeFor === "All" || exam.ExamType.examTypeFor === role;
+    });
 
     if (filteredExams.length === 0) {
       return res

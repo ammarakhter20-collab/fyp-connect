@@ -7,6 +7,8 @@ const ExamMarksDetail = ({ accordionId, exam, onRefresh }) => {
   const [editingRow, setEditingRow] = useState(null); // key: `${groupId}-${studentId}`
   const [editedMarks, setEditedMarks] = useState({}); // { examinerId: newMarks }
 
+  const loggedInUserId = JSON.parse(localStorage.getItem('user'))?._id;
+
   const maxMarks = exam.examWeightage || 100;
 
   // Get all unique examiner names across all students in all groups for column headers
@@ -225,7 +227,7 @@ const ExamMarksDetail = ({ accordionId, exam, onRefresh }) => {
 
                                     return (
                                       <td key={exId} className="px-3 py-3 font-semibold">
-                                        {isEditing && !isCLO ? (
+                                        {isEditing && !isCLO && exId === loggedInUserId ? (
                                           <input
                                             type="number"
                                             value={editedMarks[exId] != null ? editedMarks[exId] : marks}

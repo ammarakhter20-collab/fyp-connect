@@ -29,6 +29,7 @@ const [formData, setFormData] = useState({
   secondaryEmail: '',
   phoneNumber: '',
   address: '',
+  appPassword: '',
 });
 
 const [passwordData, setPasswordData] = useState({
@@ -247,6 +248,7 @@ console.log("Checking user id", user);
       secondaryEmail: formData.secondaryEmail,
       phoneNumber: formData.phoneNumber,
       address: formData.address,
+      appPassword: formData.appPassword,
     };
 
     const key = JSON.parse(localStorage.getItem('key'));
@@ -395,6 +397,7 @@ setFormData({
   secondaryEmail: StudData.secondaryEmail || '',
   phoneNumber: StudData.phoneNumber || '',
   address: StudData.address || '',
+  appPassword: StudData.appPassword || '',
 });
 }, [StudData]);
 
@@ -646,24 +649,45 @@ const handleFileChange = (e) => {
                     </label>
                   </div>
                 </div>
-                <div className="relative z-0 w-full mb-5 group">
-                  <input
-                    type="text"
-                    name="address"
-                    className={`block py-2.5 px-0 w-full text-lg font-semibold text-gray-900 bg-transparent border-b-2 border-gray-300 focus:border-primary focus:outline-none appearance-none ${
-                      editable ? "" : ""
-                      }`}
-                    placeholder=" "
-                    value={formData.address}
-                    onChange={handleInputChange}
-                  disabled={!editable}
-                  />
-                  <label
-                    htmlFor="floating_phone"
-                    className="peer-focus:font-medium absolute text-xl font-light text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-                  >
-                    Address
-                  </label>
+                <div className="grid md:grid-cols-2 md:gap-6 mt-4">
+                  <div className="relative z-0 w-full mb-5 group">
+                    <input
+                      type="text"
+                      name="address"
+                      className={`block py-2.5 px-0 w-full text-lg font-semibold text-gray-900 bg-transparent border-b-2 border-gray-300 focus:border-primary focus:outline-none appearance-none ${
+                        editable ? "" : ""
+                        }`}
+                      placeholder=" "
+                      value={formData.address}
+                      onChange={handleInputChange}
+                    disabled={!editable}
+                    />
+                    <label
+                      htmlFor="floating_phone"
+                      className="peer-focus:font-medium absolute text-xl font-light text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                    >
+                      Address
+                    </label>
+                  </div>
+                  <div className="relative z-0 w-full mb-5 group">
+                    <input
+                      type="password"
+                      name="appPassword"
+                      className={`block py-2.5 px-0 w-full text-lg font-semibold text-gray-900 bg-transparent border-b-2 border-gray-300 focus:border-primary focus:outline-none appearance-none ${
+                        editable ? "" : ""
+                        }`}
+                      placeholder=" "
+                      value={formData.appPassword}
+                      onChange={handleInputChange}
+                    disabled={!editable}
+                    />
+                    <label
+                      htmlFor="floating_phone"
+                      className="peer-focus:font-medium absolute text-xl font-light text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                    >
+                      Google App Password
+                    </label>
+                  </div>
                 </div>
 
                 <div className="flex justify-end">

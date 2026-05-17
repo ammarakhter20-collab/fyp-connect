@@ -216,8 +216,10 @@ const StdViewProject = () => {
             return exams.map(ex => {
                 const name = ex.examId?.examName || ex.examName || "";
                 const isMatch = keywords.some(kw => name.toLowerCase().includes(kw.toLowerCase()));
+                const status = ex.examId?.status || "";
+                const isCompleted = status === "Completed" || status === "Finished";
 
-                if (isMatch) {
+                if (isMatch && isCompleted) {
                     const student = ex.students.find(s => {
                         const sid = s.studentId?._id || s.studentId;
                         return sid.toString() === userId.toString();
@@ -236,65 +238,71 @@ const StdViewProject = () => {
         };
 
         if (currentPartStatus === "part-I") {
-            setOrientationData({
+            const orientationMarks = getStudentMarksForExam(["Orientation"]);
+            setOrientationData(orientationMarks.length > 0 ? {
                 groupId,
                 students: [{
                     regNo: parsedUserData.registrationNumber,
                     studentName: parsedUserData.name,
                     _Id: userId,
-                    exam: getStudentMarksForExam(["Orientation"])
+                    exam: orientationMarks
                 }]
-            });
+            } : null);
 
-            setProposalData({
+            const proposalMarks = getStudentMarksForExam(["Proposal"]);
+            setProposalData(proposalMarks.length > 0 ? {
                 groupId,
                 students: [{
                     regNo: parsedUserData.registrationNumber,
                     studentName: parsedUserData.name,
                     _Id: userId,
-                    exam: getStudentMarksForExam(["Proposal"])
+                    exam: proposalMarks
                 }]
-            });
+            } : null);
 
-            setMid_1_data({
+            const mid1Marks = getStudentMarksForExam(["Mid-I", "Midterm 1", "Mid I", "Midterm"]);
+            setMid_1_data(mid1Marks.length > 0 ? {
                 groupId,
                 students: [{
                     regNo: parsedUserData.registrationNumber,
                     studentName: parsedUserData.name,
                     _Id: userId,
-                    exam: getStudentMarksForExam(["Mid-I", "Midterm 1", "Mid I", "Midterm"])
+                    exam: mid1Marks
                 }]
-            });
+            } : null);
 
-            setFinal_1_data({
+            const final1Marks = getStudentMarksForExam(["Final-I", "Final I", "Final Evaluation"]);
+            setFinal_1_data(final1Marks.length > 0 ? {
                 groupId,
                 students: [{
                     regNo: parsedUserData.registrationNumber,
                     studentName: parsedUserData.name,
                     _Id: userId,
-                    exam: getStudentMarksForExam(["Final-I", "Final I", "Final Evaluation"])
+                    exam: final1Marks
                 }]
-            });
+            } : null);
         } else {
-            setMid_2_data({
+            const mid2Marks = getStudentMarksForExam(["Mid-II", "Midterm 2", "Mid II"]);
+            setMid_2_data(mid2Marks.length > 0 ? {
                 groupId,
                 students: [{
                     regNo: parsedUserData.registrationNumber,
                     studentName: parsedUserData.name,
                     _Id: userId,
-                    exam: getStudentMarksForExam(["Mid-II", "Midterm 2", "Mid II"])
+                    exam: mid2Marks
                 }]
-            });
+            } : null);
 
-            setFinal_2_data({
+            const final2Marks = getStudentMarksForExam(["Final-II", "Final II"]);
+            setFinal_2_data(final2Marks.length > 0 ? {
                 groupId,
                 students: [{
                     regNo: parsedUserData.registrationNumber,
                     studentName: parsedUserData.name,
                     _Id: userId,
-                    exam: getStudentMarksForExam(["Final-II", "Final II"])
+                    exam: final2Marks
                 }]
-            });
+            } : null);
         }
     }, [examData, currentPartStatus]);
 

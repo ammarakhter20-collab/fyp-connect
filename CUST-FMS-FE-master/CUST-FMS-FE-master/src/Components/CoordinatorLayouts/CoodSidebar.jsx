@@ -345,6 +345,19 @@ const Sidebar = () => {
             </li>
             <li>
               <NavLink
+                to="/CoodAssignPanel"
+                onClick={() => handleTabClick('CoodAssignPanel')}
+                className={({ isActive }) =>
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                }
+                data-tab="CoodAssignPanel"
+              >
+                <FaClipboardList className={`flex-shrink-0 w-7 h-7`} />
+                <span className={`ms-3`}>Assign Panel</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
                 to="/CoodCourseCat"
                 onClick={() => handleTabClick('CoodCourseCat')}
                 className={({ isActive }) =>

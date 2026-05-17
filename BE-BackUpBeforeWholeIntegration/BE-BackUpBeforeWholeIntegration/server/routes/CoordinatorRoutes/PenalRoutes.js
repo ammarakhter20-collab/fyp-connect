@@ -94,4 +94,16 @@ router.delete(
   panelDetailsController.removeFacultyMember
 );
 
+router.get(
+  "/groups-for-panel-assignment",
+  authMiddleware,
+  panelDetailsController.getGroupsForPanelAssignment
+);
+
+router.patch(
+  "/unassign-panel",
+  authMiddleware,
+  panelDetailsController.unassignPanel
+);
+
 module.exports = router;

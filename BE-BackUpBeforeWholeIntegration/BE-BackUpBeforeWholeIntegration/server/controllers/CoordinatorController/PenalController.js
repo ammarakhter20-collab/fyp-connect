@@ -682,6 +682,99 @@ const getEvaluationStatofexminer = async (req, res) => {
   }
 };
 
+// ============================================================================
+// GET GROUPS FOR PANEL ASSIGNMENT
+// Fetches all accepted FYP groups for a given term, showing their current panel
+// ============================================================================
+const getGroupsForPanelAssignment = async (req, res) => {
+  try {
+    const { termId } = req.query;
+    if (!termId) {
+      return res.status(400).json({ error: "termId query parameter is required" });
+    }
+
+    console.log("[getGroupsForPanelAssignment] termId:", termId);
+
+    const termObjectId = new mongoose.Types.ObjectId(termId);
+
+    // Fetch all accepted FYP registrations for this term
+    const groups = await FYPReg.find({
+      $or: [
+        { term: termObjectId },
+        { term: termId }
+      ],
+      reqStatus: { $in: ["approved", "Accepted", "accepted"] }
+    })
+      .populate({ path: "selectedOption", model: "GenUser", select: "name" })
+      .populate({ path: "assignedPanel", model: "PanelDetails", select: "panelName panelCode" })
+      .exec();
+
+    console.log(`[getGroupsForPanelAssignment] Found ${groups.length} groups`);
+
+    const result = groups.map((g) => ({
+      groupId: g._id,
+      topicName: g.topicData?.topic || "N/A",
+      supervisorName: g.selectedOption?.name || "N/A",
+      memberCount: g.groupMembers?.length || 0,
+      members: (g.groupMembers || []).map((m) => ({
+        name: m.name,
+        regNum: m.registrationNumber,
+      })),
+      currentPanel: g.assignedPanel
+        ? {
+            panelId: g.assignedPanel._id,
+            panelName: g.assignedPanel.panelName || g.assignedPanel.panelCode || "Unknown",
+          }
+        : null,
+    }));
+
+    // Also fetch all panels for this term so the frontend can show a dropdown
+    const panels = await PanelDetails.find({ term: termObjectId })
+      .populate({ path: "PanelMembers.member", model: "GenUser", select: "name" })
+      .exec();
+
+    const panelOptions = panels.map((p) => ({
+      panelId: p._id,
+      panelName: p.panelName || p.panelCode,
+      members: p.PanelMembers.map((pm) => pm.member?.name || "Unknown"),
+    }));
+
+    res.status(200).json({ groups: result, panels: panelOptions });
+  } catch (error) {
+    console.error("Error in getGroupsForPanelAssignment:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// ============================================================================
+// UNASSIGN PANEL
+// Removes the panel assignment from a specific FYP group
+// ============================================================================
+const unassignPanel = async (req, res) => {
+  try {
+    const { registrationId } = req.body;
+    if (!registrationId) {
+      return res.status(400).json({ error: "registrationId is required" });
+    }
+
+    const registration = await FYPReg.findById(registrationId);
+    if (!registration) {
+      return res.status(404).json({ error: "FYP registration not found" });
+    }
+
+    registration.assignedPanel = null;
+    await registration.save();
+
+    res.status(200).json({
+      message: "Panel unassigned successfully",
+      registration,
+    });
+  } catch (error) {
+    console.error("Error unassigning panel:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 // Other controller methods for updating, deleting, and fetching panel details
 
 module.exports = {
@@ -701,4 +794,6 @@ module.exports = {
   removeFacultyMember,
   getEvaluationStatofexminer,
   getEvaluationStatofAllexm,
+  getGroupsForPanelAssignment,
+  unassignPanel,
 };

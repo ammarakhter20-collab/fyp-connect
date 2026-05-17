@@ -9,7 +9,6 @@ import { Navigate } from 'react-router-dom';
 const CoodAssignedExam = () => {
     const [isLoading, setIsLoading] = useState(false);  
     const [CoodCreatedExam, setCoodCreatedExam] = useState('');
-    const [activeExamsData, setActiveExamsData] = useState([]);
 
     useEffect(() => {
         initFlowbite();
@@ -71,48 +70,12 @@ const CoodAssignedExam = () => {
         }
     };
 
-    const fetchActiveExams = async () => {
-        try {
-            const key = JSON.parse(localStorage.getItem("key"));
-            if (!key) {
-                console.error('Authorization key not found in local storage.');
-                return;
-            }
 
-            const url = `/api/EvaluateExamRoutes/active-exams-with-marks`;
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${key}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.status === 401) {
-                Navigate('/login');
-                return;
-            }
-
-            const data = await response.json();
-
-            if (response.ok) {
-                console.log("Active Exams with Marks", data.activeExams);
-                setActiveExamsData(data.activeExams || []);
-            } else {
-                console.error('Error fetching active exams:', response.statusText);
-                setActiveExamsData([]);
-            }
-        } catch (error) {
-            console.error('Error fetching Active Exams Data:', error);
-            setActiveExamsData([]);
-        }
-    };
 
     
 
     useEffect(() => {
         fetchCoordinatorExam();
-        fetchActiveExams();
     }, [])
 
 
@@ -125,9 +88,6 @@ const CoodAssignedExam = () => {
     <div className='mx-16 mt-10'>
     {/* Tab 1: Existing Coordinator Exams (Attendance/Orientation) */}
     <AsCoordinator accordionId = {364} CoodExam={CoodCreatedExam} />
-
-    {/* Tab 2: All Active Exams with Panel Member Marks */}
-    <ActiveExams accordionId={366} activeExams={activeExamsData} onRefresh={fetchActiveExams} />
     </div>
          )}
     </>

@@ -32,19 +32,19 @@ const ProposalEvaluation = ({ data, accordionId, accordText }) => {
                 <tr className='border-b text-center'>
                   <th className="px-6 py-3 w-52">Reg no</th>
                   <th className="px-6 py-3 w-[15.625rem] text-left">Name</th>
-                  {data.students[0]?.exam[0]?.obtainedCLOAverage?.map((clo, cloIndex) => (
-                    <th className="px-6 py-3 w-52" key={cloIndex}>CLO {cloIndex + 1}(10)</th>
-                  ))}
+                  <th className="px-6 py-3 w-52">Obtained Marks</th>
                 </tr>
               </thead>
               <tbody>
                 {data.students.map((student, studentIndex) => (
-                  <tr key={studentIndex}>
-                    <td className="px-6 py-4 w-52 text-center">{student.regNo}</td>
-                    <td className="px-6 py-4 w-52">{student.studentName}</td>
-                    {student.exam[0]?.obtainedCLOAverage?.map((clo, cloIndex) => (
-                      <td className="w-52 text-center" key={cloIndex}>{clo.averageCLOPercentage}</td>
-                    ))}
+                  <tr key={studentIndex} className="text-center">
+                    <td className="px-6 py-4 w-52">{student.regNo}</td>
+                    <td className="px-6 py-4 w-[15.625rem] text-left">{student.studentName}</td>
+                    <td className="px-6 py-4 w-52 text-center font-bold">
+                      {student.exam && student.exam.length > 0 && student.exam[0].obtainedAverage !== undefined
+                        ? (typeof student.exam[0].obtainedAverage === 'number' ? student.exam[0].obtainedAverage.toFixed(2) : student.exam[0].obtainedAverage)
+                        : 'N/A'}
+                    </td>
                   </tr>
                 ))}
               </tbody>

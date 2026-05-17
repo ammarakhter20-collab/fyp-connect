@@ -65,6 +65,7 @@ import CoodManagePercentage from "./pages/Coordinator/CoodManageExams/CoodManage
 import CoodManageQuestions from "./pages/Coordinator/CoodManageExams/CoodManageClo/CoodManageQuestions/CoodManageQuestions";
 import CoodManageClos from "./pages/Coordinator/CoodManageExams/CoodManageClo/CoodManageClos/CoodManageClos";
 import CoodAssignedExam from "./pages/Coordinator/CoodAssignedExams/CoodAssignedExam";
+import CoodAssignPanel from "./pages/Coordinator/CoodAssignPanel/CoodAssignPanel";
 import CoodResults from "./pages/Coordinator/CoodResults/CoodResults";
 import HoDProfile from "./pages/HoD/HoDProfile/HoDProfile";
 import HoDDashboard from "./pages/HoD/HoDDashboard/HoDDashboard";
@@ -533,6 +534,11 @@ function App() {
                 <Route path="/CoodAssignedExam" element={
                   <CoodLayout>
                     <CoodAssignedExam />
+                  </CoodLayout>
+                } />
+                <Route path="/CoodAssignPanel" element={
+                  <CoodLayout>
+                    <CoodAssignPanel />
                   </CoodLayout>
                 } />
                 <Route path="/CoodResults" element={

@@ -268,6 +268,8 @@ const CoodFypRegistration = ({ accordionId }) => {
         console.log(' FYP Registration open for Term successfully');
         window.location.reload(true);
       } else {
+        const errData = await response.json();
+        alert(errData.error || 'Failed to Create FYP Registration');
         console.log('Failed to Creation of FYP Registration ');
       }
     }

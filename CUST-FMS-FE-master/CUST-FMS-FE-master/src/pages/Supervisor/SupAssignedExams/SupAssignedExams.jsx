@@ -217,7 +217,15 @@ const AssignedExam = () => {
         return;
       }
 
-      const formattedReports = reports.map((report, index) => ({
+      // Filter reports so examiners only see APPROVED ones
+      const approvedReports = reports.filter(r => r.status && r.status.toUpperCase() === "APPROVED");
+
+      if (!approvedReports.length) {
+        alert("The supervisor has not approved any report for this group yet.");
+        return;
+      }
+
+      const formattedReports = approvedReports.map((report, index) => ({
         serial: index + 1,
         fyp: report.FYPGroup?.topicData?.topic || selectedGroup.fypTitle || "N/A",
         examtype: report.Exam?.examName || "N/A",

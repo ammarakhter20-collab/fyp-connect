@@ -425,8 +425,8 @@ const CoodExaminerPanel = () => {
       }
       const data = await response.json();
       //Fetched  Data
-      // Allow coordinators to be shown in the list
-      const filteredData = data.faculties.filter(faculty => faculty.role !== 'hod');
+      // Allow coordinators and hod to be shown in the list
+      const filteredData = data.faculties;
 
       const progrmData = filteredData.map((faculty, index) => ({
         value: faculty._id,
@@ -748,7 +748,8 @@ const CoodExaminerPanel = () => {
       const data = await response.json();
       //Fetched  Data
       console.log(data, 'fetched Term Data')
-      const dataofterm = data.fypTerms.map((term, index) => ({
+      const activeTerms = data.fypTerms.filter(term => term.status === 'activated');
+      const dataofterm = activeTerms.map((term, index) => ({
         ...term,
         label: term.sessionTerm,
         value: term._id,

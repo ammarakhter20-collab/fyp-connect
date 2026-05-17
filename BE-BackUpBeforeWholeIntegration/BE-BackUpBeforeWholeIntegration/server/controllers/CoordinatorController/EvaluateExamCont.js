@@ -616,7 +616,8 @@ const addOrientationMarks = async (req, res) => {
 
 const getActiveExamsWithMarks = async (req, res) => {
   try {
-    console.log("[DEBUG] getActiveExamsWithMarks called");
+    const { userId } = req.query;
+    console.log("[DEBUG] getActiveExamsWithMarks called, userId:", userId);
 
     // 1. Fetch all active exams
     const allExams = await CreateExam.find({ status: "Active" })
@@ -682,14 +683,25 @@ const getActiveExamsWithMarks = async (req, res) => {
           // Build student data with per-examiner breakdown
           const students = [];
           for (const student of group.students) {
-            const examiners = (student.evaluationsByExaminers || []).map((ex) => ({
-              examinerId: ex.examinerId?._id || ex.examinerId,
-              examinerName: ex.examinerId?.name || "Unknown",
-              marks: ex.marks != null ? ex.marks : 0,
-              totalWeightage: ex.totalWeightage || exam.ExamWeightage || 0,
-              feedback: ex.feedback || "",
-              hasCLOData: !!(ex.evaluations && ex.evaluations.length > 0),
-            }));
+            const examiners = (student.evaluationsByExaminers || []).map((ex) => {
+              const hasCLOData = !!(ex.evaluations && ex.evaluations.length > 0);
+              let computedMarks = ex.marks != null ? ex.marks : 0;
+
+              if (hasCLOData) {
+                computedMarks = ex.evaluations.reduce((acc, cloForExam) => {
+                  return acc + (cloForExam.obtainedCLOPercentage || 0);
+                }, 0);
+              }
+
+              return {
+                examinerId: ex.examinerId?._id || ex.examinerId,
+                examinerName: ex.examinerId?.name || "Unknown",
+                marks: computedMarks,
+                totalWeightage: ex.totalWeightage || exam.ExamWeightage || 0,
+                feedback: ex.feedback || "",
+                hasCLOData: hasCLOData,
+              };
+            });
 
             students.push({
               studentId: student.studentId?._id || student.studentId,
@@ -701,6 +713,16 @@ const getActiveExamsWithMarks = async (req, res) => {
           }
 
           if (students.length > 0) {
+            // FILTER: If userId is provided, ensure this group has the user as an examiner
+            if (userId) {
+              const isUserExaminer = students.some(s => 
+                s.examiners.some(ex => String(ex.examinerId) === String(userId))
+              );
+              if (!isUserExaminer) {
+                continue; // Skip this group if the logged-in user isn't an examiner
+              }
+            }
+
             groups.push({
               groupId: group.groupId?._id || group.groupId,
               supervisorId: evalDoc.supervisorId,
@@ -712,19 +734,21 @@ const getActiveExamsWithMarks = async (req, res) => {
         }
       }
 
-      activeExams.push({
-        _id: exam._id,
-        examName: exam.ExamType ? exam.ExamType.examName : "Unknown",
-        examTypeFor: exam.ExamType ? exam.ExamType.examTypeFor : "Unknown",
-        examWeightage: exam.ExamWeightage,
-        announcedDate: exam.AnnouncedDate,
-        partStatus: exam.partStatus,
-        portalCategory: exam.portalCategory,
-        termId: exam.Term._id,
-        termName: exam.Term.sessionTerm,
-        status: exam.status,
-        groups,
-      });
+      if (groups.length > 0) {
+        activeExams.push({
+          _id: exam._id,
+          examName: exam.ExamType ? exam.ExamType.examName : "Unknown",
+          examTypeFor: exam.ExamType ? exam.ExamType.examTypeFor : "Unknown",
+          examWeightage: exam.ExamWeightage,
+          announcedDate: exam.AnnouncedDate,
+          partStatus: exam.partStatus,
+          portalCategory: exam.portalCategory,
+          termId: exam.Term._id,
+          termName: exam.Term.sessionTerm,
+          status: exam.status,
+          groups,
+        });
+      }
     }
 
     console.log(`[DEBUG] Returning ${activeExams.length} active exams with marks`);
@@ -914,9 +938,16 @@ const getExaminerMarksForGroup = async (req, res) => {
           }));
         }
 
+        let computedMarks = examinerEntry.marks != null ? examinerEntry.marks : 0;
+        if (hasCLOData) {
+          computedMarks = examinerEntry.evaluations.reduce((acc, cloForExam) => {
+            return acc + (cloForExam.obtainedCLOPercentage || 0);
+          }, 0);
+        }
+
         students.push({
           studentId: student.studentId,
-          marks: examinerEntry.marks != null ? examinerEntry.marks : 0,
+          marks: computedMarks,
           totalWeightage: examinerEntry.totalWeightage || 0,
           hasCLOData,
           cloEvaluations

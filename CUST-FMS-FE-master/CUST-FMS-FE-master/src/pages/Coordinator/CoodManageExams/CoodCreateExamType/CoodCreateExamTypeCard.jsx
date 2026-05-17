@@ -121,7 +121,12 @@ const CoodCreateExamTypeCard = (props) => {
                                 id='examTypeFor'
                                 name='examTypeFor'
                                 className={`bg-white border ${errors.examTypeFor ? 'border-red-500' : 'border-gray-300'} text-black text-sm rounded-2xl block w-full p-2.5`}
-                                options={[{ value: 'Supervisor', label: 'Supervisor' }, { value: 'coordinator', label: 'Coordinator' }, { value: 'Student', label: 'Student' }, { value: 'All', label: 'All' }]}
+                                options={[
+                                    { value: 'Supervisor', label: 'Supervisor' },
+                                    { value: 'coordinator', label: 'Coordinator' },
+                                    { value: 'hod', label: 'HoD' },
+                                    { value: 'All', label: 'All Panel Members' }
+                                ]}
                                 isSearchable
                                 onChange={handleExamTypeForChange}
                                 value={examTypeFor}

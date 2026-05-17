@@ -50,9 +50,8 @@ const createFYPRegistration = async (req, res) => {
     const existingRegistration = await FYPRegistrationDead.findOne({ term });
 
     if (existingRegistration) {
-      console.log(`Existing registration found for term ${term}, deleting...`);
-      await FYPRegistrationDead.findByIdAndDelete(existingRegistration._id);
-      console.log("Existing registration deleted successfully");
+      console.log(`Existing registration found for term ${term}, rejecting duplicate creation.`);
+      return res.status(400).json({ error: "A registration deadline for this term has already been created. You cannot create multiple registrations for the same term." });
     }
 
     let hours, minutes, period;

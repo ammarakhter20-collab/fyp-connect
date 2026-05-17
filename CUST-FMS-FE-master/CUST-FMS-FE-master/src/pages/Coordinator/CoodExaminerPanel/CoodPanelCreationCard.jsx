@@ -350,8 +350,8 @@ const CoodPanelCreationCard = ({ onclose, saveExaminerPanel, optionsData, Progra
                 className={`bg-white border border-gray-300 text-black text-sm rounded-2xl block w-full p-2.5`}
                 options={data
                     .filter((option) => {
-                        // Check if the option is a faculty member or coordinator and not already selected
-                        const eligibleRoles = ['faculty', 'coordinator'];
+                        // Check if the option is a faculty member, coordinator or hod and not already selected
+                        const eligibleRoles = ['faculty', 'coordinator', 'hod'];
                         const isEligible = eligibleRoles.includes(option.role?.toLowerCase());
                         return isEligible && !selectedMembers.includes(option);
                     })

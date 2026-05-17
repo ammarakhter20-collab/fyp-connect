@@ -221,7 +221,8 @@ const CoodCreateExam = () => {
       const data = await response.json();
       //Fetched  Data
       console.log(data, 'fetched Term Data')
-      const dataofterm = data.fypTerms.map((term, index) => ({
+      const activeTerms = data.fypTerms.filter(term => term.status === 'activated');
+      const dataofterm = activeTerms.map((term, index) => ({
         ...term,
         label: term.sessionTerm,
         value: term?._id,

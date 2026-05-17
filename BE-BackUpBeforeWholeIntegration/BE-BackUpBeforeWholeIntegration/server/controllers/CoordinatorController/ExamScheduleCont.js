@@ -210,36 +210,6 @@ const createExamSchedule = async (req, res) => {
       // Save the new exam schedule to the database
       await newExamSchedule.save();
 
-      // --- FIX: Assign this Panel to all FYP Groups in the Exams Term ---
-      if (examDetails && examDetails.Term) {
-        try {
-          const termId = examDetails.Term;
-          console.log(`Auto-assigning Panel ${panel} to groups in Term ${termId}`);
-
-          // Check how many match BEFORE update
-          const matchQuery = {
-            $or: [
-              { term: termId },
-              { term: termId.toString() },
-              { "term._id": termId },
-              { "term._id": termId.toString() }
-            ]
-          };
-
-          const matchCount = await Project.countDocuments(matchQuery);
-          console.log(`Found ${matchCount} groups matching Term (ID or Object)`);
-
-          const updateResult = await Project.updateMany(
-            matchQuery,
-            { $set: { assignedPanel: panel } }
-          );
-          console.log("Groups updated with panel result:", updateResult);
-        } catch (assignError) {
-          console.error("Failed to auto-assign panel to groups:", assignError);
-        }
-      }
-      // -----------------------------------------------------------------
-
       // Send notifications only if transporter exists
       if (transporter) {
         await sendNotification(panel, transporter, examInfo);
