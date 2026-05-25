@@ -86,24 +86,41 @@ const getAttendanceUnderSupervision = async (req, res) => {
   console.log("Check in");
   console.log("Check in");
   console.log("Check in");
-  // console.log("req.params", req.params);
-  // console.log("req.params", req.params);
   const grpId = req.params.id || req.params.userid;
-  // console.log("Userrrrrr", grpId);
-  // console.log("Userrrrrr", grpId);
   try {
     if (grpId) {
-      const fypGroup = await FYPGroupAttendance.find({ fypgroup: grpId })
+      let fypGroup = await FYPGroupAttendance.find({ fypgroup: grpId })
         .populate({
-          path: "memberAttendances.member",
+          path: "partStatus.meetings.memberAttendances.member",
           model: "GenUser",
-          options: { strictPopulate: false }, // Use strictPopulate: false
+          options: { strictPopulate: false },
         })
-        .populate("fypgroup")
+        .populate({
+          path: "fypgroup",
+          populate: {
+            path: "groupMembers",
+            model: "GenUser",
+          }
+        })
         .exec();
 
       if (!fypGroup || fypGroup.length === 0) {
-        return res.status(404).json({ message: "Attendance data not found" });
+        // Fetch the group registration to build a default blank attendance object
+        const fypRegistration = await FypRegistration.findById(grpId)
+          .populate({
+            path: "groupMembers",
+            model: "GenUser",
+          });
+
+        if (!fypRegistration) {
+          return res.status(404).json({ message: "Group not found" });
+        }
+
+        // Return a simulated fypGroup array with an empty partStatus array
+        fypGroup = [{
+          fypgroup: fypRegistration,
+          partStatus: []
+        }];
       }
 
       res.status(200).json({ fypGroup });

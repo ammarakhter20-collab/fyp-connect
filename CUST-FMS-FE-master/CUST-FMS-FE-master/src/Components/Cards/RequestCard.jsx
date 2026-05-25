@@ -17,13 +17,13 @@ const RequestCard = (props) => {
 
   return (
     <>
-      <div className='bg-primary h-44 max-h-44 max-w-sm rounded-lg'>
-        <div className='text-white pt-5 pl-8 h-28 w-96 overflow-hidden'>
+      <div className='bg-primary h-44 max-h-44 max-w-sm rounded-lg shadow-md'>
+        <div className='text-white pt-5 px-6 h-28'>
           {/* <p className='font-normal'>{techReq ? 'Edit Request' : 'My Request'}</p> */}
 
-          <p className='font-semibold mt-1 text-2xl'>{reqType}</p>
+          <p className='font-semibold mt-1 text-xl leading-tight break-words'>{reqType}</p>
         </div>
-        <div className='text-right mt-3 mr-8'>
+        <div className='text-right mt-1 mr-6'>
           <Simple text={'Request'} onClick={onRegisterNow} />
         </div>
       </div>

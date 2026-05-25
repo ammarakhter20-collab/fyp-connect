@@ -390,10 +390,26 @@ const getFypData = async (req, res) => {
     // const userRegistrationNumber = req.body.currentUserRegNum;
     const userRegistrationNumber = req.query.registrationNumber; // Extract registration number from query parameters
 
+    // Fetch student's current profile to get their active term
+    const studentUser = await User.findOne({ registrationNumber: userRegistrationNumber });
+    if (!studentUser) {
+      return res.status(404).json({ message: "Student user not found" });
+    }
+
+    const query = {
+      "groupMembers.registrationNumber": userRegistrationNumber,
+    };
+
+    // If the student has an active term, only fetch groups matching that term to prevent duplicate project listings
+    if (studentUser.term) {
+      query.$or = [
+        { term: studentUser.term },
+        { term: studentUser.term.toString() }
+      ];
+    }
+
     // console.log("Checking registration Number", userRegistrationNumber);
-    const userFypRegistrations = await FypRegistration.find({
-      "groupMembers.registrationNumber": userRegistrationNumber, // Find where groupMembers contains an object with the specified registration number
-    })
+    const userFypRegistrations = await FypRegistration.find(query)
       .populate("selectedTechnology")
       .populate("selectedOption")
       .populate("selectedPlatform")
@@ -699,75 +715,26 @@ const StudentCount = async (req, res) => {
   console.log("Student Count Called");
   const { deptId } = req.params;
 
-  if (!deptId) {
-    return res.status(400).json({ error: "deptId parameter is required" });
+  try {
+    const query = { role: { $regex: /^student$/i } };
+    if (deptId && deptId !== "undefined" && deptId !== "null" && deptId !== "all") {
+      query.department = deptId;
+    }
+    const studentCount = await User.countDocuments(query);
+    console.log("Student Count Calculated:", studentCount);
+    res.status(200).json({ studentCount });
+  } catch (error) {
+    console.error("Error counting students:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
-
-  // try {
-  //   // Find activated terms
-  //   const activeTerms = await FYPTerm.find({ status: "activated" });
-  //   console.log("Active Terms:", activeTerms);
-
-  //   if (activeTerms.length === 0) {
-  //     return res.status(404).json({ message: "No active terms found" });
-  //   }
-
-  //   const termIds = activeTerms.map((term) => term._id);
-  //   console.log("Term IDs:", termIds);
-
-  //   // Convert deptId to ObjectId
-  //   const departmentId = mongoose.Types.ObjectId(deptId);
-  //   console.log("Department ID:", departmentId);
-
-  //   // Aggregate to count students
-  //   const studentCount = await FypRegistration.aggregate([
-  //     { $unwind: "$groupMembers" },
-  //     {
-  //       $match: {
-  //         "term._id": { $in: termIds },
-  //         "groupMembers.department": departmentId,
-  //       },
-  //     },
-  //     {
-  //       $group: {
-  //         _id: null,
-  //         count: { $sum: 1 },
-  //       },
-  //     },
-  //   ]);
-
-  //   console.log("StudentCount Called Checking", studentCount);
-
-  //   res.status(200).json({
-  //     studentCount: studentCount.length > 0 ? studentCount[0].count : 0,
-  //   });
-  // } catch (error) {
-  //   console.error("Error counting students:", error.message);
-  //   res.status(500).json({ error: "Internal server error" });
-  // }
 };
 
 const ProjectCount = async (req, res) => {
   console.log("Project Count Called");
 
   try {
-    const activeTerms = await FYPTerm.find({ status: "activated" });
-    console.log("Active Terms for Projects:", activeTerms);
-
-    if (activeTerms.length === 0) {
-      return res.status(404).json({ message: "No active terms found" });
-    }
-
-    const termIds = activeTerms.map((term) => term._id); // Assuming _id is ObjectId in FYPTerm model
-
-    console.log("Checking TermIDs:", termIds);
-
-    const projectCount = await FypRegistration.countDocuments({
-      term: { $in: termIds },
-    });
-
-    console.log("Project Count:", projectCount);
-
+    const projectCount = await FypRegistration.countDocuments({});
+    console.log("Project Count Calculated:", projectCount);
     res.status(200).json({ projectCount });
   } catch (error) {
     console.error("Error counting projects:", error.message);

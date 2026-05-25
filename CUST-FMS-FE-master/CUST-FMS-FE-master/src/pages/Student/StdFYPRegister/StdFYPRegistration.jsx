@@ -752,19 +752,16 @@ const FYPRegistration = ({ selectedTab, isFYPRegistered, accordionId }) => {
 
       const filteredFacultyOptions = facultyData.filter(faculty => {
         if (deniedSups.includes(faculty._id)) return false;
+        
+        // Exclude hod and coordinator roles from supervisor selection
+        if (faculty.role && /^(hod|coordinator)$/i.test(faculty.role)) return false;
 
-        if (faculty.department && faculty.program) {
+        if (faculty.department) {
           // Extract IDs safely
           const facDeptId = faculty.department?._id || faculty.department;
-          const facProgId = faculty.program?._id || faculty.program;
-
           const userDeptId = currentUser.department?._id || currentUser.department;
-          const userProgId = currentUser.program?._id || currentUser.program;
 
-          return (
-            String(facDeptId) === String(userDeptId) &&
-            String(facProgId) === String(userProgId)
-          );
+          return String(facDeptId) === String(userDeptId);
         } else {
           return false;
         }
@@ -773,7 +770,7 @@ const FYPRegistration = ({ selectedTab, isFYPRegistered, accordionId }) => {
       const facultyOptions = filteredFacultyOptions.map(faculty => ({
         value: faculty._id,
         label: faculty.name,
-        departmentId: faculty.department._id,
+        departmentId: faculty.department?._id || faculty.department,
       }));
 
       setSupervisorOptions(facultyOptions);

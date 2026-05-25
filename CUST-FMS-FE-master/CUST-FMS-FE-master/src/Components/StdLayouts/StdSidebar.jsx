@@ -142,21 +142,19 @@ const Sidebar = ({ isFYPRegistered }) => {
               </Link>
 
               <ul className="space-y-2 font-medium">
-                <div className='ml-14'>
-                  <li>
-                    <NavLink
-                      to="/Profile"
-                      onClick={() => handleTabClick('Profile')}
-                      className={({ isActive }) =>
-                        isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
-                      }
-                      data-tab="Profile"
-                    >
-                      <CgProfile className={`flex-shrink-0 w-7 h-7`} />
-                      <span className={`ms-3`}>Profile</span>
-                    </NavLink>
-                  </li>
-                </div>
+                <li>
+                  <NavLink
+                    to="/Profile"
+                    onClick={() => handleTabClick('Profile')}
+                    className={({ isActive }) =>
+                      isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
+                    }
+                    data-tab="Profile"
+                  >
+                    <CgProfile className={`flex-shrink-0 w-7 h-7`} />
+                    <span className={`ms-3`}>Profile</span>
+                  </NavLink>
+                </li>
                 <div className="bottom-0 w-full left-0 right-0 border-b border-white border-opacity-10"></div>
                 <li>
                   <NavLink

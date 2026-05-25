@@ -7,6 +7,7 @@ import AttendanceMeetingCard from '../../../Components/Cards/AttendanceMeetingCa
 import StdAttendencedetails from './StdAttendencedetails';
 import ButbgPrimary from '../../../Components/Buttons/ButbgPrimary';
 import LoadingSpinner from '../../../Components/LoadingSpinner/LoadingSpinner';
+import { baseUrl } from '../../../Components/config/config';
 const Attendance = () => {
     const [isAttendanceCardOpen, setIsAttendanceCardOpen] = useState(false);
     const [loadingSpinner, setLoadingSpinner] = useState(false);
@@ -28,9 +29,9 @@ const Attendance = () => {
         try {
             setLoadingSpinner(true); // Show loading spinner while processing
 
-            const apiUrl = '/api/auth/mark-attendance';
+            const apiUrl = `${baseUrl}/api/auth/mark-attendance`;
             const nkey = localStorage.getItem('key');
-            const token = JSON.parse(nkey);
+            const token = nkey ? JSON.parse(nkey) : null;
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -98,13 +99,14 @@ const Attendance = () => {
     const fetchApprovedGroups = async () => {
         try {
             setLoadingSpinner(true);
-            const token = localStorage.getItem('key');
+            const nkey = localStorage.getItem('key');
+            const token = nkey ? JSON.parse(nkey) : null;
             const userData = localStorage.getItem('user');
             const parsedUserData = JSON.parse(userData);
             const userid = parsedUserData._id;
 
 
-            const response = await fetch(`/api/fyp/fyprequests/${userid}?filter=approved`, {
+            const response = await fetch(`${baseUrl}/api/fyp/fyprequests/${userid}?filter=approved`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -128,11 +130,12 @@ const Attendance = () => {
     const fetchAttendance = async (grpId) => {
         try {
             setLoadingSpinner(true);
-            const token = localStorage.getItem('key');
+            const nkey = localStorage.getItem('key');
+            const token = nkey ? JSON.parse(nkey) : null;
             const userData = localStorage.getItem('user');
 
             // const userId = parsedUserData._id;
-            const response = await fetch(`/api/auth/get-group-attendance/${grpId}?`, {
+            const response = await fetch(`${baseUrl}/api/auth/get-group-attendance/${grpId}?`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,

@@ -994,11 +994,13 @@ const CoodCreateProject = ({ accordionId }) => {
 
         console.log("Facultyyyyyyyyyyyyyyyyyyyyyy Beforeeeeeeeeeeee", matchedFaculty);
 
-        const FacultyOptions = matchedFaculty.map(faculty => ({
-          value: faculty._id,
-          label: `${faculty.name} - ${faculty.program.programTitle}`,
-          // Add other necessary fields here
-        }));
+        const FacultyOptions = matchedFaculty
+          .filter(faculty => faculty.role && !/^(hod|coordinator)$/i.test(faculty.role))
+          .map(faculty => ({
+            value: faculty._id,
+            label: faculty.department && faculty.department.departmentName ? `${faculty.name} (${faculty.department.departmentName})` : (faculty.program && faculty.program.programTitle ? `${faculty.name} - ${faculty.program.programTitle}` : faculty.name),
+            // Add other necessary fields here
+          }));
 
         console.log("FacultyOptionsssssssssss after", FacultyOptions);
 

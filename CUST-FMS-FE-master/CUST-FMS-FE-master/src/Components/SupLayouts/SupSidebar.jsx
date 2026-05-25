@@ -62,7 +62,7 @@ const Sidebar = () => {
                 to="/SupProfile"
                 onClick={() => handleTabClick('SupProfile')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 // className={`relative flex items-center p-3 rounded-lg   hover:bg-gray-100 dark:hover:bg-gray-700`}
                 data-tab="SupProfile"
@@ -77,7 +77,7 @@ const Sidebar = () => {
                 to="/SupDashboard"
                 onClick={() => handleTabClick('SupDashboard')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupDashboard"
               >
@@ -90,7 +90,7 @@ const Sidebar = () => {
                 to="/SupuploadFYPtopic"
                 onClick={() => handleTabClick('SupuploadFYPtopic')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupuploadFYPtopic"
               >
@@ -103,7 +103,7 @@ const Sidebar = () => {
                 to="/SupRequest"
                 onClick={() => handleTabClick('SupRequest')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupRequest"
               >
@@ -116,7 +116,7 @@ const Sidebar = () => {
                 to="/SupPrevSupProj"
                 onClick={() => handleTabClick('SupPrevSupProj')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupPrevSupProj"
               >
@@ -129,7 +129,7 @@ const Sidebar = () => {
                 to="/SupProjectDetails"
                 onClick={() => handleTabClick('SupProjectDetails')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupProjectDetails"
               >
@@ -142,7 +142,7 @@ const Sidebar = () => {
                 to="/SupAssignedExam"
                 onClick={() => handleTabClick('SupAssignedExam')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupAssignedExam"
               >
@@ -155,7 +155,7 @@ const Sidebar = () => {
                 to="/SupPanelDetails"
                 onClick={() => handleTabClick('SupPanelDetails')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupPanelDetails"
               >
@@ -168,7 +168,7 @@ const Sidebar = () => {
                 to="/SupTimetable"
                 onClick={() => handleTabClick('SupTimetable')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupTimetable"
               >
@@ -181,7 +181,7 @@ const Sidebar = () => {
                 to="/SupAttendance"
                 onClick={() => handleTabClick('SupAttendance')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupAttendance"
               >
@@ -194,7 +194,7 @@ const Sidebar = () => {
                 to="/SupAssignedTasks"
                 onClick={() => handleTabClick('SupAssignedTasks')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupAssignedTasks"
               >
@@ -207,7 +207,7 @@ const Sidebar = () => {
                 to="/SupChatCall"
                 onClick={() => handleTabClick('SupChatCall')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupChatCall"
               >
@@ -220,7 +220,7 @@ const Sidebar = () => {
                 to="/SupAnnouncements"
                 onClick={() => handleTabClick('SupAnnouncements')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupAnnouncements"
               >
@@ -233,7 +233,7 @@ const Sidebar = () => {
                 to="/SupCourseCatalog"
                 onClick={() => handleTabClick('SupCourseCatalog')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupCourseCatalog"
               >
@@ -246,7 +246,7 @@ const Sidebar = () => {
                 to="/Logout"
                 onClick={() => handleTabClick('Logout')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="Logout"
               >

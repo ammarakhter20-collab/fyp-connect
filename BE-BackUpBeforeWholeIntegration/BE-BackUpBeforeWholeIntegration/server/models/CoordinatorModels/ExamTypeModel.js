@@ -12,7 +12,7 @@ const ExamTypeSchema = new mongoose.Schema({
   },
   examTypeFor: {
     type: String,
-    enum: ["All", "Supervisor", "Coordinator", "Student"],
+    enum: ["All", "Supervisor", "Coordinator", "Student", "HoD", "Examiner"],
     required: true,
   },
   portalCategory: {
@@ -22,8 +22,8 @@ const ExamTypeSchema = new mongoose.Schema({
   },
   defaultPart: {
     type: String,
-    enum: ["Part-I", "Part-II", "General"],
-    default: "General",
+    enum: ["Part-I", "Part-II"],
+    default: "Part-I",
   },
 });
 

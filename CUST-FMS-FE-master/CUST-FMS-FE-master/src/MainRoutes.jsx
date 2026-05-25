@@ -99,11 +99,16 @@ function MainRoutes({userRole}) {
           const key = JSON.parse(localStorage.getItem("key"));
           console.log("Token:", key);
           const currentUser = JSON.parse(localStorage.getItem("user"));
+          if (!currentUser) {
+            setIsLoading(false);
+            return;
+          }
           const currentUserRegNum = currentUser.registrationNumber;
           console.log("Checking current logged in user data", currentUserRegNum);
       
           if (!key) {
             console.error('Bearer token is missing.');
+            setIsLoading(false);
             return;
           }
       

@@ -14,7 +14,9 @@ import GenAccor from '../../../Components/Accordians/GenAccor';
 
 const CoodResults = () => {
 
-    const [loadingSpinner, setLoadingSpinner] = useState(false);
+    const [loadingResults, setLoadingResults] = useState(false);
+    const [loadingTerms, setLoadingTerms] = useState(false);
+    const [loadingExamTypes, setLoadingExamTypes] = useState(false);
     const [showResultsSelectCard, setShowResultsSelectCard] = useState(false);
     const [showResult, setShowResult] = useState(false);
     const [showOverallResult, setShowOverAllResult] = useState(false);
@@ -32,17 +34,57 @@ const CoodResults = () => {
     const [tabheading, setTabHeading] = useState(null);
     const [overAllResult, setOverAllResult] = useState(null)
     const [portalResult, setPortalResult] = useState(null)
+    const [hasPartII, setHasPartII] = useState(false);
+    const [partStatusFilter, setPartStatusFilter] = useState('combined');
+    const [isCombinedView, setIsCombinedView] = useState(false);
 
 
 
 
-    const handletermChange = (selectedOption) => {
+    const handletermChange = async (selectedOption) => {
         setTerm(selectedOption);
+        setHasPartII(false);
+        setPartStatusFilter('combined');
+        setIsCombinedView(false);
+
+        if (selectedOption && (selectedOption.value || selectedOption._id)) {
+            await checkPartIIStatus(selectedOption.value || selectedOption._id);
+        }
     };
     const handleExamChange = (selectedOption) => {
 
         setExam(selectedOption);
 
+    };
+
+    const checkPartIIStatus = async (termId) => {
+        try {
+            const nkey = localStorage.getItem('key');
+            const token = JSON.parse(nkey);
+            const response = await fetch(`${baseUrl}/api/EvaluateExamRoutes/check-part-ii-status/${termId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            if (!response.ok) {
+                console.error('Failed to check Part II status');
+                return;
+            }
+
+            const data = await response.json();
+            console.log('Part II status check:', data);
+
+            if (data.success && data.hasPartII) {
+                setHasPartII(true);
+            } else {
+                setHasPartII(false);
+            }
+        } catch (error) {
+            console.error('Error checking Part II status:', error);
+        }
     };
     const handleViewResult = () => {
         setResultsData(null)
@@ -53,7 +95,7 @@ const CoodResults = () => {
 
         if (exam.value === 'portal_result_list') {
             console.log("Portal Result")
-            fetchResultsData(term._id, exam.value)
+            fetchResultsData(term.value || term._id, exam.value)
             setShowResultsSelectCard(false);
             setShowResult(false);
             setShowOverAllResult(false)
@@ -62,7 +104,7 @@ const CoodResults = () => {
         else if (exam.value === 'overall_result_list') {
 
             console.log("Overall Result")
-            fetchResultsData(term._id, exam.value)
+            fetchResultsData(term.value || term._id, exam.value)
             setShowResultsSelectCard(false);
             setShowResult(false);
             setShowPortalResult(false)
@@ -70,7 +112,7 @@ const CoodResults = () => {
 
 
         } else {
-            fetchResultsData(term._id, exam.value)
+            fetchResultsData(term.value || term._id, exam.value)
             setShowResultsSelectCard(false);
             setShowOverAllResult(false)
             setShowPortalResult(false)
@@ -114,7 +156,7 @@ const CoodResults = () => {
 
     const fetchResultsData = async (termId, examName) => {
         try {
-            setLoadingSpinner(true);
+            setLoadingResults(true);
             const nkey = localStorage.getItem('key');
             const token = JSON.parse(nkey);
             const userData = localStorage.getItem('user');
@@ -148,17 +190,36 @@ const CoodResults = () => {
                     console.error('Portal Report Error:', portalData.error);
                     alert(`Error: ${portalData.error}`);
                 }
-                setLoadingSpinner(false);
+                setLoadingResults(false);
                 return; // Early return — portal result is handled entirely here
 
             } else if (examName === 'overall_result_list') {
-                response = await fetch(`${baseUrl}/api/EvaluateExamRoutes/getExamEvaluationsbyTerm/${termId}`, {
+                const queryParams = hasPartII ? `?partStatus=${partStatusFilter}` : '';
+                response = await fetch(`${baseUrl}/api/EvaluateExamRoutes/overall-fyp-result/${termId}${queryParams}`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
                 });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to fetch Overall Result');
+                }
+
+                const overallData = await response.json();
+                console.log('Overall FYP Result Data:', overallData);
+
+                if (overallData.success) {
+                    setOverAllResult(overallData.data);
+                    setIsCombinedView(partStatusFilter === 'combined');
+                } else {
+                    console.error('Overall Result Error:', overallData.error);
+                    alert(`Error: ${overallData.error}`);
+                }
+                setLoadingResults(false);
+                return; // Early return — overall result is handled entirely here
 
             } else {
                 response = await fetch(`${baseUrl}/api/EvaluateExamRoutes/getExamEvaluations/${termId}/${examName}`, {
@@ -277,7 +338,7 @@ const CoodResults = () => {
 
             console.error('Error fetching Data:', error.message);
         } finally {
-            setLoadingSpinner(false);
+            setLoadingResults(false);
         }
     };
 
@@ -305,7 +366,7 @@ const CoodResults = () => {
 
     const fetchTermData = async () => {
         try {
-            setLoadingSpinner(true);
+            setLoadingTerms(true);
             const nkey = localStorage.getItem('key');
             const token = JSON.parse(nkey);
             const userData = localStorage.getItem('user');
@@ -334,12 +395,12 @@ const CoodResults = () => {
         } catch (error) {
             console.error('Error fetching Data:', error.message);
         } finally {
-            setLoadingSpinner(false);
+            setLoadingTerms(false);
         }
     };
     const fetchExamTypes = async () => {
         try {
-            setLoadingSpinner(true);
+            setLoadingExamTypes(true);
             const key = JSON.parse(localStorage.getItem("key"));
             const config = { headers: { Accept: 'application/json', Authorization: `Bearer ${key}` } };
             const url = `${baseUrl}/api/ExamType/GetCreatedExamType`;
@@ -376,7 +437,7 @@ const CoodResults = () => {
         } catch (error) {
             console.error('Error fetching Exam Types:', error.response ? error.response.data : error.message);
         } finally {
-            setLoadingSpinner(false);
+            setLoadingExamTypes(false);
         }
     }
 
@@ -466,6 +527,34 @@ const CoodResults = () => {
         return attendanceMarks;
     };
 
+    const exportOverallResultToExcel = () => {
+        if (!overAllResult || overAllResult.length === 0) {
+            alert('No overall result data to export.'); return;
+        }
+        const th = (text) =>
+            `<th style="font-weight:bold;border:1px solid #888;padding:4px 6px;text-align:center;">${text}</th>`;
+        const td = (val) =>
+            `<td style="border:1px solid #ccc;padding:3px 6px;text-align:center;">${val ?? ''}</td>`;
+        const examNames = overAllResult.length > 0 ? Object.keys(overAllResult[0].exams) : [];
+        const hdrRow = [
+            th('Reg No'),th('Name'),
+            ...examNames.map(e=>th(e)),
+        ].join('');
+        const dataRows = overAllResult.map((s) => {
+            let r=td(s.registrationNumber)+td(s.name);
+            examNames.forEach(e=>{r+=td(s.exams[e]??'-');});
+            return `<tr>${r}</tr>`;
+        }).join('');
+        const lbl=partStatusFilter==='combined'?'Combined':partStatusFilter==='part-I'?'Part I':'Part II';
+        const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><table border="1" cellspacing="0" cellpadding="4" style="font-family:Arial;font-size:11px;border-collapse:collapse;"><thead><tr>${hdrRow}</tr></thead><tbody>${dataRows}</tbody></table></body></html>`;
+        const blob=new Blob([html],{type:'application/vnd.ms-excel;charset=utf-8;'});
+        const link=document.createElement('a');
+        link.href=URL.createObjectURL(blob);
+        link.download=`Overall_Result_${lbl}_${new Date().toISOString().slice(0,10)}.xls`;
+        link.style.display='none';
+        document.body.appendChild(link);link.click();document.body.removeChild(link);
+    };
+
     const handleViewAttendanceClick = () => { }
 
 
@@ -496,9 +585,11 @@ const CoodResults = () => {
             indicator.style.top = `${topOffset}px`;
         }
     }, []);
+    const isLoading = loadingResults || loadingTerms || loadingExamTypes;
+
     return (
         <>
-            {loadingSpinner ? ( // Show loading spinner while loading is true
+            {isLoading ? ( // Show loading spinner while loading is true
                 <LoadingSpinner />
             ) : (
                 <div className='bg-slate-100 w-full h-full'>
@@ -554,9 +645,49 @@ const CoodResults = () => {
                                                     />
                                                 </label>
                                             </div>
-                                            <div className="col-span-1 flex justify-center my-2">
-                                                <Simple text="Done" type="Submit" onClick={handleViewResult} />
-                                            </div>
+                                             {term && (term.value || term._id) && (
+                                                 <div className="my-4">
+                                                     <label className="block text-md font-semibold text-gray-700 mb-2">Filter by Part Status</label>
+                                                     <div className="flex gap-4 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                                                         <label className="inline-flex items-center cursor-pointer hover:bg-gray-100 p-1 rounded">
+                                                             <input
+                                                                 type="radio"
+                                                                 className="form-radio text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                                                                 name="partStatus"
+                                                                 value="combined"
+                                                                 checked={partStatusFilter === 'combined'}
+                                                                 onChange={(e) => setPartStatusFilter(e.target.value)}
+                                                             />
+                                                             <span className="ml-2 text-gray-700 font-medium">Combined</span>
+                                                         </label>
+                                                         <label className="inline-flex items-center cursor-pointer hover:bg-gray-100 p-1 rounded">
+                                                             <input
+                                                                 type="radio"
+                                                                 className="form-radio text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                                                                 name="partStatus"
+                                                                 value="part-I"
+                                                                 checked={partStatusFilter === 'part-I'}
+                                                                 onChange={(e) => setPartStatusFilter(e.target.value)}
+                                                             />
+                                                             <span className="ml-2 text-gray-700 font-medium">Part I</span>
+                                                         </label>
+                                                         <label className="inline-flex items-center cursor-pointer hover:bg-gray-100 p-1 rounded">
+                                                             <input
+                                                                 type="radio"
+                                                                 className="form-radio text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                                                                 name="partStatus"
+                                                                 value="part-II"
+                                                                 checked={partStatusFilter === 'part-II'}
+                                                                 onChange={(e) => setPartStatusFilter(e.target.value)}
+                                                             />
+                                                             <span className="ml-2 text-gray-700 font-medium">Part II</span>
+                                                         </label>
+                                                     </div>
+                                                 </div>
+                                             )}
+                                             <div className="col-span-1 flex justify-center my-2">
+                                                 <Simple text="Done" type="Submit" onClick={handleViewResult} />
+                                             </div>
                                         </form>
                                     </div>
                                 </div>
@@ -582,9 +713,9 @@ const CoodResults = () => {
                                                                 <th>Obtained Marks</th>
                                                             ) : (
                                                                 <>
-                                                                    {students[0]?.obtainedAverageofCLO.map((clo, cloIdx) => (
+                                                                    {students[0]?.obtainedAverageofCLO?.map((clo, cloIdx) => (
                                                                         <th key={cloIdx}>{`CLO ${cloIdx + 1} (${clo.totalCLOPercentage.toFixed(2)})`}</th>
-                                                                    ))}
+                                                                    )) || <th>CLO Marks</th>}
                                                                     <th>Total</th>
                                                                 </>
                                                             )}
@@ -601,10 +732,10 @@ const CoodResults = () => {
                                                                         <td>{student.obtainedAverage?.toFixed(2)}</td>
                                                                     ) : (
                                                                         <>
-                                                                            {student.obtainedAverageofCLO.map((clo, cloIdx) => (
+                                                                            {student.obtainedAverageofCLO?.map((clo, cloIdx) => (
                                                                                 <td key={cloIdx}>{clo.averageCLOPercentage.toFixed(2)}</td>
-                                                                            ))}
-                                                                            <td>{student.obtainedAverageofCLO.reduce((total, clo) => total + clo.averageCLOPercentage, 0).toFixed(2)}</td>
+                                                                            )) || <td>-</td>}
+                                                                            <td>{(student.obtainedAverageofCLO || []).reduce((total, clo) => total + clo.averageCLOPercentage, 0).toFixed(2)}</td>
                                                                         </>
                                                                     )}
                                                                     {(tabheading === "Attendance-I" || tabheading === "Attendance-II") && (
@@ -637,65 +768,101 @@ const CoodResults = () => {
 
 
                         {showOverallResult && (
-
-
                             <div>
-
                                 <div id={`accordion-collapse-${2}`} data-accordion="collapse">
-                                    <h2 id={`accordion-collapse-heading-timetable-${2}`}>
-                                        <GenAccor text={"Overall Result"} accordionId={2} />
-                                    </h2>
-                                    <div id={`accordion-collapse-body-timetable-${2}`} className="hidden" aria-labelledby={`accordion-collapse-heading-timetable-${2}`}>
-                                        <table className="w-full text-sm rtl:text-right text-center bg-white">
-                                            <thead className="text-xs text-indigo-900 uppercase bg-gray-50">
-                                                <tr>
-                                                    <th>Sr no.</th>
-                                                    <th>Reg no</th>
-                                                    <th>Name</th>
-                                                    <th>Proposal</th>
-                                                    <th>Orientation</th>
-                                                    <th>Mid I</th>
-                                                    <th>Attendance</th>
-                                                    <th>Final I</th>
-                                                    <th>Total</th>
-                                                    <th>Mid II</th>
-                                                    <th>Attendance</th>
-                                                    <th>Final II</th>
-                                                    <th>Total</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className='text-indigo-950'>
-                                                {console.log(overAllResult, "Overall data consoled")}
-                                                {overAllResult && Object.values(overAllResult).length > 0 ? (
-                                                    Object.values(overAllResult).map((student, studentIdx) => (
-                                                        <tr key={studentIdx}>
-                                                            <td>{studentIdx + 1}</td>
-                                                            <td>{student.registrationNumber}</td>
-                                                            <td>{student.name}</td>
-                                                            <td>{student.exams.Proposal || '-'}</td>
-                                                            <td>{student.exams.Orientation || '-'}</td>
-                                                            <td>{student.exams.MidI || '-'}</td>
-                                                            <td>{student.exams.AttendanceI || '-'}</td>
-                                                            <td>{student.exams.FinalI || '-'}</td>
-                                                            <td>{student.exams.TotalI || '-'}</td>
-                                                            <td>{student.exams.MidII || '-'}</td>
-                                                            <td>{student.exams.AttendanceII || '-'}</td>
-                                                            <td>{student.exams.FinalII || '-'}</td>
-                                                            <td>{student.exams.TotalII || '-'}</td>
-                                                        </tr>
-                                                    ))
-                                                ) : (
-                                                    <tr>
-                                                        <td colSpan={13}>No students found</td>
-                                                    </tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-
-                                    </div>
-                                </div>
-                            </div>
-
+                                     <h2 id={`accordion-collapse-heading-timetable-${2}`}>
+                                         <GenAccor text={isCombinedView ? "Overall Result (Part I + Part II)" : "Overall Result"} accordionId={2} />
+                                     </h2>
+                                     <div id={`accordion-collapse-body-timetable-${2}`} className="hidden" aria-labelledby={`accordion-collapse-heading-timetable-${2}`}>
+                                         <div className="flex justify-end p-2 bg-white border-b border-gray-200">
+                                             <button 
+                                                 onClick={(e) => { e.preventDefault(); exportOverallResultToExcel(); }}
+                                                 className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-medium text-sm transition-colors flex items-center gap-2"
+                                             >
+                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                                 Export to Excel
+                                             </button>
+                                         </div>
+                                         <div className="overflow-x-auto shadow-md sm:rounded-lg">
+                                             <table id={`overall-result-table-${2}`} className="w-full text-sm rtl:text-right text-center bg-white">
+                                                 <thead className="text-xs text-indigo-900 uppercase bg-gray-50">
+                                                     <tr>
+                                                         <th>Sr no.</th>
+                                                         <th>Reg no</th>
+                                                         <th>Name</th>
+                                                         {/* Dynamic Header Rendering */}
+                                                         {overAllResult && overAllResult.length > 0 && Object.keys(overAllResult[0].exams).map((examName, idx) => (
+                                                             <th key={idx}>{examName}</th>
+                                                         ))}
+                                                         {(partStatusFilter === 'combined' || partStatusFilter === 'part-I') && (
+                                                             <>
+                                                                 <th className="bg-indigo-50 font-bold border-l border-gray-300">Total I</th>
+                                                                 <th className="bg-green-50">Status I</th>
+                                                             </>
+                                                         )}
+                                                         {(partStatusFilter === 'combined' || partStatusFilter === 'part-II') && (
+                                                             <>
+                                                                 <th className="bg-indigo-50 font-bold border-l border-gray-300">Total II</th>
+                                                                 <th className="bg-green-50">Status II</th>
+                                                             </>
+                                                         )}
+                                                     </tr>
+                                                 </thead>
+                                                 <tbody className='text-indigo-950'>
+                                                     {console.log(overAllResult, "Overall data consoled")}
+                                                     {overAllResult && Object.values(overAllResult).length > 0 ? (
+                                                         Object.values(overAllResult).map((student, studentIdx) => (
+                                                             <tr key={studentIdx}>
+                                                                 <td>{studentIdx + 1}</td>
+                                                                 <td>{student.registrationNumber}</td>
+                                                                 <td>{student.name}</td>
+                                                                 {/* Dynamic Marks Rendering */}
+                                                                 {Object.keys(student.exams).map((examName, idx) => (
+                                                                     <td key={idx}>{student.exams[examName] || '-'}</td>
+                                                                 ))}
+                                                                 
+                                                                 {(partStatusFilter === 'combined' || partStatusFilter === 'part-I') && (
+                                                                     <>
+                                                                         <td className="font-bold bg-indigo-50 border-l border-gray-300">{student.TotalPartI?.toFixed(2) || '0.00'}</td>
+                                                                         <td className="font-semibold">
+                                                                             {student.passFailPartI === 'PASS' ? (
+                                                                                 <span className="px-2 py-1 rounded bg-green-100 text-green-700">PASS</span>
+                                                                             ) : student.passFailPartI === 'FAIL' ? (
+                                                                                 <span className="px-2 py-1 rounded bg-red-100 text-red-700">FAIL</span>
+                                                                             ) : (
+                                                                                 <span>-</span>
+                                                                             )}
+                                                                         </td>
+                                                                     </>
+                                                                 )}
+                                                                 
+                                                                 {(partStatusFilter === 'combined' || partStatusFilter === 'part-II') && (
+                                                                     <>
+                                                                         <td className="font-bold bg-indigo-50 border-l border-gray-300">{student.TotalPartII?.toFixed(2) || '0.00'}</td>
+                                                                         <td className="font-semibold">
+                                                                             {student.passFailPartII === 'PASS' ? (
+                                                                                 <span className="px-2 py-1 rounded bg-green-100 text-green-700">PASS</span>
+                                                                             ) : student.passFailPartII === 'FAIL' ? (
+                                                                                 <span className="px-2 py-1 rounded bg-red-100 text-red-700">FAIL</span>
+                                                                             ) : (
+                                                                                 <span>-</span>
+                                                                             )}
+                                                                         </td>
+                                                                     </>
+                                                                 )}
+                                                             </tr>
+                                                         ))
+                                                     ) : (
+                                                         <tr>
+                                                             <td colSpan={14}>No students found</td>
+                                                         </tr>
+                                                     )}
+                                                 </tbody>
+                                             </table>
+                                         </div>
+                                     </div>
+                                 </div>
+                             </div>
                         )}
 
 

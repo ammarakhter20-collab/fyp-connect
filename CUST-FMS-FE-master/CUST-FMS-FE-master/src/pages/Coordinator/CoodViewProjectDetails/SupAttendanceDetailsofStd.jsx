@@ -15,10 +15,10 @@ const SupAttendanceDetailsofStd = (props) => {
                             <thead className="text-xs text-indigo-900 uppercase border-b   ">
                                 <tr>
                                     <th colSpan={2}>
-                                        Course: {data[0]?.Course}
+                                        Course: {data[0]?.Course || 'N/A'}
                                     </th>
                                     <th  colSpan={2}>
-                                        Conducted meetings: {data[0]?.Meetings}
+                                        Conducted meetings: {(data[0]?.Meetings !== undefined && data[0]?.Meetings !== null) ? data[0].Meetings : 'N/A'}
                                     </th>
                                 </tr>
                                 <tr>

@@ -65,7 +65,8 @@ const UserSchema = new Schema({
         this.role === "faculty" ||
         this.role === "coordinator" ||
         this.role === "Coordinator" ||
-        this.role === "hod"
+        this.role === "hod" ||
+        this.partStatus === "failed-part-I"
       );
     },
   },

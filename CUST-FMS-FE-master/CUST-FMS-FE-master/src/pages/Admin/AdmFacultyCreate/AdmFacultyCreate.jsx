@@ -752,6 +752,8 @@ const AdmFacultyCreate = ({ accordionId }) => {
     setDesignation(faculty.designation); // Assuming designation is a state variable for faculty designation
     if (faculty.program && faculty.program._id) {
       setSelectedProgram({ value: faculty.program._id, label: faculty.program.programTitle });
+    } else {
+      setSelectedProgram(null);
     }
     if (faculty.department && faculty.department._id) {
       setSelectedDepartment({ value: faculty.department._id, label: faculty.department.departmentName });
@@ -792,20 +794,26 @@ const AdmFacultyCreate = ({ accordionId }) => {
     setFacultyName(faculty.name);
     setPhoneNumber(faculty.phoneNumber);
 
-    setSelectedProgram({ value: faculty.program._id, label: faculty.program.programTitle });
-    setSelectedDepartment({ value: faculty.department._id, label: faculty.department.departmentName });
+    if (faculty.program && faculty.program._id) {
+      setSelectedProgram({ value: faculty.program._id, label: faculty.program.programTitle });
+    } else {
+      setSelectedProgram(null);
+    }
+    if (faculty.department && faculty.department._id) {
+      setSelectedDepartment({ value: faculty.department._id, label: faculty.department.departmentName });
+    }
     // setSelectedTerm({ value: faculty.term._id, label: faculty.term.sessionTerm });
     setSelectedRole({ value: faculty.role, label: faculty.role });
     setSelectedDesignation({ value: faculty.designation, label: faculty.designation });
     console.log("Check role id", faculty.role);
     console.log("Check role label", faculty.role);
     setExtension(faculty.extension);
-    const dobDate = faculty.dateOfBirth.substring(0, 10);
+    const dobDate = faculty.dateOfBirth ? faculty.dateOfBirth.substring(0, 10) : '';
     setDob(dobDate);
     setEmail(faculty.email);
     setSecondaryEmail(faculty.secondaryEmail);
     setPassword(faculty.password);
-    const joining = faculty.joiningDate.substring(0, 10);
+    const joining = faculty.joiningDate ? faculty.joiningDate.substring(0, 10) : '';
 
     setJoiningDate(joining);
     setCnic(faculty.cnic);
@@ -1005,11 +1013,11 @@ const AdmFacultyCreate = ({ accordionId }) => {
       isValid = false;
       errors.selectedDesignation = 'Please enter designation.';
     }
-    // Program is not required for hod or coordinator
-    if (!isHodOrCoordinator && !selectedProgram) {
-      isValid = false;
-      errors.selectedProgram = 'Please select or enter program.';
-    }
+    // Program is not required anymore for any faculty role
+    // if (!isHodOrCoordinator && !selectedProgram) {
+    //   isValid = false;
+    //   errors.selectedProgram = 'Please select or enter program.';
+    // }
     // Department is required for all roles
     if (!selectedDepartment) {
       isValid = false;
@@ -1345,7 +1353,7 @@ const AdmFacultyCreate = ({ accordionId }) => {
                       )}
                     </div>
 
-                    <div className='flex flex-col mt-1'>
+                    {/* <div className='flex flex-col mt-1'>
                       <label htmlFor='programDropdown' className='mb-1 text-sm font-medium text-black'>
                         Program
                       </label>
@@ -1365,7 +1373,7 @@ const AdmFacultyCreate = ({ accordionId }) => {
                       {formErrors.selectedProgram && (
                         <p className='text-red-500 text-sm mt-1'>{formErrors.selectedProgram}</p>
                       )}
-                    </div>
+                    </div> */}
 
                     {/* <div className='flex flex-col mt-1'>
       <label htmlFor='termDropdown' className='mb-1 text-sm font-medium text-black'>
@@ -1589,7 +1597,6 @@ const AdmFacultyCreate = ({ accordionId }) => {
                           <th className='px-6 py-3'>CNIC</th>
                           <th className='px-6 py-3'>Designation</th>
                           <th className='px-6 py-3'>Department</th>
-                          <th className='px-6 py-3'>Program</th>
                           <th className='px-6 py-3'>Action</th>
                         </tr>
                       </thead>
@@ -1636,16 +1643,7 @@ const AdmFacultyCreate = ({ accordionId }) => {
                                 ) : (
                                   faculty.department ? faculty.department : 'Hello'
                                   // Display department.label if departmentName is not available
-                                )}
-                              </td>
-                              <td className='px-6 py-4'>
-                                {faculty.program && faculty.program.programTitle ? (
-                                  // Display programTitle if available in faculty.program
-                                  faculty.program.programTitle
-                                ) : (
-                                  // Handle case when program or programTitle is not available
-                                  'N/A'
-                                )}
+                                  )}
                               </td>
 
                               <td className='px-6 py-4'>
@@ -1663,7 +1661,7 @@ const AdmFacultyCreate = ({ accordionId }) => {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan='9' className='text-center py-4'>No faculties found</td>
+                            <td colSpan='8' className='text-center py-4'>No faculties found</td>
                           </tr>
                         )}
 

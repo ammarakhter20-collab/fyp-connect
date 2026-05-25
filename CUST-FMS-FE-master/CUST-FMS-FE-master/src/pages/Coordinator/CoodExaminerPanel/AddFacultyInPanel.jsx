@@ -33,10 +33,12 @@ console.log("Checking Panelllllllllll", panelData);
     console.log("Function Calledddddddd filtereing", facultyData);
     console.log("selected Program", selectedProgram);
     if (selectedProgram) {
+      const progObj = programsData.find(p => p.value === selectedProgram.value);
+      const progDeptId = progObj && progObj.department ? (progObj.department._id || progObj.department) : null;
+
       const filtered = facultyData.filter(faculty => {
-        console.log("faculty.programId:", faculty.program._id);
-        console.log("selectedProgram:", selectedProgram);
-        return faculty.program._id === selectedProgram.value;
+        const facDeptId = faculty.departmentId;
+        return facDeptId && progDeptId && String(facDeptId) === String(progDeptId);
       });
       console.log("cheecking filtered Faculty", filtered);
       const faculty = filtered.map(fac => ({
@@ -47,7 +49,7 @@ console.log("Checking Panelllllllllll", panelData);
     } else {
       setFacultyOptions([]);
     }
-  }, [selectedProgram])
+  }, [selectedProgram, facultyData, programsData])
 
   const handleFacultyChange = (selectedOption) => {
      setSelectedFacutly(selectedOption);

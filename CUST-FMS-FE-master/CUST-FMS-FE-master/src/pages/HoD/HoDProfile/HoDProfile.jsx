@@ -90,6 +90,7 @@ const fetchUserData = async () => {
 
     // setStudentData(response.data.user);
     setStudData(response.data.user);
+    localStorage.setItem('user', JSON.stringify(response.data.user));
     // localStorage.setItem('studentData', JSON.stringify(response.data.user));
   } catch (error) {
     console.error('Error fetching user data:', error);
@@ -164,6 +165,10 @@ const handleUploadPicture = async () => {
       image: response.data.user.image // Assuming the response contains updated user data
     }));
 
+    // Synchronize the fresh image to localStorage user object immediately
+    const updatedLocalStorageUser = { ...userData, image: response.data.user.image };
+    localStorage.setItem('user', JSON.stringify(updatedLocalStorageUser));
+
     // Clear the file state after successful upload
     setFile(null);
 
@@ -227,6 +232,9 @@ console.log("Checking user id", user);
     console.log('Profile updated:', response.data);
     setConfirmationMessage('Profile Updated successfully');
     setShowConMsg(true);
+
+    // Fetch fresh user data to update localStorage and state with fresh values
+    await fetchUserData();
 
     // Hide the confirmation message after 3 seconds
     setTimeout(() => {
@@ -452,12 +460,21 @@ const handleFileChange = (e) => {
               <div>
               <div className='max-w-md bg-white border border-gray-200 rounded-lg shadow absolute inset-0 mx-auto h-60 mt-14 '>
 
-<div className='h-[5.625rem] mt-[-3.3125rem] rounded-full '>
-  <img
-    className='rounded-full w-24 h-24 object-fill mx-auto border-white border-2'
-    src={`/uploads/${StudData.image}`}
-    alt='Card Image'
-  />
+<div className='h-[5.625rem] mt-[-3.3125rem] rounded-full relative z-20'>
+  {StudData?.image && StudData.image !== "undefined" && StudData.image !== "" ? (
+    <img
+      className='rounded-full w-24 h-24 object-fill mx-auto border-white border-4 shadow-md bg-white'
+      src={`/uploads/${StudData.image}`}
+      alt='Card Image'
+      onError={(e) => {
+        e.target.src = '/assets/images/CardImg.png';
+      }}
+    />
+  ) : (
+    <div className='rounded-full w-24 h-24 mx-auto border-white border-4 shadow-md bg-gradient-to-tr from-primary to-indigo-600 flex items-center justify-center text-white text-3xl font-bold uppercase'>
+      {StudData?.name ? StudData.name.charAt(0).toUpperCase() : 'H'}
+    </div>
+  )}
 </div>
 <div className='p-5 pt-2'>
   <div className='AdminName'>

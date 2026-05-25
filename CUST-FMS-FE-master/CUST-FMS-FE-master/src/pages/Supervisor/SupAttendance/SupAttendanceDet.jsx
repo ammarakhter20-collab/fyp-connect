@@ -53,7 +53,8 @@ const AttendanceDet = ({ accordionId, groupData, onViewDetailsClick }) => {
                     return total + fypGroup.partStatus.reduce((meetingsTotal, part) => {
                       return meetingsTotal + part.meetings.reduce((meetings, meeting) => {
                         return meetings + meeting.memberAttendances.reduce((attendanceCount, attendance) => {
-                          return attendanceCount + (attendance.member === member._id && attendance.status === 'present' ? 1 : 0);
+                          const attMemberId = attendance.member && (attendance.member._id || attendance.member).toString();
+                          return attendanceCount + (attMemberId === member._id.toString() && attendance.status === 'present' ? 1 : 0);
                         }, 0);
                       }, 0);
                     }, 0);

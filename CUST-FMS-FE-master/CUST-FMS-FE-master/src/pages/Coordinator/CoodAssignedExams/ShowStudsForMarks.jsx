@@ -3,7 +3,7 @@ import GenAccor from '../../../Components/Accordians/GenAccor';
 import LoadingSpinner from '../../../Components/LoadingSpinner/LoadingSpinner';
 import axios from 'axios';
 
-const ShowStudsForMarks = ({ accordionId, exam, Students, termId, examId, examWeightage }) => {
+const ShowStudsForMarks = ({ accordionId, exam, Students, termId, examId, examWeightage, examStatus }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [marks, setMarks] = useState({});
   const [isEditing, setIsEditing] = useState({});
@@ -11,24 +11,94 @@ const ShowStudsForMarks = ({ accordionId, exam, Students, termId, examId, examWe
   const maxMarks = examWeightage || 100;
 
   useEffect(() => {
+    const fetchExistingMarks = async () => {
+      try {
+        setIsLoading(true);
+        const key = JSON.parse(localStorage.getItem("key"));
+        const userData = JSON.parse(localStorage.getItem('user'));
+        const coordinatorId = userData?._id;
+
+        const response = await fetch(`/api/EvaluateExamRoutes/evaluations/${termId}/${exam}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${key}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        let loadedMarks = {};
+        let loadedEditing = {};
+
+        if (response.ok) {
+          const resData = await response.json();
+          if (resData.evaluation && resData.evaluation.students && resData.evaluation.students.length > 0) {
+            resData.evaluation.students.forEach(student => {
+              const studentId = student.studentId;
+              const evalByCoord = student.evaluationsByExaminers?.find(
+                e => e.examinerId === coordinatorId
+              );
+              if (evalByCoord) {
+                loadedMarks[studentId] = evalByCoord.marks;
+                loadedEditing[studentId] = false;
+              }
+            });
+          }
+        }
+
+        if (Students && Students.length > 0) {
+          Students.forEach(student => {
+            const studentId = student.studentId;
+            if (loadedMarks[studentId] === undefined) {
+              loadedMarks[studentId] = "";
+              loadedEditing[studentId] = true;
+            }
+          });
+        }
+
+        setMarks(loadedMarks);
+        setIsEditing(loadedEditing);
+      } catch (err) {
+        console.error("Error loading existing marks:", err);
+        if (Students && Students.length > 0) {
+          setMarks(Students.reduce((acc, s) => ({ ...acc, [s.studentId]: "" }), {}));
+          setIsEditing(Students.reduce((acc, s) => ({ ...acc, [s.studentId]: true }), {}));
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     if (Students && Students.length > 0) {
-      setMarks(Students.reduce((acc, student) => ({ ...acc, [student.studentId]: maxMarks }), {}));
-      setIsEditing(Students.reduce((acc, student) => ({ ...acc, [student.studentId]: false }), {}));
+      fetchExistingMarks();
+    } else {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  }, [Students, maxMarks]);
+  }, [Students, termId, exam, maxMarks]);
 
   const handleMarksChange = (studentId, value) => {
-    const marksValue = Math.max(0, Math.min(maxMarks, Number(value))); // Restricting between 0 and maxMarks
+    if (value === "") {
+      setMarks({ ...marks, [studentId]: "" });
+      return;
+    }
+    const marksValue = Math.max(0, Math.min(maxMarks, Number(value)));
     setMarks({ ...marks, [studentId]: marksValue });
   };
 
   const handleEditToggle = (studentId) => {
     console.log('Checking student id for editing', studentId);
+    if (examStatus === "Completed") {
+      alert("Exam has been finished. Marks cannot be edited.");
+      return;
+    }
     setIsEditing({ ...isEditing, [studentId]: !isEditing[studentId] });
   };
 
   const handleDoneClick = async () => {
+    if (examStatus === "Completed") {
+      alert("Exam has been finished. You cannot modify marks.");
+      return;
+    }
+
     try {
         setIsLoading(true);
         const key = JSON.parse(localStorage.getItem("key"));
@@ -40,7 +110,16 @@ const ShowStudsForMarks = ({ accordionId, exam, Students, termId, examId, examWe
             return;
         }
 
-        const studentMarks = Object.keys(marks).map(studentId => ({ studentId, marks: marks[studentId] }));
+        const studentMarks = [];
+        for (const student of Students) {
+          const mVal = marks[student.studentId];
+          if (mVal === undefined || mVal === "") {
+            alert(`Please enter marks for all students first.`);
+            setIsLoading(false);
+            return;
+          }
+          studentMarks.push({ studentId: student.studentId, marks: Number(mVal) });
+        }
 
         console.log("Exam Data:", exam);
         console.log("Student Marks:", studentMarks);
@@ -59,9 +138,16 @@ const ShowStudsForMarks = ({ accordionId, exam, Students, termId, examId, examWe
 
         if (response.ok) {
             alert('Marks submitted successfully!');
+            // Turn off editing mode for all students after saving
+            const savedEditing = {};
+            Students.forEach(student => {
+              savedEditing[student.studentId] = false;
+            });
+            setIsEditing(savedEditing);
         } else {
             const errorData = await response.json();
             console.error('Failed to submit marks:', errorData);
+            alert(`Failed to submit marks: ${errorData.error || 'Server error'}`);
         }
     } catch (error) {
         console.error('Error submitting marks:', error.message);
@@ -69,7 +155,6 @@ const ShowStudsForMarks = ({ accordionId, exam, Students, termId, examId, examWe
         setIsLoading(false);
     }
 };
-
 
   return (
     <>
@@ -84,8 +169,8 @@ const ShowStudsForMarks = ({ accordionId, exam, Students, termId, examId, examWe
             <div id={`accordion-collapse-body-timetable-${accordionId}`} className="hidden" aria-labelledby={`accordion-collapse-heading-timetable-${accordionId}`}>
               <div className="pt-0 pb-0 border border-b-0 border-gray-200 relative">
                 <div className="table-container overflow-x-auto relative max-h-[20rem] overflow-y-auto">
-                  <table className="w-full text-sm text-left rtl:text-center text-black bg-gray-50   border-collapse border border-gray-300">
-                    <thead className="text-xs text-indigo-900 uppercase bg-gray-50    ">
+                  <table className="w-full text-sm text-left rtl:text-center text-black bg-gray-50 border-collapse border border-gray-300">
+                    <thead className="text-xs text-indigo-900 uppercase bg-gray-50">
                       <tr className='border-b text-center'>
                         <th className="px-6 py-3 w-52">Sr No.</th>
                         <th className="px-6 py-3 w-[31.25rem] text-left">Reg No</th>
@@ -102,26 +187,31 @@ const ShowStudsForMarks = ({ accordionId, exam, Students, termId, examId, examWe
                             <td className="px-6 py-4 font-semibold text-start">{item.registrationNumber}</td>
                             <td className="px-6 py-4 font-semibold">{item.name}</td>
                             <td className="px-6 py-4 font-semibold">
-                              {isEditing[item.studentId] ? (
+                              {isEditing[item.studentId] && examStatus !== "Completed" ? (
                                 <input
                                   type="number"
                                   value={marks[item.studentId]}
                                   onChange={(e) => handleMarksChange(item.studentId, e.target.value)}
-                                  className="w-20 text-center"
+                                  className="w-20 text-center border rounded-md"
                                   min="0"
                                   max={maxMarks}
+                                  placeholder="Marks"
                                 />
                               ) : (
-                                marks[item.studentId]
+                                marks[item.studentId] === "" ? "-" : marks[item.studentId]
                               )}
                             </td>
                             <td className="px-6 py-4 font-semibold">
-                              <button
-                                className="underline text-black hover:text-gray-500"
-                                onClick={() => handleEditToggle(item.studentId)}
-                              >
-                                {isEditing[item.studentId] ? 'Save' : 'Edit'}
-                              </button>
+                              {examStatus === "Completed" ? (
+                                <span className="text-gray-500 text-sm">Finished</span>
+                              ) : (
+                                <button
+                                  className="underline text-black hover:text-gray-500"
+                                  onClick={() => handleEditToggle(item.studentId)}
+                                >
+                                  {isEditing[item.studentId] ? 'Save' : 'Edit'}
+                                </button>
+                              )}
                             </td>
                           </tr>
                         ))
@@ -130,21 +220,19 @@ const ShowStudsForMarks = ({ accordionId, exam, Students, termId, examId, examWe
                           <td colSpan="5" className="text-center py-4">Data not Found</td>
                         </tr>
                       )}
-                      <tr>
-                      </tr>
                     </tbody>
                   </table>
-                  
-                       
                 </div>
-                        <div className='flex flex-row justify-end mt-2 sticky bottom-0'>
-                          <button
-                            className="px-6 py-2 bg-secondary text-white rounded hover:bg-primary"
-                            onClick={handleDoneClick}
-                          >
-                            Done
-                          </button>
-                          </div>
+                {examStatus !== "Completed" && (
+                  <div className='flex flex-row justify-end mt-2 sticky bottom-0 p-2'>
+                    <button
+                      className="px-6 py-2 bg-secondary text-white rounded hover:bg-primary"
+                      onClick={handleDoneClick}
+                    >
+                      Done
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -22,7 +22,7 @@ const SupAttendanceDetailsofStd = (props) => {
                                         Course: {data[0]?.Course || 'N/A'}
                                     </th>
                                     <th colSpan={2}>
-                                        Conducted meetings: {data[0]?.Meetings || 'N/A'}
+                                        Conducted meetings: {(data[0]?.Meetings !== undefined && data[0]?.Meetings !== null) ? data[0].Meetings : 'N/A'}
                                     </th>
                                 </tr>
                                 <tr>

@@ -7,6 +7,7 @@ import { CiEdit } from "react-icons/ci";
 import bcrypt from 'bcryptjs'; 
 import { initFlowbite } from 'flowbite';
 import LoadingSpinner from '../../../Components/LoadingSpinner/LoadingSpinner';
+import { baseUrl } from '../../../Components/config/config';
 const StudProfile = ({isFYPRegistered}) => {
 const [editable, setEditable] = useState(false);
 const [formData, setFormData] = useState({
@@ -417,8 +418,11 @@ const handleFileChange = (e) => {
                   <div className='h-[5.625rem] mt-[-3.3125rem] rounded-full '>
                     <img
                       className='rounded-full w-24 h-24 object-fill mx-auto border-white border-2'
-                      src={`/uploads/${StudData.image}`}
+                      src={StudData?.image && StudData.image !== "undefined" && StudData.image !== "" ? `/uploads/${StudData.image}` : '/assets/images/CardImg.png'}
                       alt='Card Image'
+                      onError={(e) => {
+                        e.target.src = '/assets/images/CardImg.png';
+                      }}
                     />
                   </div>
                   <div className='p-5 pt-2'>

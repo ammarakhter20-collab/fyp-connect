@@ -138,7 +138,7 @@ const Sidebar = () => {
                 to="/CoodProfile"
                 onClick={() => handleTabClick('CoodProfile')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 // className={`relative flex items-center p-3 rounded-lg   hover:bg-gray-100 dark:hover:bg-gray-700`}
                 data-tab="CoodProfile"
@@ -153,7 +153,7 @@ const Sidebar = () => {
                 to="/CoodDashboard" 
                 onClick={() => handleTabClick('CoodDashboard')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodDashboard"
               >
@@ -166,7 +166,7 @@ const Sidebar = () => {
                 to="/CoodAnnouncement" 
                 onClick={() => handleTabClick('CoodAnnouncement')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodAnnouncement"
               >
@@ -179,7 +179,7 @@ const Sidebar = () => {
                 to="/CoodFypRegistration"
                 onClick={() => handleTabClick('CoodFypRegistration')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodFypRegistration"
               >
@@ -192,7 +192,7 @@ const Sidebar = () => {
                 to="/SupuploadFYPtopic"
                 onClick={() => handleTabClick('SupuploadFYPtopic')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupuploadFYPtopic"
               >
@@ -205,7 +205,7 @@ const Sidebar = () => {
                 to="/SupRequest"
                 onClick={() => handleTabClick('SupRequest')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupRequest"
               >
@@ -218,7 +218,7 @@ const Sidebar = () => {
                 to="/SupPrevSupProj"
                 onClick={() => handleTabClick('SupPrevSupProj')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupPrevSupProj"
               >
@@ -231,7 +231,7 @@ const Sidebar = () => {
                 to="/CoodAssignedExam"
                 onClick={() => handleTabClick('CoodAssignedExam')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodAssignedExams"
               >
@@ -244,7 +244,7 @@ const Sidebar = () => {
                 to="/SupTimetable"
                 onClick={() => handleTabClick('SupTimetable')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupTimetable"
               >
@@ -257,7 +257,7 @@ const Sidebar = () => {
                 to="/SupAttendance"
                 onClick={() => handleTabClick('SupAttendance')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupAttendance"
               >
@@ -270,7 +270,7 @@ const Sidebar = () => {
                 to="/SupAssignedTasks"
                 onClick={() => handleTabClick('SupAssignedTasks')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupAssignedTasks"
               >
@@ -283,7 +283,7 @@ const Sidebar = () => {
                 to="/SupChatCall"
                 onClick={() => handleTabClick('SupChatCall')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupChatCall"
               >
@@ -296,7 +296,7 @@ const Sidebar = () => {
                 to="/SupAnnouncements"
                 onClick={() => handleTabClick('SupAnnouncements')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupAnnouncements"
               >
@@ -309,7 +309,7 @@ const Sidebar = () => {
                 to="/SupCourseCatalog"
                 onClick={() => handleTabClick('SupCourseCatalog')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="SupCourseCatalog"
               >
@@ -322,7 +322,7 @@ const Sidebar = () => {
                 to="/CoodFeedback"
                 onClick={() => handleTabClick('CoodFeedback')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodFeedback"
               >
@@ -335,7 +335,7 @@ const Sidebar = () => {
                 to="/CoodExaminerPanel"
                 onClick={() => handleTabClick('CoodExaminerPanel')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodExaminerPanel"
               >
@@ -348,7 +348,7 @@ const Sidebar = () => {
                 to="/CoodAssignPanel"
                 onClick={() => handleTabClick('CoodAssignPanel')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodAssignPanel"
               >
@@ -361,7 +361,7 @@ const Sidebar = () => {
                 to="/CoodCourseCat"
                 onClick={() => handleTabClick('CoodCourseCat')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodCourseCat"
               >
@@ -370,138 +370,7 @@ const Sidebar = () => {
               </NavLink>
             </li>
 
-            {/* Supervision Section */}
-            <li>
-              <div className="dropdown">
-                <div
-                  onClick={() => toggleDropdown('supervisionDropdown')}
-                  className="flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10 cursor-pointer"
-                >
-                  <InfoOutlinedIcon className="flex-shrink-0 w-7 h-7" />
-                  <span className="flex items-center justify-between flex-1">
-                    <span className="ms-3">Supervision</span>
-                    <svg
-                      className={`w-4 h-4 transform ${dropdownStates.supervisionDropdown ? 'rotate-180' : ''}`}
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 10 6"
-                    >
-                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                    </svg>
-                  </span>
-                </div>
 
-                {dropdownStates.supervisionDropdown && (
-                  <ul className="space-y-2 font-medium ms-3">
-                    <li>
-                      <NavLink
-                        to="/CoodUploadFYPTopic"
-                        onClick={() => handleTabClick('CoodUploadFYPTopic')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="CoodUploadFYPTopic"
-                      >
-                        <FileUploadRoundedIcon className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">Upload FYP Topic</span>
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/CoodSupRequest"
-                        onClick={() => handleTabClick('CoodSupRequest')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="CoodSupRequest"
-                      >
-                        <RiFileEditLine className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">Requests</span>
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/CoodMyProjects"
-                        onClick={() => handleTabClick('CoodMyProjects')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="CoodMyProjects"
-                      >
-                        <SourceOutlinedIcon className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">My Projects / Thesis</span>
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/CoodSupAssignedExam"
-                        onClick={() => handleTabClick('CoodSupAssignedExam')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="CoodSupAssignedExam"
-                      >
-                        <AssignmentTurnedInOutlinedIcon className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">Assigned Exams</span>
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/CoodPanelDetails"
-                        onClick={() => handleTabClick('CoodPanelDetails')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="CoodPanelDetails"
-                      >
-                        <IoIosPeople className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">Panel Details</span>
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/CoodTimetable"
-                        onClick={() => handleTabClick('CoodTimetable')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="CoodTimetable"
-                      >
-                        <FaClock className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">Timetable</span>
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/CoodAttendance"
-                        onClick={() => handleTabClick('CoodAttendance')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="CoodAttendance"
-                      >
-                        <EmojiPeopleOutlinedIcon className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">Attendance</span>
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/CoodSupAnnouncements"
-                        onClick={() => handleTabClick('CoodSupAnnouncements')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="CoodSupAnnouncements"
-                      >
-                        <TfiAnnouncement className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">Announcements</span>
-                      </NavLink>
-                    </li>
-                  </ul>
-                )}
-              </div>
-            </li>
 
 
             <li>
@@ -532,7 +401,7 @@ const Sidebar = () => {
                 to="/CoodStudentList"
                 onClick={() => handleTabClick('CoodStudentList')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodStudentList"
               >
@@ -545,7 +414,7 @@ const Sidebar = () => {
                 to="/CoodProjectsLists"
                 onClick={() => handleTabClick('CoodProjectsLists')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodProjectsLists"
               >
@@ -588,7 +457,7 @@ const Sidebar = () => {
                 to="/CoodCreateProject"
                 onClick={() => handleTabClick('CoodCreateProject')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodCreateProject"
               >
@@ -601,7 +470,7 @@ const Sidebar = () => {
                 to="/CoodCreateTechnology"
                 onClick={() => handleTabClick('CoodCreateTechnology')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodCreateTechnology"
               >
@@ -614,7 +483,7 @@ const Sidebar = () => {
                 to="/CoodCreatePlatform"
                 onClick={() => handleTabClick('CoodCreatePlatform')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodCreatePlatform"
               >
@@ -627,7 +496,7 @@ const Sidebar = () => {
                 to="/CoodCreateCategories"
                 onClick={() => handleTabClick('CoodCreateCategories')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodCreateCategories"
               >
@@ -671,7 +540,7 @@ const Sidebar = () => {
                 to="/CoodCreateExamType"
                 onClick={() => handleTabClick('CoodCreateExamType')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodCreateExamType"
               >
@@ -684,7 +553,7 @@ const Sidebar = () => {
                 to="/CoodCreateExam"
                 onClick={() => handleTabClick('CoodCreateExam')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodCreateExam"
               >
@@ -733,7 +602,7 @@ const Sidebar = () => {
                         to="/CoodManageClos"
                         onClick={() => handleTabClick('CoodManageClos')}
                         className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg hover:bg-gray-100 text-white' : 'flex items-center p-3 rounded-lg text-gray-400 hover:bg-gray-100 hover:bg-opacity-10'
+                          isActive ? 'flex items-center p-3 rounded-lg hover:bg-gray-100 text-white' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                         }
                         data-tab="CoodManageClos"
                       >
@@ -746,7 +615,7 @@ const Sidebar = () => {
                         to="/CoodManageQuestions"
                         onClick={() => handleTabClick('CoodManageQuestions')}
                         className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg hover:bg-gray-100 text-white' : 'flex items-center p-3 rounded-lg text-gray-400 hover:bg-gray-100 hover:bg-opacity-10'
+                          isActive ? 'flex items-center p-3 rounded-lg hover:bg-gray-100 text-white' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                         }
                         data-tab="CoodManageQuestions"
                       >
@@ -784,7 +653,7 @@ const Sidebar = () => {
                 to="/CoodResults"
                 onClick={() => handleTabClick('CoodResults')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodResults"
               >
@@ -798,7 +667,7 @@ const Sidebar = () => {
                 to="/CoodEvaluationStatuses"
                 onClick={() => handleTabClick('CoodEvaluationStatuses')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="CoodEvaluationStatuses"
               >
@@ -811,7 +680,7 @@ const Sidebar = () => {
                 to="/Logout"
                 onClick={() => handleTabClick('Logout')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="Logout"
               >

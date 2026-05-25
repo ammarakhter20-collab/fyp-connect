@@ -1,14 +1,42 @@
 const FYPterm = require("../../models/AdminModels/fypTerm");
 const jwt = require("jsonwebtoken");
 const cron = require("node-cron");
+const GenUser = require("../../models/AdminModels/GenUserModel");
+const FypRegistration = require("../../models/StudentModels/fypRegModel");
+const FYPGroupAttendance = require("../../models/SupervisorModels/FYPAttendanceModel");
+const ExamMarks = require("../../models/SupervisorModels/examMarksAssignment");
+const TaskAssignment = require("../../models/SupervisorModels/TaskAssigmentModel");
+const StudentReport = require("../../models/CoordinatorModels/StudentReportsModel");
+const FYPTopicChangeRequest = require("../../models/StudentModels/TopicReqModel");
+const FYPTechnologyChangeRequest = require("../../models/StudentModels/TechReqModel");
+const FypChangeRequest = require("../../models/SupervisorModels/changeRequest");
+const Feedback = require("../../models/SupervisorModels/FeedbackModel");
+const CreateExamModel = require("../../models/CoordinatorModels/ExamCreationModel");
+const ExamAssignment = require("../../models/CoordinatorModels/ExamAssignment");
+const PanelDetails = require("../../models/CoordinatorModels/PenalModel");
+const FYPRegistrationDeadline = require("../../models/CoordinatorModels/CreateFYPRegModel");
+const PassFailCriteria = require("../../models/CoordinatorModels/PassFailCriteriaModel");
+const SupervisorPercentage = require("../../models/CoordinatorModels/ManagePercentageModel");
+const Evaluation = require("../../models/CoordinatorModels/EvaluateExamModel");
+const Result = require("../../models/CoordinatorModels/ResultsModel");
+
 // Use environment variable directly or load from a configuration file
 const secretKey = process.env.TOKEN_KEY;
+
 
 const createFYPterm = async (req, res) => {
   console.log("Inside FYPterm creation controller");
   const { sessionTerm, startDate, endDate } = req.body;
 
   try {
+    const termStr = String(sessionTerm);
+    if (!/^\d{3}$/.test(termStr)) {
+      return res.status(400).json({ error: "Session Term must be exactly 3 digits (e.g., 251 or 253)." });
+    }
+    if (!/[13]$/.test(termStr)) {
+      return res.status(400).json({ error: "Session Term must end with 1 or 3." });
+    }
+
     const start = new Date(startDate);
     const end = new Date(endDate);
 
@@ -30,6 +58,22 @@ const createFYPterm = async (req, res) => {
     const existingTerm = await FYPterm.findOne({ sessionTerm: sessionTerm });
     if (existingTerm) {
       return res.status(400).json({ error: `A term with the name '${sessionTerm}' already exists.` });
+    }
+
+    // 4. Check Maximum 2 Terms per Year
+    const termYear = start.getFullYear();
+    const yearStart = new Date(Date.UTC(termYear, 0, 1, 0, 0, 0));
+    const yearEnd = new Date(Date.UTC(termYear, 11, 31, 23, 59, 59, 999));
+
+    const termsInYearCount = await FYPterm.countDocuments({
+      startDate: {
+        $gte: yearStart,
+        $lte: yearEnd
+      }
+    });
+
+    if (termsInYearCount >= 2) {
+      return res.status(400).json({ error: "all the two terms per year are already being created" });
     }
 
     const fypTerm = await FYPterm.create({
@@ -56,6 +100,14 @@ const updateFYPterm = async (req, res) => {
   const { sessionTerm, startDate, endDate } = req.body;
 
   try {
+    const termStr = String(sessionTerm);
+    if (!/^\d{3}$/.test(termStr)) {
+      return res.status(400).json({ error: "Session Term must be exactly 3 digits (e.g., 251 or 253)." });
+    }
+    if (!/[13]$/.test(termStr)) {
+      return res.status(400).json({ error: "Session Term must end with 1 or 3." });
+    }
+
     const start = new Date(startDate);
     const end = new Date(endDate);
 
@@ -64,6 +116,23 @@ const updateFYPterm = async (req, res) => {
     maxEndDate.setMonth(maxEndDate.getMonth() + 6);
     if (end > maxEndDate) {
       return res.status(400).json({ error: "Term duration cannot exceed 6 months." });
+    }
+
+    // 2. Check Maximum 2 Terms per Year
+    const termYear = start.getFullYear();
+    const yearStart = new Date(Date.UTC(termYear, 0, 1, 0, 0, 0));
+    const yearEnd = new Date(Date.UTC(termYear, 11, 31, 23, 59, 59, 999));
+
+    const termsInYearCount = await FYPterm.countDocuments({
+      _id: { $ne: selectedTermId },
+      startDate: {
+        $gte: yearStart,
+        $lte: yearEnd
+      }
+    });
+
+    if (termsInYearCount >= 2) {
+      return res.status(400).json({ error: "all the two terms per year are already being created" });
     }
 
     // Find the FYPterm by ID and update its data
@@ -249,6 +318,83 @@ const deactivateTerm = async (req, res) => {
   }
 };
 
+const deleteFYPterm = async (req, res) => {
+  const { id } = req.params;
+  const mongoose = require("mongoose");
+  console.log("Inside deleteFYPterm controller for ID:", id);
+
+  try {
+    const termId = id;
+    const termIds = [termId];
+    const termConditions = [
+      { term: termId },
+      { "term._id": termId },
+      { "term.termId": termId }
+    ];
+
+    if (mongoose.Types.ObjectId.isValid(termId)) {
+      const termObjectId = new mongoose.Types.ObjectId(termId);
+      termIds.push(termObjectId);
+      termConditions.push(
+        { term: termObjectId },
+        { "term._id": termObjectId },
+        { "term.termId": termObjectId }
+      );
+    }
+
+    // 1. Find all FypRegistration groups belonging to this term
+    const groups = await FypRegistration.find({ $or: termConditions });
+    const groupIds = groups.map(g => g._id);
+
+    console.log(`Found ${groupIds.length} groups to delete for term ${termId}`);
+
+    // 2. Delete group-dependent records
+    if (groupIds.length > 0) {
+      await FYPGroupAttendance.deleteMany({ fypgroup: { $in: groupIds } });
+      await ExamMarks.deleteMany({ groupId: { $in: groupIds } });
+      await TaskAssignment.deleteMany({ groupId: { $in: groupIds } });
+      await StudentReport.deleteMany({ FYPGroup: { $in: groupIds } });
+      await FYPTopicChangeRequest.deleteMany({ groupId: { $in: groupIds } });
+      await FYPTechnologyChangeRequest.deleteMany({ groupId: { $in: groupIds } });
+      await FypChangeRequest.deleteMany({ fypGroup: { $in: groupIds } });
+      await Feedback.deleteMany({ groupId: { $in: groupIds } });
+    }
+
+    // 3. Delete direct term-dependent records
+    await GenUser.deleteMany({ role: "Student", term: { $in: termIds } });
+    await FypRegistration.deleteMany({ $or: termConditions });
+    await CreateExamModel.deleteMany({ Term: { $in: termIds } });
+    await ExamAssignment.deleteMany({ termId: { $in: termIds } });
+    await PanelDetails.deleteMany({ term: { $in: termIds } });
+    await FYPRegistrationDeadline.deleteMany({ term: { $in: termIds } });
+    await PassFailCriteria.deleteMany({ term: { $in: termIds } });
+    await SupervisorPercentage.deleteMany({ term: { $in: termIds } });
+
+    // 4. Pull/remove the term from terms arrays in Evaluations and Results
+    await Evaluation.updateMany(
+      { "terms.termId": { $in: termIds } },
+      { $pull: { terms: { termId: { $in: termIds } } } }
+    );
+    await Result.updateMany(
+      { "terms.termId": { $in: termIds } },
+      { $pull: { terms: { termId: { $in: termIds } } } }
+    );
+
+    // 5. Finally, delete the term itself
+    const deletedTerm = await FYPterm.findByIdAndDelete(termId);
+
+    if (!deletedTerm) {
+      return res.status(404).json({ message: "Term not found." });
+    }
+
+    console.log("Term and all associated data deleted successfully for ID:", termId);
+    res.status(200).json({ message: "Term and all associated data deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting term:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createFYPterm,
   getTermData,
@@ -257,4 +403,5 @@ module.exports = {
   deactivateTerm,
   fetchFYPTermCount,
   getActivatedTermsForCheck,
+  deleteFYPterm,
 };

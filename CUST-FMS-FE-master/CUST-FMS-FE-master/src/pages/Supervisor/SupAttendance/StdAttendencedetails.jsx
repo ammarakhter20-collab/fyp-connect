@@ -4,7 +4,9 @@ import GenAccor from '../../../Components/Accordians/GenAccor';
 
 const StdAttendancedetails = ({ accordionId, groupData, memberId }) => {
 
-    const member = groupData.fypGroup[0].fypgroup.groupMembers.find((member) => member._id === memberId);
+    const member = groupData && groupData.fypGroup && groupData.fypGroup[0] && groupData.fypGroup[0].fypgroup && groupData.fypGroup[0].fypgroup.groupMembers
+        ? groupData.fypGroup[0].fypgroup.groupMembers.find((member) => member._id === memberId)
+        : null;
 
     console.log(groupData, "attendence groupdata")
 
@@ -17,16 +19,23 @@ const StdAttendancedetails = ({ accordionId, groupData, memberId }) => {
 
     }, [groupData]);
   
-    const totalAttendedMeetings = groupData.fypGroup[0].partStatus.reduce((total, part) => {
-        return total + part.meetings.reduce((meetings, meeting) => {
-            return meetings + meeting.memberAttendances.reduce((attendanceCount, attendance) => {
-                return attendanceCount + (attendance.member === memberId && attendance.status === 'present' ? 1 : 0);
-            }, 0);
-        }, 0);
-    }, 0);
+    const totalAttendedMeetings = groupData && groupData.fypGroup && groupData.fypGroup[0] && groupData.fypGroup[0].partStatus
+        ? groupData.fypGroup[0].partStatus.reduce((total, part) => {
+            return total + (part.meetings ? part.meetings.reduce((meetings, meeting) => {
+                return meetings + (meeting.memberAttendances ? meeting.memberAttendances.reduce((attendanceCount, attendance) => {
+                    const attMemberId = attendance.member && (attendance.member._id || attendance.member).toString();
+                    return attendanceCount + (attMemberId === memberId.toString() && attendance.status === 'present' ? 1 : 0);
+                }, 0) : 0);
+            }, 0) : 0);
+        }, 0)
+        : 0;
     
-    const totalConductedMeetings = groupData.fypGroup[0].partStatus[0].meetings.length;
-    const Percentage = totalConductedMeetings > 0 && totalConductedMeetings ? (totalAttendedMeetings / totalConductedMeetings) * 100 : 0; 
+    const totalConductedMeetings = groupData && groupData.fypGroup && groupData.fypGroup[0] && groupData.fypGroup[0].partStatus
+        ? groupData.fypGroup[0].partStatus.reduce((total, part) => {
+            return total + (part.meetings ? part.meetings.length : 0);
+        }, 0)
+        : 0;
+    const Percentage = totalConductedMeetings > 0 ? (totalAttendedMeetings / totalConductedMeetings) * 100 : 0; 
 
     return (
         <>
@@ -44,13 +53,13 @@ const StdAttendancedetails = ({ accordionId, groupData, memberId }) => {
                             <thead className="text-xs text-indigo-900 uppercase bg-gray-50 ">
                                 <tr>
                                     <th colSpan="2" className="px-6 py-3">
-                                        Student Name: {member.name}
+                                        Student Name: {member ? member.name : ''}
                                     </th>
                                     <th colSpan="2" className="px-6 py-3">
-                                        Registration No.: {member.registrationNumber}
+                                        Registration No.: {member ? member.registrationNumber : ''}
                                     </th>
                                     <th colSpan="2" className="px-6 py-3">
-                                        Course: {member.course}
+                                        Course: {member ? member.course : ''}
                                     </th>
                                 </tr>
                                 <tr>
@@ -76,7 +85,10 @@ const StdAttendancedetails = ({ accordionId, groupData, memberId }) => {
                                 {groupData.fypGroup[0].partStatus.map((part, partIndex) => (
                                     part.meetings.map((meeting, meetingIndex) => {
                                         const meetingNumber = meetingIndex + 1;
-                                        const meetingAttended = (meeting.memberAttendances.filter(attendance => attendance.member === memberId && attendance.status === 'present')).length;
+                                        const meetingAttended = meeting.memberAttendances.filter(attendance => {
+                                            const attMemberId = attendance.member && (attendance.member._id || attendance.member).toString();
+                                            return attMemberId === memberId.toString() && attendance.status === 'present';
+                                        }).length;
                                         const meetingConducted = meetingNumber;
                                         const meetingPercentage = meetingConducted > 0 ? (meetingAttended / meetingConducted) * 100 : 0;
                                         const date = new Date(meeting.meetingDate);
@@ -90,7 +102,10 @@ const StdAttendancedetails = ({ accordionId, groupData, memberId }) => {
                                                 <td className="px-6 py-3">{meetingNumber}</td>
                                                 <td className="px-6 py-3">{meetingPercentage.toFixed(2)}</td>
                                                 <td className="px-6 py-3">
-                                                    {meeting.memberAttendances.find(attendance => attendance.member === memberId && attendance.status === 'present') ? (
+                                                    {meeting.memberAttendances.find(attendance => {
+                                                        const attMemberId = attendance.member && (attendance.member._id || attendance.member).toString();
+                                                        return attMemberId === memberId.toString() && attendance.status === 'present';
+                                                    }) ? (
                                                         <span className="bg-green-500 text-white p-2 rounded">P</span>
                                                     ) : (
                                                         <span className="bg-red-500 text-white p-2 rounded">A</span>

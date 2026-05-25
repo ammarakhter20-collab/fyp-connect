@@ -194,14 +194,14 @@ const importFaculty = async (req, res) => {
       // console.log("Fetched Program ID", programId);
       // console.log("Fetched Term ID", termId);
 
-      if (Role && programId && (Role.toLowerCase() === "hod" || Role.toLowerCase() === "coordinator")) {
+      if (Role && departmentId && (Role.toLowerCase() === "hod" || Role.toLowerCase() === "coordinator")) {
         const existingRoleUser = await YourModel.findOne({
           role: new RegExp(`^${Role}$`, "i"),
-          program: programId,
+          department: departmentId,
         });
 
         if (existingRoleUser) {
-          throw new Error(`A ${Role} for program ${ProgramName} already exists. Excel import aborted.`);
+          throw new Error(`A ${Role} for department ${DepartmentName} already exists. Excel import aborted.`);
         }
       }
 

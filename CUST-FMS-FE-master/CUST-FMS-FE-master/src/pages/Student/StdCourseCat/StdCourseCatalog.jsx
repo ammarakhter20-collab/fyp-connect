@@ -6,6 +6,7 @@ import GenAccor from "../../../Components/Accordians/GenAccor";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import LoadingSpinner from '../../../Components/LoadingSpinner/LoadingSpinner';
+import { baseUrl } from '../../../Components/config/config';
 
 const CourseCatalog = ({accordionId}) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -143,7 +144,7 @@ const CourseCatalog = ({accordionId}) => {
       <td className="px-6 py-4 font-semibold flex items-center justify-center">
         {item.pdfFile && (
           <a
-            href={`/${item.pdfFile.replace(/\\/g, '/')}`}
+            href={`${baseUrl}/${item.pdfFile.replace(/\\/g, '/')}`}
             download={`file_${serialCounter}.pdf`} // Use serialCounter for dynamic filename
             target="_blank"
             rel="noopener noreferrer"

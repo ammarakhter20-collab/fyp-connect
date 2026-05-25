@@ -81,6 +81,15 @@ router.get(
 );
 
 // ============================================================================
+// STUDENT: Personal Overall Report (locked until all exams Completed + 100% wt)
+// ============================================================================
+router.get(
+  "/student-overall-report/:termId/:studentId",
+  authMiddleware,
+  reportController.getStudentOverallReport
+);
+
+// ============================================================================
 // COORDINATOR: Active Exams with Panel Member Marks
 // ============================================================================
 

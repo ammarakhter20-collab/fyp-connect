@@ -144,11 +144,22 @@ const AddMarks = ({ selectedGroup, onclose, examWeightage, onAddClick, examData,
             for (const cloId in marksData[studentId]) {
                 for (const questionId in marksData[studentId][cloId]) {
                     const value = marksData[studentId][cloId][questionId];
-                    const maxMarks = examData.schedule[0].CreatedExam.CLOForExams.CLOs
-                        .find(clo => clo._id === cloId)
-                        .Questions.find(question => question._id === questionId)
-                        .marks;
-                    if (value === null || isNaN(parseInt(value)) || parseInt(value) > maxMarks) {
+                    const foundClo = examData.schedule[0].CreatedExam.CLOForExams.CLOs
+                        .find(clo => String(clo._id) === String(cloId));
+                    
+                    if (!foundClo) {
+                        continue;
+                    }
+
+                    const foundQuestion = foundClo.Questions
+                        .find(question => String(question._id) === String(questionId));
+
+                    if (!foundQuestion) {
+                        continue;
+                    }
+
+                    const maxMarks = foundQuestion.marks;
+                    if (value === null || value === undefined || value === '' || isNaN(parseInt(value)) || parseInt(value) > maxMarks) {
                         valid = false;
                         break;
                     }

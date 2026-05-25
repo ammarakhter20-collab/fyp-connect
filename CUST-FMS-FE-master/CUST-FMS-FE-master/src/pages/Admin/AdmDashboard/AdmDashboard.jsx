@@ -108,13 +108,25 @@ const [departmentCount, setDepartmentCount] = useState(null);
       setSelectedRole({ value: faculty.role, label: faculty.role});
       setPhoneNumber(faculty.phoneNumber);
       setSelectedDesignation({ value: faculty.designation, label: faculty.designation});
-      setSelectedProgram({ value: faculty.program._id, label: faculty.program.programTitle });
-      setSelectedDepartment({ value: faculty.department._id, label: faculty.department.departmentName });
-      setSelectedTerm({ value: faculty.term._id, label: faculty.term.sessionTerm });
+      if (faculty.program && faculty.program._id) {
+        setSelectedProgram({ value: faculty.program._id, label: faculty.program.programTitle });
+      } else {
+        setSelectedProgram({ value: '', label: 'N/A' });
+      }
+      if (faculty.department && faculty.department._id) {
+        setSelectedDepartment({ value: faculty.department._id, label: faculty.department.departmentName });
+      } else {
+        setSelectedDepartment({ value: '', label: 'N/A' });
+      }
+      if (faculty.term && faculty.term._id) {
+        setSelectedTerm({ value: faculty.term._id, label: faculty.term.sessionTerm });
+      } else {
+        setSelectedTerm({ value: '', label: 'N/A' });
+      }
       setExtension(faculty.extension);
-      const dobDate = faculty.dateOfBirth.substring(0, 10);
+      const dobDate = faculty.dateOfBirth ? faculty.dateOfBirth.substring(0, 10) : '';
       setDob(dobDate);
-      const joining = faculty.joiningDate.substring(0, 10);
+      const joining = faculty.joiningDate ? faculty.joiningDate.substring(0, 10) : '';
       setJoiningDate(joining);
       setEmail(faculty.email);
       setSecondaryEmail(faculty.secondaryEmail);
@@ -1006,7 +1018,7 @@ const [departmentCount, setDepartmentCount] = useState(null);
               </div>
 
               <div className='FacultyCard max-w-3xl w-96 h-52 '>
-              <a href='/AdmCreateFaculty' className='block w-full px-6 py-4 bg-white border border-gray-200 rounded-2xl shadow hover:bg-gray-100 ' >
+              <a href='/AdmFacultyCreate' className='block w-full px-6 py-4 bg-white border border-gray-200 rounded-2xl shadow hover:bg-gray-100 ' >
                 <div className='ml-3 text-white'>
                   <div className='TitleAndApprovedStatus flex flex-row justify-between'>
                     <h5 className='mb-2 text-lg font-bold tracking-tight text-primary uppercase'>Faculty</h5>

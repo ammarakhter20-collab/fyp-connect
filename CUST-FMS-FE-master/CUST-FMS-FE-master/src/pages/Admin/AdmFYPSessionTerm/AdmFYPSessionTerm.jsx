@@ -113,7 +113,10 @@ const AdmFYPSessionTerm = ({ accordionId }) => {
 
   const handleSessionTermChange = (e) => {
     // Remove any non-digit characters (only allow numbers 0-9)
-    const numericValue = e.target.value.replace(/\D/g, '');
+    let numericValue = e.target.value.replace(/\D/g, '');
+    if (numericValue.length > 3) {
+      numericValue = numericValue.substring(0, 3);
+    }
     setSessionTerm(numericValue);
     setFormErrors({ ...formErrors, sessionTerm: '' }); // Clear sessionTerm error
   };
@@ -162,6 +165,12 @@ console.log("Checkingg now = ", TermCreationRestriction)
     if (!sessionTerm) {
       errors.sessionTerm = 'Session Term is required.';
       isValid = false;
+    } else if (!/^\d{3}$/.test(sessionTerm)) {
+      errors.sessionTerm = 'Session Term must be exactly 3 digits (e.g., 251 or 253).';
+      isValid = false;
+    } else if (!/[13]$/.test(sessionTerm)) {
+      errors.sessionTerm = 'Session Term must end with 1 or 3.';
+      isValid = false;
     }
     if (!startDate) {
       errors.startDate = 'Starting date is required.';
@@ -172,12 +181,26 @@ console.log("Checkingg now = ", TermCreationRestriction)
       isValid = false;
     }
     const startDateObj = new Date(startDate);
-  const endDateObj = new Date(endDate);
-  if (endDateObj <= startDateObj) {
-    alert('End date must be after the start date');
-    return; // Exit the function early if validation fails
-  }
+    const endDateObj = new Date(endDate);
+    if (endDateObj <= startDateObj) {
+      alert('End date must be after the start date');
+      return; // Exit the function early if validation fails
+    }
 
+    // Check if 2 terms already exist for this specific year
+    const termYear = new Date(startDate).getFullYear();
+    const existingTermsInYear = terms.filter(term => {
+      const year = new Date(term.startDate).getFullYear();
+      if (selectedTerm) {
+        return year === termYear && term._id !== selectedTerm._id;
+      }
+      return year === termYear;
+    });
+
+    if (existingTermsInYear.length >= 2) {
+      window.alert("all the two terms per year are already being created");
+      return false;
+    }
 
     setFormErrors(errors);
     return isValid;
@@ -312,10 +335,45 @@ console.log("Checkingg now = ", TermCreationRestriction)
       console.error('Error deactivating term:', error.message);
       // Handle network or other errors
     }
-    finally {
+  };
+
+  const handleDeleteTerm = async (term) => {
+    const isConfirmed = window.confirm(
+      `WARNING: Are you sure you want to permanently delete term "${term.sessionTerm}"?\n\nThis will delete all students, groups, attendances, exams, assignments, marks, and evaluations associated with this term. This action cannot be undone.`
+    );
+    if (!isConfirmed) return;
+
+    try {
+      setLoadingSpinner(true);
+      const nkey = localStorage.getItem('key');
+      const token = JSON.parse(nkey);
+
+      const response = await fetch(`/api/auth/deleteTerm/${term._id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        console.log('Term deleted successfully');
+        const updatedFYPterm = terms.filter((item) => item._id !== term._id);
+        setTerms(updatedFYPterm);
+        setConfirmationMessage('Term and all associated data deleted successfully');
+        setShowConfirmation(true);
+      } else {
+        console.error('Error deleting term:', data.message || data.error);
+        window.alert(data.message || data.error || 'Failed to delete term.');
+      }
+    } catch (error) {
+      console.error('Error deleting term:', error.message);
+      window.alert('Network error while deleting term.');
+    } finally {
       setLoadingSpinner(false);
     }
   };
+
 
  
 
@@ -486,7 +544,8 @@ console.log("Terms data fetched = ", terms)
         <td className="px-6 py-4">{item.status}</td>
         <td className="px-6 py-4">
           <button className="underline mx-2" onClick={() => handleEditTerm(item)}>Edit</button>
-          <button className="underline" onClick={() => handleDeactivateTerm(item)}>Deactivate</button>
+          <button className="underline mx-2" onClick={() => handleDeactivateTerm(item)}>Deactivate</button>
+          <button className="underline mx-2 text-red-600 hover:text-red-800 font-medium" onClick={() => handleDeleteTerm(item)}>Delete</button>
         </td>
       </tr>
     );
@@ -520,9 +579,9 @@ console.log("Terms data fetched = ", terms)
         </div>
         {showModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="bg-white p-4 rounded-lg w-[31.25rem] h-[390px] relative">
+            <div className="bg-white p-6 rounded-lg w-[31.25rem] min-h-[390px] h-auto relative">
             <form onSubmit={handleSubmit}>
-              <button className="absolute top-2 right-2 text-gray-600 focus:outline-none" onClick={() => setShowModal(false)}>
+              <button type="button" className="absolute top-2 right-2 text-gray-600 focus:outline-none" onClick={() => setShowModal(false)}>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -544,6 +603,25 @@ console.log("Terms data fetched = ", terms)
                   className={`bg-white border border-gray-300 text-black text-sm rounded-2xl block w-full p-2.5`}
                   // required
                 />
+                {sessionTerm.length === 2 && (
+                  <div className="mt-2 text-xs text-gray-600 bg-indigo-50/50 p-2 rounded-xl border border-dashed border-indigo-200 flex items-center gap-2">
+                    <span className="font-medium text-indigo-900">Suggestions:</span>
+                    <button 
+                      type="button"
+                      onClick={() => setSessionTerm(sessionTerm + '1')}
+                      className="bg-white hover:bg-indigo-100 text-indigo-700 font-semibold px-2 py-0.5 rounded border border-indigo-200 transition-colors shadow-sm"
+                    >
+                      {sessionTerm}1
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setSessionTerm(sessionTerm + '3')}
+                      className="bg-white hover:bg-indigo-100 text-indigo-700 font-semibold px-2 py-0.5 rounded border border-indigo-200 transition-colors shadow-sm"
+                    >
+                      {sessionTerm}3
+                    </button>
+                  </div>
+                )}
                 {formErrors.sessionTerm && <p className='text-red-500 text-sm mt-1'>{formErrors.sessionTerm}</p>}
               </div>
               <div className="flex justify-between mt-8">

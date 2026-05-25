@@ -11,11 +11,13 @@ const AsCoordinator = ({accordionId, CoodExam}) => {
     const [AllStudents , setAllStudents] = useState('');
     const [ShowStuds , setShowStuds] = useState(false);
     const [selectedTermId, setSelectedTermId] = useState(null);
+    const [selectedExam, setSelectedExam] = useState(null);
 
     const handleAddMarks = async (item) => {
       console.log("Hanlde Add marks Calleddddddddddddddd", item);
         await fetchTermStudentsForMarks(item.Term._id);
         setSelectedTermId(item.Term._id);
+        setSelectedExam(item);
         setShowStuds(true);
     }
     
@@ -118,7 +120,17 @@ const AsCoordinator = ({accordionId, CoodExam}) => {
               </div>
 
               <div>
-                {ShowStuds && <ShowStudsForMarks accordionId={365} exam={CoodExam[0].ExamType.examName} Students={AllStudents} termId={selectedTermId} examId={CoodExam[0]._id} examWeightage={CoodExam[0].ExamWeightage} />}
+                {ShowStuds && selectedExam && (
+                  <ShowStudsForMarks 
+                    accordionId={365} 
+                    exam={selectedExam.ExamType.examName} 
+                    Students={AllStudents} 
+                    termId={selectedTermId} 
+                    examId={selectedExam._id} 
+                    examWeightage={selectedExam.ExamWeightage} 
+                    examStatus={selectedExam.status}
+                  />
+                )}
               </div>
             </div>
           )}

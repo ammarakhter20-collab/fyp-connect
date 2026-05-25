@@ -10,6 +10,7 @@ import CardOnebutton from '../../../Components/Cards/CardOnebutton';
 import Select from 'react-select';
 import Simple from '../../../Components/Buttons/Simple';
 import FilterButton from '../../../Components/Buttons/FilterButton';
+import { baseUrl } from '../../../Components/config/config';
 
 const HoDCourseCatalog = ({ accordionId }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -183,7 +184,7 @@ const HoDCourseCatalog = ({ accordionId }) => {
                             <td className="px-6 py-4 font-semibold flex items-center justify-center">
                               {item.pdfFile && (
                                 <a
-                                  href={`/${item.pdfFile.replace(/\\/g, '/')}`}
+                                  href={`${baseUrl}/${item.pdfFile.replace(/\\/g, '/')}`}
                                   download={`file_${serialCounter}.pdf`} // Use serialCounter for dynamic filename
                                   target="_blank"
                                   rel="noopener noreferrer"

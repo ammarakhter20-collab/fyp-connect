@@ -105,7 +105,7 @@ const Timetable = () => {
     <>
     <div className='bg-slate-100 w-full h-full'>
       <div className=" mx-14 pt-12">
-        <div className="bg-white max-h-40 h-40 max-w-xs rounded-lg mb-6">
+        <div className="bg-primary max-h-40 h-40 max-w-xs rounded-lg mb-6 text-white">
           <div className=''>
             <p className="font-semibold ml-6 pt-4">Timetable</p>
           </div>

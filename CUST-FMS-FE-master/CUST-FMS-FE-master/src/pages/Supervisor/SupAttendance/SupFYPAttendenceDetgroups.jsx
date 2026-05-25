@@ -6,19 +6,30 @@ const FYPAttendenceDetgroups = ({ accordionId, groupData, onMarkAttendanceClick,
   console.log('we aare inside fyp group attendence details', groupData)
 
   let serialNum = 1;
-  const reqData = groupData.fypRequests.map(data => ({
-    _id: data._id,
-    groupNo: serialNum++,
-    fypTitle: data.topicData.topic,
-    members: data.groupMembers.map(member => ({
-      Name: member.name,
-      RegistrationNo: member.registrationNumber,
-      term : member.term.sessionTerm,
-    })),
-    SuprvisionRequest: data.reqDate,
-    term : data.groupMembers[0].term.sessionTerm,
-    status: data.reqStatus,
-  }));
+  const reqData = (groupData && groupData.fypRequests ? groupData.fypRequests : []).map(data => {
+    const fypTitle = data.topicData && data.topicData.topic ? data.topicData.topic : (data.topicData || 'No Title');
+    const members = (data.groupMembers || []).map(member => {
+      const termName = member.term && typeof member.term === 'object' ? member.term.sessionTerm : (member.term || '');
+      return {
+        Name: member.name || '',
+        RegistrationNo: member.registrationNumber || '',
+        term: termName,
+      };
+    });
+    const groupTerm = data.groupMembers && data.groupMembers[0] && data.groupMembers[0].term && typeof data.groupMembers[0].term === 'object'
+      ? data.groupMembers[0].term.sessionTerm
+      : (data.groupMembers && data.groupMembers[0] && data.groupMembers[0].term ? data.groupMembers[0].term : '');
+
+    return {
+      _id: data._id,
+      groupNo: serialNum++,
+      fypTitle,
+      members,
+      SuprvisionRequest: data.reqDate || '',
+      term: groupTerm,
+      status: data.reqStatus || '',
+    };
+  });
 
   const handleClick01 = (groupNo) => {
 

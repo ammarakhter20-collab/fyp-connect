@@ -54,26 +54,40 @@ const getFypRegistrationsByPanelMember = async (req, res) => {
     const asExaminer = [];
 
     fypRegistrations.forEach((fyp) => {
-      // Log to see why it might fail
-      // console.log("Checking FYP:", fyp._id, "Panel:", fyp.assignedPanel?._id);
+      // 1. If the user is the supervisor of this group, always push to asSupervisor
+      if (fyp.selectedOption && fyp.selectedOption._id.toString() === userId) {
+        asSupervisor.push(fyp);
+      }
 
+      // 2. If the user is in the assigned panel, push to asExaminer
       if (
         fyp.assignedPanel &&
         panelIds.some(
           (id) => id.toString() === fyp.assignedPanel._id.toString()
         )
       ) {
-        if (fyp.selectedOption && fyp.selectedOption._id.toString() === userId) {
-          asSupervisor.push(fyp);
-        } else {
-          asExaminer.push(fyp);
-        }
+        asExaminer.push(fyp);
       }
     });
 
+    // Sanitize groups: if the group has been promoted to part-II, filter out failed members
+    // so they are not shown to panels/supervisors for evaluation in Part-II.
+    const sanitizeGroup = (fypDoc) => {
+      const fypObj = fypDoc.toObject ? fypDoc.toObject() : fypDoc;
+      if (fypObj.partStatus === "part-II" && fypObj.groupMembers) {
+        fypObj.groupMembers = fypObj.groupMembers.filter(
+          (member) => member.memberStatus !== "failed-part-I"
+        );
+      }
+      return fypObj;
+    };
+
+    const sanitizedSupervisor = asSupervisor.map(sanitizeGroup);
+    const sanitizedExaminer = asExaminer.map(sanitizeGroup);
+
     // Return the matching and non-matching groups
     console.log(`Found ${asSupervisor.length} supervisor exams and ${asExaminer.length} examiner exams.`);
-    res.status(200).json({ asSupervisor, asExaminer });
+    res.status(200).json({ asSupervisor: sanitizedSupervisor, asExaminer: sanitizedExaminer });
   } catch (error) {
     console.error("Error fetching FypRegistrations by panel member:", error);
     res.status(500).json({ error: "Internal server error" });

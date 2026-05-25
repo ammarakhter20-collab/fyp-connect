@@ -2,16 +2,38 @@ import React, { useState, useRef, useEffect } from 'react';
 import Simple from '../../../../../Components/Buttons/Simple';
 import Select from 'react-select';
 
-const CoodCreateCloforExamCard = ({ onclose, saveExamClick, dataToEdit, programs, examTypes }) => {
+const CoodCreateCloforExamCard = ({ onclose, saveExamClick, dataToEdit, programs, examTypes, departments }) => {
     const [exam, setExam] = useState(dataToEdit ? dataToEdit.exam : '');
     const [shortCode, setShortCode] = useState(dataToEdit ? dataToEdit.shortCode : '');
+    const [department, setDepartment] = useState('');
     const [program, setProgram] = useState(dataToEdit ? dataToEdit.program : '');
+    const [filteredPrograms, setFilteredPrograms] = useState([]);
     const [errors, setErrors] = useState({});
 
     const handleExamChange = (selectedOption) => {
         setExam(selectedOption);
         if (errors.exam) {
             setErrors(prevErrors => ({ ...prevErrors, exam: null }));
+        }
+    };
+
+    const handleDepartmentChange = (selectedOption) => {
+        setDepartment(selectedOption);
+        // Reset program selection when department changes
+        setProgram('');
+        if (errors.department) {
+            setErrors(prevErrors => ({ ...prevErrors, department: null }));
+        }
+
+        // Filter programs that belong to the selected department
+        if (selectedOption) {
+            const filtered = programs.filter(prog => {
+                const progDeptId = prog.department?._id || prog.department;
+                return progDeptId === selectedOption.value;
+            });
+            setFilteredPrograms(filtered);
+        } else {
+            setFilteredPrograms([]);
         }
     };
 
@@ -36,6 +58,7 @@ const CoodCreateCloforExamCard = ({ onclose, saveExamClick, dataToEdit, programs
         
         const newErrors = {};
         if (!shortCode) newErrors.shortCode = 'Short Code is required';
+        if (!department) newErrors.department = 'Department is required';
         if (!program) newErrors.program = 'Program is required';
         // Uncomment this if exam field is required
         // if (!exam) newErrors.exam = 'Exam is required';
@@ -53,8 +76,10 @@ const CoodCreateCloforExamCard = ({ onclose, saveExamClick, dataToEdit, programs
 
         saveExamClick(data);
         setExam('');
+        setDepartment('');
         setProgram('');
         setShortCode('');
+        setFilteredPrograms([]);
         onclose();
     };
 
@@ -97,17 +122,34 @@ const CoodCreateCloforExamCard = ({ onclose, saveExamClick, dataToEdit, programs
                         </label>
                     </div>
                     <div className="my-4">
+                        <label htmlFor='department' className="block text-md font-semibold text-gray-700">
+                            Department
+                            <Select
+                                id='department'
+                                name='department'
+                                className={`bg-white border border-gray-300 text-black text-sm rounded-2xl block w-full p-2.5 ${errors.department ? 'border-red-500' : ''}`}
+                                options={departments}
+                                isSearchable
+                                onChange={handleDepartmentChange}
+                                value={department}
+                                placeholder='Select Department'
+                            />
+                            {errors.department && <p className="text-red-500 text-sm">{errors.department}</p>}
+                        </label>
+                    </div>
+                    <div className="my-4">
                         <label htmlFor='program' className="block text-md font-semibold text-gray-700">
                             Program
                             <Select
                                 id='program'
                                 name='program'
                                 className={`bg-white border border-gray-300 text-black text-sm rounded-2xl block w-full p-2.5 ${errors.program ? 'border-red-500' : ''}`}
-                                options={programs}
+                                options={filteredPrograms}
                                 isSearchable
                                 onChange={handleProgramChange}
                                 value={program}
-                                placeholder='Select or type'
+                                placeholder={department ? 'Select Program' : 'Select Department first'}
+                                isDisabled={!department}
                             />
                             {errors.program && <p className="text-red-500 text-sm">{errors.program}</p>}
                         </label>

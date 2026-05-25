@@ -134,7 +134,7 @@ const Sidebar = () => {
                 to="/HoDProfile"
                 onClick={() => handleTabClick('HoDProfile')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 // className={`relative flex items-center p-3 rounded-lg   hover:bg-gray-100 dark:hover:bg-gray-700`}
                 data-tab="CoodProfile"
@@ -149,7 +149,7 @@ const Sidebar = () => {
                 to="/HoDDashboard" 
                 onClick={() => handleTabClick('HoDDashboard')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="HoDDashboard"
               >
@@ -158,138 +158,7 @@ const Sidebar = () => {
               </NavLink>
             </li>
 
-            {/* Supervision Section */}
-            <li>
-              <div className="dropdown">
-                <div
-                  onClick={() => toggleDropdown('supervisionDropdown')}
-                  className="flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10 cursor-pointer"
-                >
-                  <InfoOutlinedIcon className="flex-shrink-0 w-7 h-7" />
-                  <span className="flex items-center justify-between flex-1">
-                    <span className="ms-3">Supervision</span>
-                    <svg
-                      className={`w-4 h-4 transform ${dropdownStates.supervisionDropdown ? 'rotate-180' : ''}`}
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 10 6"
-                    >
-                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                    </svg>
-                  </span>
-                </div>
 
-                {dropdownStates.supervisionDropdown && (
-                  <ul className="space-y-2 font-medium ms-3">
-                    <li>
-                      <NavLink
-                        to="/HoDUploadFYPTopic"
-                        onClick={() => handleTabClick('HoDUploadFYPTopic')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="HoDUploadFYPTopic"
-                      >
-                        <FileUploadRoundedIcon className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">Upload FYP Topic</span>
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/HoDSupRequest"
-                        onClick={() => handleTabClick('HoDSupRequest')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="HoDSupRequest"
-                      >
-                        <RiFileEditLine className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">Requests</span>
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/HoDMyProjects"
-                        onClick={() => handleTabClick('HoDMyProjects')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="HoDMyProjects"
-                      >
-                        <SourceOutlinedIcon className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">My Projects / Thesis</span>
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/HoDAssignedExam"
-                        onClick={() => handleTabClick('HoDAssignedExam')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="HoDAssignedExam"
-                      >
-                        <AssignmentTurnedInOutlinedIcon className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">Assigned Exams</span>
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/HoDPanelDetails"
-                        onClick={() => handleTabClick('HoDPanelDetails')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="HoDPanelDetails"
-                      >
-                        <IoIosPeople className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">Panel Details</span>
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/HoDTimetable"
-                        onClick={() => handleTabClick('HoDTimetable')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="HoDTimetable"
-                      >
-                        <FaClock className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">Timetable</span>
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/HoDAttendance"
-                        onClick={() => handleTabClick('HoDAttendance')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="HoDAttendance"
-                      >
-                        <EmojiPeopleOutlinedIcon className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">Attendance</span>
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/HoDAnnouncements"
-                        onClick={() => handleTabClick('HoDAnnouncements')}
-                        className={({ isActive }) =>
-                          isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
-                        }
-                        data-tab="HoDAnnouncements"
-                      >
-                        <TfiAnnouncement className="flex-shrink-0 w-7 h-6" />
-                        <span className="ms-3">Announcements</span>
-                      </NavLink>
-                    </li>
-                  </ul>
-                )}
-              </div>
-            </li>
 
 
             <li>
@@ -297,7 +166,7 @@ const Sidebar = () => {
                 to="/HoDCourseCatalog"
                 onClick={() => handleTabClick('HoDCourseCatalog')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                  isActive ? 'flex items-center p-3 rounded-lg bg-white text-primary' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="HoDCourseCatalog"
               >
@@ -387,7 +256,7 @@ const Sidebar = () => {
                 to="/HoDProjectList"
                 onClick={() => handleTabClick('HoDProjectList')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-primary bg-opacity-10 text-primary' : 'flex items-center p-3 rounded-lg text-gray-500 hover:bg-gray-50'
+                  isActive ? 'relative flex items-center p-3 rounded-lg bg-white text-primary ' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="HoDProjectList"
               >
@@ -475,7 +344,7 @@ const Sidebar = () => {
                 to="/HoDResults"
                 onClick={() => handleTabClick('HoDResults')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-primary bg-opacity-10 text-primary' : 'flex items-center p-3 rounded-lg text-gray-500 hover:bg-gray-50'
+                  isActive ? 'relative flex items-center p-3 rounded-lg bg-white text-primary ' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="HoDResults"
               >
@@ -490,7 +359,7 @@ const Sidebar = () => {
                 to="/HoDFeedback"
                 onClick={() => handleTabClick('HoDFeedback')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-primary bg-opacity-10 text-primary' : 'flex items-center p-3 rounded-lg text-gray-500 hover:bg-gray-50'
+                  isActive ? 'relative flex items-center p-3 rounded-lg bg-white text-primary ' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="HoDFeedback"
               >
@@ -504,7 +373,7 @@ const Sidebar = () => {
                 to="/HoDExaminerPanel"
                 onClick={() => handleTabClick('HoDExaminerPanel')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-primary bg-opacity-10 text-primary' : 'flex items-center p-3 rounded-lg text-gray-500 hover:bg-gray-50'
+                  isActive ? 'relative flex items-center p-3 rounded-lg bg-white text-primary ' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="HoDExaminerPanel"
               >
@@ -521,7 +390,7 @@ const Sidebar = () => {
                 to="/Logout"
                 onClick={() => handleTabClick('Logout')}
                 className={({ isActive }) =>
-                  isActive ? 'flex items-center p-3 rounded-lg bg-primary bg-opacity-10 text-primary' : 'flex items-center p-3 rounded-lg text-gray-500 hover:bg-gray-50'
+                  isActive ? 'relative flex items-center p-3 rounded-lg bg-white text-primary ' : 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
                 }
                 data-tab="Logout"
               >

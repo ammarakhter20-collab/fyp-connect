@@ -1,5 +1,6 @@
 const Topic = require("../../models/SupervisorModels/SupTopic");
 const GenUser = require("../../models/AdminModels/GenUserModel");
+const Program = require("../../models/AdminModels/program");
 const createTopic = async (req, res) => {
   try {
     const { category, title: topic, description } = req.body.addtopic;
@@ -88,10 +89,17 @@ const getAllTopics = async (req, res) => {
 const getAllofFeredTopics = async (req, res) => {
   try {
     const { programId } = req.query; // Extract program ID from query parameters
-    const supervisors = await GenUser.find(
-      { role: { $in: ["faculty", "hod", "coordinator"] }, program: programId },
-      "_id"
-    ); // Find supervisors (including HoD) with the matching program ID
+    const programObj = await Program.findById(programId);
+    const departmentId = programObj ? programObj.department : null;
+
+    const query = { role: "faculty" };
+    if (departmentId) {
+      query.department = departmentId;
+    } else {
+      query.program = programId;
+    }
+
+    const supervisors = await GenUser.find(query, "_id"); // Find supervisors with matching department/program
 
     // Get topics uploaded by the matched supervisors
     const topics = await Topic.find({ uploadedBy: { $in: supervisors } });
@@ -119,9 +127,9 @@ const getAllofFeredTopicsByDep = async (req, res) => {
     const { departmentId } = req.query; // Extract program ID from query parameters
     console.log("Checking Department Id", departmentId);
     const supervisors = await GenUser.find(
-      { role: { $in: ["faculty", "hod", "coordinator"] }, department: departmentId },
+      { role: "faculty", department: departmentId },
       "_id"
-    ); // Find supervisors (including HoD) with the matching department ID
+    ); // Find supervisors with the matching department ID
 
     // Get topics uploaded by the matched supervisors
     const topics = await Topic.find({ uploadedBy: { $in: supervisors } });

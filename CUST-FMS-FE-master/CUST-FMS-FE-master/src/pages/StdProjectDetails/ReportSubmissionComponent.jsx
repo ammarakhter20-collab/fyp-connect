@@ -3,7 +3,7 @@ import GenAccor from '../../Components/Accordians/GenAccor';
 import LoadingSpinner from '../../Components/LoadingSpinner/LoadingSpinner';
 import axios from 'axios';
 
-const ReportSubmissionComponent = ({ accordionId, onGoBack, createdExam, ReportInst, rejectionFeedback }) => {
+const ReportSubmissionComponent = ({ accordionId, onGoBack, createdExam, ReportInst, rejectionFeedback, currentIndex = 1, totalExams = 1 }) => {
   const [ExamType, setExamType] = useState('');
  
   const [isLoading, setIsLoading] = useState(false);
@@ -157,7 +157,7 @@ const handleSubmit = async (event) => {
     alert('Error uploading Report.');
   } finally {
     setIsLoading(false);
-    window.location.reload();
+    // Don't reload — let the parent component handle queue advancement via ReportInst()
   }
 };
 
@@ -171,7 +171,7 @@ console.log("Checking Created Exam", createdExam);
         <div className='mx-16 mt-10'>
           <div id={`accordion-collapse-${accordionId}`} data-accordion="collapse" className={`mt-14 `}>
             <h2 id={`accordion-collapse-heading-timetable-${accordionId}`}>
-              <GenAccor text="Report Submission" accordionId={accordionId} />
+              <GenAccor text={totalExams > 1 ? `Report Submission (${currentIndex} of ${totalExams})` : "Report Submission"} accordionId={accordionId} />
             </h2>
 
             <div id={`accordion-collapse-body-timetable-${accordionId}`} className={`transition-opacity duration-300 ease-in-out`} aria-labelledby={`accordion-collapse-heading-timetable-${accordionId}`}>

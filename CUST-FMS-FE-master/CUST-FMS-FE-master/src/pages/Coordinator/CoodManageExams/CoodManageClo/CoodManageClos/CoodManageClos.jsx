@@ -18,6 +18,7 @@ const CoodManageClos = () => {
 
     const [CloData, setCloData] = useState([]);
     const [programsData, setProgramsData] = useState([]);
+    const [departmentsData, setDepartmentsData] = useState([]);
     const [addedQuestions, setAddedQuestions] = useState([]);
     const [questionsofSelectedCLO, setQuestionsofSelectedCLO] = useState([]);
     const [selectedCLOtoAddQues, setSelectedCLOtoAddQues] = useState(null);
@@ -361,8 +362,39 @@ try {
         }
     };
 
+    const fetchDepartments = async () => {
+        try {
+            setLoadingSpinner(true);
+            const nkey = localStorage.getItem('key');
+            const token = JSON.parse(nkey);
+            const response = await fetch(`/api/auth/fetchDepartmentData`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch Departments');
+            }
+            const data = await response.json();
+            console.log(data, 'fetched Departments');
+            const deptData = data.departments.map((dept, index) => ({
+                value: dept._id,
+                label: dept.departmentName,
+                ...dept,
+            }));
+            setDepartmentsData(deptData);
+        } catch (error) {
+            console.error('Error fetching Departments:', error.message);
+        } finally {
+            setLoadingSpinner(false);
+        }
+    };
+
 
     useEffect(() => {
+        fetchDepartments();
         fetchPrograms();
         fetchCLOs();
         fetchQuestions();
@@ -406,6 +438,7 @@ try {
                                 //dataToEdit={examCloDataToEdit}
                                 //optionsData={optionsData}
                                 programs={programsData}
+                                departments={departmentsData}
                             />
                         </div>)}
 

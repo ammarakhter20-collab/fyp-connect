@@ -11,6 +11,7 @@ let newData;
 if(data){ newData = data.map((fields, index) => ({
     ...fields,
     index: index+1, 
+    examTypeFor: fields.examTypeFor === 'All' ? 'Panel Members' : fields.examTypeFor
 }) )}
 
   return (

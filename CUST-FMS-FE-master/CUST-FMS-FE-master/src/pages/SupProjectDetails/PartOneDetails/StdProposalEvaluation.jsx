@@ -49,7 +49,7 @@ const ProposalEvaluation = ({ data, accordionId, accordText }) => {
                 ))}
               </tbody>
             </table>
-            <RemarksFile data={data.students[0]?.exam[0]?.feedback} />
+            <RemarksFile data={data.students[0]?.exam[0]?.evaluationsByExaminers} />
           </div>
         </div>
       </div>

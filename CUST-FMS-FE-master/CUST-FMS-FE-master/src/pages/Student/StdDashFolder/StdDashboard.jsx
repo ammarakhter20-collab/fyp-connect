@@ -7,7 +7,7 @@ import ProjDetails from './StdprojDetails';
 import GroupMembers from './StdGroupMembers';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-// import { baseUrl, Config } from '../../Components/config/config';
+import { baseUrl } from '../../../Components/config/config';
 import LoadingSpinner from '../../../Components/LoadingSpinner/LoadingSpinner';
 import GenAccor from '../../../Components/Accordians/GenAccor';
 import { GoArrowUpRight } from "react-icons/go";
@@ -894,7 +894,14 @@ const Dashboard = ({ isFYPRegistered, accordionId }) => {
                     <img className='rounded-t-lg h-24' src='/assets/images/CardBg.png' alt='Card back' />
                   </a>
                   <div className='h-[5.625rem] mt-[-4.0625rem] rounded-full'>
-                    <img className='rounded-full w-24 h-24 object-fill mx-auto' src={`/uploads/${studentData.image}`} alt='Student Profile' />
+                    <img 
+                      className='rounded-full w-24 h-24 object-fill mx-auto' 
+                      src={studentData?.image && studentData.image !== "undefined" && studentData.image !== "" ? `/uploads/${studentData.image}` : '/assets/images/CardImg.png'} 
+                      alt='Student Profile' 
+                      onError={(e) => {
+                        e.target.src = '/assets/images/CardImg.png';
+                      }}
+                    />
                   </div>
                   <div className='p-5'>
                     <div className='StudentName'>

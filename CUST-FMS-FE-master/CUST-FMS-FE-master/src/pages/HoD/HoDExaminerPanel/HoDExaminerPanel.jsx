@@ -6,7 +6,8 @@ import FilterButton from '../../../Components/Buttons/FilterButton';
 import Simple from '../../../Components/Buttons/Simple';
 
 const HoDExaminerPanel = ({ accordionId }) => {
-  const [loadingSpinner, setLoadingSpinner] = useState(false);
+  const [loadingPanels, setLoadingPanels] = useState(false);
+  const [loadingTerms, setLoadingTerms] = useState(false);
   const [PanelData, setPanelData] = useState('');
   const [TermData, setTermData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -44,7 +45,7 @@ const HoDExaminerPanel = ({ accordionId }) => {
 
   const fetchPanels = async () => {
     try {
-      setLoadingSpinner(true);
+      setLoadingPanels(true);
       const nkey = localStorage.getItem('key');
       const token = JSON.parse(nkey);
       const response = await fetch(`/api/manageexampanels/get-all-panels`, {
@@ -64,13 +65,13 @@ const HoDExaminerPanel = ({ accordionId }) => {
     } catch (error) {
       console.error('Error fetching Examiner panels Data:', error.message);
     } finally {
-      setLoadingSpinner(false);
+      setLoadingPanels(false);
     }
   };
 
   const TermDataGet = async () => {
     try {
-      setLoadingSpinner(true);
+      setLoadingTerms(true);
       const apiUrl = '/api/auth/getTermdata';
       const nkey = localStorage.getItem('key');
       const token = JSON.parse(nkey);
@@ -91,7 +92,7 @@ const HoDExaminerPanel = ({ accordionId }) => {
     } catch (error) {
       console.error('Error fetching Term Data:', error);
     } finally {
-      setLoadingSpinner(false);
+      setLoadingTerms(false);
     }
   };
 
@@ -110,9 +111,11 @@ const HoDExaminerPanel = ({ accordionId }) => {
     }
   };
 
+  const isLoading = loadingPanels || loadingTerms;
+
   return (
     <>
-      {loadingSpinner ? ( // Show loading spinner while loading is true
+      {isLoading ? ( // Show loading spinner while loading is true
         <LoadingSpinner />
       ) : (
         <div className='mt-10 mx-16'>

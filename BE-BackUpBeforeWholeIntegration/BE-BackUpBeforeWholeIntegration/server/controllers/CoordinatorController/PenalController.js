@@ -248,15 +248,13 @@ const deletePanel = async (req, res) => {
 const countExaminerPanels = async (req, res) => {
   const { depId } = req.params;
 
-  if (!depId) {
-    return res.status(400).json({ error: "depId parameter is required" });
-  }
-
   try {
+    let query = {};
+    if (depId && depId !== "undefined" && depId !== "null" && depId !== "[object Object]") {
+      query.department = depId;
+    }
     // Count the total number of panels with the matching departmentId
-    const totalPanels = await PanelDetails.countDocuments({
-      department: depId,
-    });
+    const totalPanels = await PanelDetails.countDocuments(query);
 
     // Return the total count
     res.status(200).json({ totalPanels });
@@ -447,45 +445,86 @@ const getEvaluationStatusByPanel = async (req, res) => {
       const termDoc = evalDoc.terms.find(t => t.termId.toString() === termId);
       if (!termDoc) continue;
 
-      const examDoc = termDoc.exams.find(e => e.examName === examName);
-      if (!examDoc) continue;
+      // Determine which exams to process (either filter by examName or process all exams in the term)
+      let examsToProcess = termDoc.exams || [];
+      if (examName && examName !== "undefined" && examName !== "all" && examName !== "") {
+        examsToProcess = examsToProcess.filter(e => e.examName === examName);
+      }
 
-      for (const group of examDoc.fypGroups) {
-        if (!groupsMap[group.groupId.toString()]) {
-          const reg = await FYPReg.findById(group.groupId);
-          const panel = await PanelDetails.findById(group.panelId).populate("PanelMembers.member");
-          
-          let evaluators = [];
-          if (panel) {
-             evaluators = panel.PanelMembers.map(pm => ({
-               evaluatorId: pm.member._id,
-               evaluatorName: pm.member.name,
-               evaluationStatus: "pending"
-             }));
+      for (const examDoc of examsToProcess) {
+        for (const group of examDoc.fypGroups) {
+          const mapKey = `${group.groupId.toString()}_${examDoc.examName}`;
+          if (!groupsMap[mapKey]) {
+            const reg = await FYPReg.findById(group.groupId).populate({ path: "selectedOption", model: "GenUser", select: "name" });
+            const panel = await PanelDetails.findById(group.panelId).populate("PanelMembers.member");
+            
+            let evaluators = [];
+            
+            if (examDoc.examTypeFor === "Supervisor") {
+              // Evaluator is the Group's Supervisor
+              if (reg && reg.selectedOption) {
+                evaluators.push({
+                  evaluatorId: reg.selectedOption._id,
+                  evaluatorName: reg.selectedOption.name,
+                  evaluationStatus: "pending"
+                });
+              }
+            } else if (examDoc.examTypeFor === "Coordinator") {
+              // Evaluator is the Coordinator
+              const coord = await GenUser.findOne({ role: { $in: ["coordinator", "Coordinator"] }, department: reg?.department }) || 
+                            await GenUser.findOne({ role: { $in: ["coordinator", "Coordinator"] } });
+              if (coord) {
+                evaluators.push({
+                  evaluatorId: coord._id,
+                  evaluatorName: coord.name,
+                  evaluationStatus: "pending"
+                });
+              }
+            } else if (examDoc.examTypeFor === "HoD") {
+              // Evaluator is the HoD
+              const hod = await GenUser.findOne({ role: { $in: ["hod", "HoD", "HOD"] }, department: reg?.department }) || 
+                          await GenUser.findOne({ role: { $in: ["hod", "HoD", "HOD"] } });
+              if (hod) {
+                evaluators.push({
+                  evaluatorId: hod._id,
+                  evaluatorName: hod.name,
+                  evaluationStatus: "pending"
+                });
+              }
+            } else {
+              // Evaluator is the Panel Members (Examiners / All / default case)
+              if (panel) {
+                 evaluators = panel.PanelMembers.map(pm => ({
+                   evaluatorId: pm.member._id,
+                   evaluatorName: pm.member.name,
+                   evaluationStatus: "pending"
+                 }));
+              }
+            }
+
+            let examDateStr = "N/A";
+            const schedule = await ExamSchedule.findOne({ panel: group.panelId, CreatedExam: examDoc.examId });
+            if (schedule && schedule.ExamDate) {
+               examDateStr = new Date(schedule.ExamDate).toLocaleDateString('en-GB');
+            }
+
+            groupsMap[mapKey] = {
+              groupId: group.groupId,
+              groupName: reg ? (reg.topicData?.title || reg.topicData?.topicTitle || reg.topicData?.topic || "N/A") : "N/A",
+              examName: examDoc.examName,
+              termName: termName,
+              termId: termId,
+              examDate: examDateStr,
+              evaluators: evaluators
+            };
           }
 
-          let examDateStr = "N/A";
-          const schedule = await ExamSchedule.findOne({ panel: group.panelId, CreatedExam: examDoc.examId });
-          if (schedule && schedule.ExamDate) {
-             examDateStr = new Date(schedule.ExamDate).toLocaleDateString('en-GB');
-          }
-
-          groupsMap[group.groupId.toString()] = {
-            groupId: group.groupId,
-            groupName: reg ? (reg.topicData?.title || reg.topicData?.topicTitle || reg.topicData?.topic || "N/A") : "N/A",
-            examName: examName,
-            termName: termName,
-            termId: termId,
-            examDate: examDateStr,
-            evaluators: evaluators
-          };
-        }
-
-        // Check marking
-        for (const student of group.students) {
-          for (const examinerMark of student.evaluationsByExaminers) {
-             const ev = groupsMap[group.groupId.toString()].evaluators.find(e => e.evaluatorId.toString() === examinerMark.examinerId.toString());
-             if (ev) ev.evaluationStatus = "completed";
+          // Check marking
+          for (const student of group.students) {
+            for (const examinerMark of student.evaluationsByExaminers) {
+               const ev = groupsMap[mapKey].evaluators.find(e => e.evaluatorId.toString() === examinerMark.examinerId.toString());
+               if (ev) ev.evaluationStatus = "completed";
+            }
           }
         }
       }
@@ -535,16 +574,51 @@ const getEvaluationStatofAllexm = async (req, res) => {
 
         for (const group of examDoc.fypGroups) {
           if (!groupsMap[group.groupId.toString()]) {
-            const reg = await FYPReg.findById(group.groupId);
+            const reg = await FYPReg.findById(group.groupId).populate({ path: "selectedOption", model: "GenUser", select: "name" });
             const panel = await PanelDetails.findById(group.panelId).populate("PanelMembers.member");
             
             let evaluators = [];
-            if (panel) {
-               evaluators = panel.PanelMembers.map(pm => ({
-                 evaluatorId: pm.member._id,
-                 evaluatorName: pm.member.name,
-                 evaluationStatus: "pending"
-               }));
+            
+            if (examDoc.examTypeFor === "Supervisor") {
+              // Evaluator is the Group's Supervisor
+              if (reg && reg.selectedOption) {
+                evaluators.push({
+                  evaluatorId: reg.selectedOption._id,
+                  evaluatorName: reg.selectedOption.name,
+                  evaluationStatus: "pending"
+                });
+              }
+            } else if (examDoc.examTypeFor === "Coordinator") {
+              // Evaluator is the Coordinator
+              const coord = await GenUser.findOne({ role: { $in: ["coordinator", "Coordinator"] }, department: reg?.department }) || 
+                            await GenUser.findOne({ role: { $in: ["coordinator", "Coordinator"] } });
+              if (coord) {
+                evaluators.push({
+                  evaluatorId: coord._id,
+                  evaluatorName: coord.name,
+                  evaluationStatus: "pending"
+                });
+              }
+            } else if (examDoc.examTypeFor === "HoD") {
+              // Evaluator is the HoD
+              const hod = await GenUser.findOne({ role: { $in: ["hod", "HoD", "HOD"] }, department: reg?.department }) || 
+                          await GenUser.findOne({ role: { $in: ["hod", "HoD", "HOD"] } });
+              if (hod) {
+                evaluators.push({
+                  evaluatorId: hod._id,
+                  evaluatorName: hod.name,
+                  evaluationStatus: "pending"
+                });
+              }
+            } else {
+              // Evaluator is the Panel Members (Examiners / All / default case)
+              if (panel) {
+                 evaluators = panel.PanelMembers.map(pm => ({
+                   evaluatorId: pm.member._id,
+                   evaluatorName: pm.member.name,
+                   evaluationStatus: "pending"
+                 }));
+              }
             }
 
             let examDateStr = "N/A";

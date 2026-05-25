@@ -961,10 +961,18 @@ const CoodResults = () => {
                                                     {overAllResult && overAllResult.length > 0 && Object.keys(overAllResult[0].exams).map((examName, idx) => (
                                                         <th key={idx}>{examName}</th>
                                                     ))}
-                                                    <th className="bg-indigo-50 font-bold border-l border-gray-300">Total I</th>
-                                                    <th className="bg-green-50">Status I</th>
-                                                    <th className="bg-indigo-50 font-bold border-l border-gray-300">Total II</th>
-                                                    <th className="bg-green-50">Status II</th>
+                                                    {(partStatusFilter === 'combined' || partStatusFilter === 'part-I') && (
+                                                        <>
+                                                            <th className="bg-indigo-50 font-bold border-l border-gray-300">Total I</th>
+                                                            <th className="bg-green-50">Status I</th>
+                                                        </>
+                                                    )}
+                                                    {(partStatusFilter === 'combined' || partStatusFilter === 'part-II') && (
+                                                        <>
+                                                            <th className="bg-indigo-50 font-bold border-l border-gray-300">Total II</th>
+                                                            <th className="bg-green-50">Status II</th>
+                                                        </>
+                                                    )}
                                                 </tr>
                                             </thead>
                                             <tbody className='text-indigo-950'>
@@ -980,27 +988,35 @@ const CoodResults = () => {
                                                                 <td key={idx}>{student.exams[examName] || '-'}</td>
                                                             ))}
                                                             
-                                                            <td className="font-bold bg-indigo-50 border-l border-gray-300">{student.TotalPartI?.toFixed(2) || '0.00'}</td>
-                                                            <td className="font-semibold">
-                                                                {student.passFailPartI === 'PASS' ? (
-                                                                    <span className="px-2 py-1 rounded bg-green-100 text-green-700">PASS</span>
-                                                                ) : student.passFailPartI === 'FAIL' ? (
-                                                                    <span className="px-2 py-1 rounded bg-red-100 text-red-700">FAIL</span>
-                                                                ) : (
-                                                                    <span>-</span>
-                                                                )}
-                                                            </td>
+                                                            {(partStatusFilter === 'combined' || partStatusFilter === 'part-I') && (
+                                                                <>
+                                                                    <td className="font-bold bg-indigo-50 border-l border-gray-300">{student.TotalPartI?.toFixed(2) || '0.00'}</td>
+                                                                    <td className="font-semibold">
+                                                                        {student.passFailPartI === 'PASS' ? (
+                                                                            <span className="px-2 py-1 rounded bg-green-100 text-green-700">PASS</span>
+                                                                        ) : student.passFailPartI === 'FAIL' ? (
+                                                                            <span className="px-2 py-1 rounded bg-red-100 text-red-700">FAIL</span>
+                                                                        ) : (
+                                                                            <span>-</span>
+                                                                        )}
+                                                                    </td>
+                                                                </>
+                                                            )}
                                                             
-                                                            <td className="font-bold bg-indigo-50 border-l border-gray-300">{student.TotalPartII?.toFixed(2) || '0.00'}</td>
-                                                            <td className="font-semibold">
-                                                                {student.passFailPartII === 'PASS' ? (
-                                                                    <span className="px-2 py-1 rounded bg-green-100 text-green-700">PASS</span>
-                                                                ) : student.passFailPartII === 'FAIL' ? (
-                                                                    <span className="px-2 py-1 rounded bg-red-100 text-red-700">FAIL</span>
-                                                                ) : (
-                                                                    <span>-</span>
-                                                                )}
-                                                            </td>
+                                                            {(partStatusFilter === 'combined' || partStatusFilter === 'part-II') && (
+                                                                <>
+                                                                    <td className="font-bold bg-indigo-50 border-l border-gray-300">{student.TotalPartII?.toFixed(2) || '0.00'}</td>
+                                                                    <td className="font-semibold">
+                                                                        {student.passFailPartII === 'PASS' ? (
+                                                                            <span className="px-2 py-1 rounded bg-green-100 text-green-700">PASS</span>
+                                                                        ) : student.passFailPartII === 'FAIL' ? (
+                                                                            <span className="px-2 py-1 rounded bg-red-100 text-red-700">FAIL</span>
+                                                                        ) : (
+                                                                            <span>-</span>
+                                                                        )}
+                                                                    </td>
+                                                                </>
+                                                            )}
                                                         </tr>
                                                     ))
                                                 ) : (

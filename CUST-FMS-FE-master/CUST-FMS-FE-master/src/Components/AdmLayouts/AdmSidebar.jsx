@@ -72,14 +72,12 @@ const Sidebar = () => {
           </Link>
 
           <ul className="space-y-2 font-medium">
-            <div className='ml-14'>
-
             <li>
               <NavLink
                 to="/AdmProfile"
                 onClick={() => handleTabClick('AdmProfile')}
                 className={({ isActive }) =>
-                isActive? 'flex items-center p-3 rounded-lg bg-white text-primary ': 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                isActive? 'flex items-center p-3 rounded-lg bg-white text-primary ': 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
   }
                 // className={`relative flex items-center p-3 rounded-lg   hover:bg-gray-100 dark:hover:bg-gray-700`}
                 data-tab="AdmProfile"
@@ -89,14 +87,13 @@ const Sidebar = () => {
                 <span className={`ms-3`}>My Profile</span>
               </NavLink>
             </li>
-            </div>
             <div className="bottom-0 w-full left-0 right-0 border-b border-white border-opacity-10"></div>
             <li>
               <NavLink
                 to="/AdmDashboard"
                 onClick={() => handleTabClick('AdmDashboard')}
                 className={({ isActive }) =>
-                isActive? 'flex items-center p-3 rounded-lg bg-primary bg-opacity-10 text-primary': 'flex items-center p-3 rounded-lg text-gray-500 hover:bg-gray-50'
+                isActive? 'relative flex items-center p-3 rounded-lg bg-white text-primary ': 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
   }
                 // className={`relative flex items-center p-3 rounded-lg   hover:bg-gray-100 dark:hover:bg-gray-700`}
                 data-tab="AdmDashboard"
@@ -188,7 +185,7 @@ const Sidebar = () => {
                 to="/Logout"
                 onClick={() => handleTabClick('Logout')}
                 className={({ isActive }) =>
-                isActive? 'flex items-center p-3 rounded-lg bg-white text-primary ': 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-white hover:bg-opacity-10'
+                isActive? 'flex items-center p-3 rounded-lg bg-white text-primary ': 'flex items-center p-3 rounded-lg text-gray-100 hover:bg-white hover:bg-opacity-10'
   }
                 data-tab="AdmLogout"
               >

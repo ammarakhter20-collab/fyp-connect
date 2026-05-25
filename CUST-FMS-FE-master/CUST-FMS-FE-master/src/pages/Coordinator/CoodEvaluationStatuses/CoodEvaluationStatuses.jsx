@@ -20,18 +20,12 @@ const CoodEvaluationStatuses = ({ accordionId }) => {
   const [title, setTitle] = useState('');
   const [errors, setErrors] = useState({});
   const [term, setTerm] = useState('');
-  const [statusOfEval, setStatusOfEval] = useState('');
 
   const [examOptions, setExamOptions] = useState([]);
   const [termOptions, setTermOptions] = useState([]);
   const [evaluationStatus, setEvaluationStatus] = useState(null);
   const [evaluationStatusofAll, setEvaluationStatusofAll] = useState(null);
   const [createdExams, setCreatedExams] = useState(null);
-
-  const statusOptions = [
-    { label: 'Pending', value: 'pending' },
-    { label: 'Completed', value: 'completed' }
-  ];
 
 
   useEffect(() => {
@@ -47,14 +41,8 @@ const CoodEvaluationStatuses = ({ accordionId }) => {
 
   const validateForm = () => {
     const errors = {};
-    if (!examForEval) {
-      errors.examEr = 'Exam is required';
-    }
     if (!term) {
       errors.tEr = 'Term is required';
-    }
-    if (!statusOfEval) {
-      errors.sEval = 'Status is required';
     }
 
     setErrors(errors);
@@ -72,9 +60,8 @@ const CoodEvaluationStatuses = ({ accordionId }) => {
       //   
       console.log("Exam", examForEval);
       console.log("term", term);
-      console.log("Status", statusOfEval);
 
-      getEvaluationStatusByPanel(term.value, examForEval.label, statusOfEval.value)
+      getEvaluationStatusByPanel(term.value, examForEval ? examForEval.label : '')
 
       setShowCheckStatus(false);
       setShowEvaluationStatusofAll(false);
@@ -122,18 +109,20 @@ const CoodEvaluationStatuses = ({ accordionId }) => {
       };
 
 
-  const getEvaluationStatusByPanel = async (termId, examName, evalStatus) => {
+  const getEvaluationStatusByPanel = async (termId, examName) => {
     console.log("Exam", examName);
     console.log("term", termId);
-    console.log("Status", evalStatus);
     try {
       setLoadingSpinner(true);
       const nkey = localStorage.getItem('key');
       const token = JSON.parse(nkey);
-      const userData = localStorage.getItem('user');
-      // const parsedUserData = JSON.parse(userData);
-      // const userid = parsedUserData._id;
-      const response = await fetch(`/api/manageexampanels/evaluationStatus/${termId}/${examName}?status=${evalStatus}`, {
+      
+      let url = `/api/manageexampanels/evaluationStatus/${termId}`;
+      if (examName) {
+        url += `/${encodeURIComponent(examName)}`;
+      }
+
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -369,10 +358,7 @@ const CoodEvaluationStatuses = ({ accordionId }) => {
     setTerm(selectedOption);
     setErrors(prevErrors => ({ ...prevErrors, tEr: '' }));
   }
-  const handleStatusOptChange = (selectedOption) => {
-    setStatusOfEval(selectedOption);
-    setErrors(prevErrors => ({ ...prevErrors, sEval: '' }));
-  }
+
   const handleRevertion = (groupId, examName, termId) => {
     if (groupId && examName && termId) {
       deleteExamEvaluation(groupId, examName, termId);
@@ -429,7 +415,6 @@ const CoodEvaluationStatuses = ({ accordionId }) => {
                             value={examForEval}
                             placeholder='Select Exam'
                           />
-                          {errors.examEr && <p className="text-red-500 text-sm">{errors.examEr}</p>}
                         </label>
                       </div>
                       <div className="my-4">
@@ -445,21 +430,6 @@ const CoodEvaluationStatuses = ({ accordionId }) => {
                             placeholder='Select Term'
                           />
                           {errors.tEr && <p className="text-red-500 text-sm">{errors.tEr}</p>}
-                        </label>
-                      </div>
-                      <div className="my-4">
-                        <label htmlFor='coordDropdown' className="block text-md font-semibold text-gray-700">Status
-                          <Select
-                            id='statusDropdown'
-                            name='statusDropdown'
-                            className="bg-white border border-gray-300 text-black text-sm rounded-2xl block w-full p-2.5"
-                            options={statusOptions}
-                            isSearchable
-                            onChange={handleStatusOptChange}
-                            value={statusOfEval}
-                            placeholder='Select Status'
-                          />
-                          {errors.sEval && <p className="text-red-500 text-sm">{errors.sEval}</p>}
                         </label>
                       </div>
                       <div className="col-span-1 flex justify-center my-2">
@@ -484,7 +454,7 @@ const CoodEvaluationStatuses = ({ accordionId }) => {
                           <tr className='border-b text-center'>
                             <th className='px-20 py-3'>Sr. No</th>
                             <th className='px-20 py-3'>FYP Title</th>
-                            <th className='px-20 py-3'>Panel Member</th>
+                            <th className='px-20 py-3'>Evaluator</th>
                             <th className='px-20 py-3'>Exam Type</th>
                             <th className='px-20 py-3'>Exam Date</th>
                             <th className='px-20 py-3'>Term</th>

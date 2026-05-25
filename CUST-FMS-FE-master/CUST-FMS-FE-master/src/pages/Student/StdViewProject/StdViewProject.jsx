@@ -18,6 +18,7 @@ import OverAll from '../../SupProjectDetails/StdOverAll';
 import axios from 'axios';
 import ReportSubmissionComponent from '../../StdProjectDetails/ReportSubmissionComponent';
 import ShowAllUploadedReports from '../../StdProjectDetails/ShowAllUploadedReports';
+import StdOverAllReport from '../../StdProjectDetails/StdOverAllReport';
 
 
 
@@ -50,7 +51,8 @@ const StdViewProject = () => {
 
     const [ReportDeadline, setReportDeadline] = useState('');
     const [showReportInstance, setShowReportInstance] = useState(false);
-    const [createdExam, setCreatedExam] = useState('');
+    const [createdExam, setCreatedExam] = useState(null);
+    const [pendingExamsQueue, setPendingExamsQueue] = useState([]);
 
 
     const [overallResultData, setOverallResultData] = useState(null);
@@ -66,7 +68,7 @@ const StdViewProject = () => {
 
     const [Mid_2_data, setMid_2_data] = useState(null);
     const [Final_2_data, setFinal_2_data] = useState(null);
-    const [FetchedGroupReports, setFetchedGroupReports] = useState('');
+    const [FetchedGroupReports, setFetchedGroupReports] = useState([]);
     const [showUploadedReports, setShowUploadedReports] = useState(false);
     const [rejectionFeedback, setRejectionFeedback] = useState('');
     const [isReportRejected, setIsReportRejected] = useState(false);
@@ -309,44 +311,78 @@ const StdViewProject = () => {
 
 
     useEffect(() => {
-        if (!groupAttendanceData || !groupAttendanceData.fypGroup) {
-            console.error("groupAttendanceData or groupAttendanceData.fypGroup is null or undefined");
+        // We need groupData to at least show the members, even if attendance is zero
+        if (!groupData || groupData.length === 0) return;
+
+        const getAttendanceMarks = (studentId) => {
+            if (!examData || !examData.groupExams) return 0;
+            const keywords = currentPartStatus === "part-I" 
+                ? ["Attendance-I", "Attendance I"] 
+                : ["Attendance-II", "Attendance II"];
+            
+            const attExam = examData.groupExams.find(ex => {
+                const name = ex.examId?.examName || ex.examName || "";
+                return keywords.some(kw => name.toLowerCase().includes(kw.toLowerCase()));
+            });
+
+            if (attExam) {
+                const studentScore = attExam.students?.find(s => {
+                    const sid = s.studentId?._id || s.studentId;
+                    return sid.toString() === studentId.toString();
+                });
+                if (studentScore) {
+                    return studentScore.obtainedAverage;
+                }
+            }
+            return 0;
+        };
+
+        const fypGroups = groupAttendanceData?.fypGroup || [];
+
+        if (fypGroups.length === 0) {
+            // No attendance recorded at all
+            const members = groupData.map(member => ({
+                _id: member._id,
+                regNo: member.regno,
+                Name: member.name,
+                Percentage: getAttendanceMarks(member._id)
+            }));
+            const attend = [{
+                members: members,
+                Course: `Design Project (${currentPartStatus})`,
+                Meetings: 0,
+                _id: null
+            }];
+            setStudentforAttendance(attend);
             return;
         }
 
-        const attend = groupAttendanceData.fypGroup.map(group => {
-            const partStatus = group.partStatus?.find(status => status.part === currentPartStatus);
+        const attend = fypGroups.map(group => {
+            let partStatus = group.partStatus?.find(status => status.part === currentPartStatus);
             if (!partStatus) {
-                console.warn("Part status not found");
-                return null;
+                partStatus = { meetings: [] };
             }
             const totalMeetings = partStatus.meetings?.length || 0;
 
             const members = group.fypgroup?.groupMembers.map(grpMember => {
-                const attendedMeetings = partStatus.meetings?.filter(meeting =>
-                    meeting.memberAttendances?.find(attendance => attendance.member === grpMember._id && attendance.status === "present")
-                )?.length || 0;
-
-                const percentage = totalMeetings === 0 ? 0 : (attendedMeetings / totalMeetings) * 100;
-
                 return {
                     _id: grpMember._id,
                     regNo: grpMember.registrationNumber,
                     Name: grpMember.name,
-                    Percentage: percentage,
+                    Percentage: getAttendanceMarks(grpMember._id),
                 };
             }) || [];
 
             return {
                 members: members,
-                Course: `Design Project (${group.fypgroup.partStatus})`,
+                Course: `Design Project (${currentPartStatus})`,
                 Meetings: totalMeetings,
                 _id: group._id
             };
-        }).filter(Boolean); // Filter out any null values
+        });
 
         setStudentforAttendance(attend);
-    }, [groupAttendanceData, currentPartStatus])
+    }, [groupAttendanceData, currentPartStatus, groupData, examData]);
 
 
 
@@ -630,22 +666,20 @@ const StdViewProject = () => {
 
 
     const handleViewClickStdAttendanceDetailsP1 = (id) => {
-        const fypGroupWithPartStatus = groupAttendanceData.fypGroup.find(group => {
-            return group.partStatus.some(partStatus => partStatus.part === currentPartStatus);
+        const fypGroupWithPartStatus = groupAttendanceData?.fypGroup?.find(group => {
+            return group.partStatus?.some(partStatus => partStatus.part === currentPartStatus);
         });
         let group = null;
         if (fypGroupWithPartStatus) {
             group = fypGroupWithPartStatus.partStatus.find(partStatus => partStatus.part === currentPartStatus);
         }
-        //  if (!group) return null;
 
-        const meeting = group.meetings.filter(meeting =>
-            meeting.memberAttendances.some(attendance => attendance.member === id)
-        );
-        // if (!meeting) return null;
+        const meeting = group?.meetings ? group.meetings.filter(meeting =>
+            meeting.memberAttendances?.some(attendance => attendance.member === id)
+        ) : [];
 
         const studentAttendance = meeting.reduce((acc, curr) => {
-            const attendance = curr.memberAttendances.find(attendance => attendance.member === id);
+            const attendance = curr.memberAttendances?.find(attendance => attendance.member === id);
             if (attendance) {
                 acc.push({
                     meetingNo: curr.meetingNo,
@@ -658,16 +692,13 @@ const StdViewProject = () => {
             return acc;
         }, []);
 
-        const selectedStudentInfo = groupData.find(member => member._id === id)
+        const selectedStudentInfo = groupData?.find(member => member._id === id);
         const selectedStudent = {
             Meeting: studentAttendance,
-            Course: `Design Project (${groupAttendanceData.fypGroup[0].fypgroup.partStatus})`,
+            Course: `Design Project (${currentPartStatus})`,
             student: selectedStudentInfo,
-
-        }
-        setSelectedStudent(selectedStudent)
-
-
+        };
+        setSelectedStudent(selectedStudent);
     }
 
 
@@ -678,22 +709,20 @@ const StdViewProject = () => {
 
 
     const handleViewClickStdAttendanceDetailsP2 = (id) => {
-        const fypGroupWithPartStatus = groupAttendanceData.fypGroup.find(group => {
-            return group.partStatus.some(partStatus => partStatus.part === currentPartStatus);
+        const fypGroupWithPartStatus = groupAttendanceData?.fypGroup?.find(group => {
+            return group.partStatus?.some(partStatus => partStatus.part === currentPartStatus);
         });
         let group = null;
         if (fypGroupWithPartStatus) {
             group = fypGroupWithPartStatus.partStatus.find(partStatus => partStatus.part === currentPartStatus);
         }
-        //  if (!group) return null;
 
-        const meeting = group.meetings.filter(meeting =>
-            meeting.memberAttendances.some(attendance => attendance.member === id)
-        );
-        // if (!meeting) return null;
+        const meeting = group?.meetings ? group.meetings.filter(meeting =>
+            meeting.memberAttendances?.some(attendance => attendance.member === id)
+        ) : [];
 
         const studentAttendance = meeting.reduce((acc, curr) => {
-            const attendance = curr.memberAttendances.find(attendance => attendance.member === id);
+            const attendance = curr.memberAttendances?.find(attendance => attendance.member === id);
             if (attendance) {
                 acc.push({
                     meetingNo: curr.meetingNo,
@@ -706,16 +735,13 @@ const StdViewProject = () => {
             return acc;
         }, []);
 
-        const selectedStudentInfo = groupData.find(member => member._id === id)
+        const selectedStudentInfo = groupData?.find(member => member._id === id);
         const selectedStudent = {
             Meeting: studentAttendance,
-            Course: `Design Project (${groupAttendanceData.fypGroup[0].fypgroup.partStatus})`,
+            Course: `Design Project (${currentPartStatus})`,
             student: selectedStudentInfo,
-
-        }
-        setSelectedStudent(selectedStudent)
-
-
+        };
+        setSelectedStudent(selectedStudent);
     }
 
 
@@ -802,12 +828,14 @@ const StdViewProject = () => {
     const fetchUploadedReports = async () => {
         const key = JSON.parse(localStorage.getItem("key"));
         try {
-            const fyp = JSON.parse(localStorage.getItem("FYPData"));
+            const fypDataStr = localStorage.getItem("FYPData");
+            if (!fypDataStr) {
+                console.log("No FYPData in localStorage, skipping fetchUploadedReports");
+                return;
+            }
+            const fyp = JSON.parse(fypDataStr);
             const groupId = fyp._id;
 
-            // Extract the term from user.term
-            // const termId = user.term;
-            // console.log("Checking Term", termId);
             const config = { headers: { Accept: 'application/json', Authorization: `Bearer ${key}` } };
             console.log("Request Sent");
             const response = await axios.get(`/api/StudentReport/gettingGroupReports/${groupId}`, config);
@@ -815,7 +843,6 @@ const StdViewProject = () => {
             if (response.status === 200) {
                 console.log("Fetched Reportsssssssssssssss", response.data);
                 setFetchedGroupReports(response.data.reports);
-                // setShowReportInstance(false);
 
             } else {
                 console.log('Error fetching Uploaded Reports');
@@ -830,17 +857,12 @@ const StdViewProject = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
     useEffect(() => {
-        CheckReportExist();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [createdExam])
-    useEffect(() => {
         fetchUploadedReports();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
 
     const handleGoBackFromRep = () => {
-        // setDetailsViewClick(false);
         setShowReportInstance(false); // Reset showReportInstance to false when going back
     };
 
@@ -851,7 +873,7 @@ const StdViewProject = () => {
             if (!userStr) return;
             const user = JSON.parse(userStr);
 
-            const termId = user.term;
+            const termId = user.term?._id || user.term;
             if (!termId) {
                 console.log("No term found for this student — skipping report check");
                 return;
@@ -873,73 +895,117 @@ const StdViewProject = () => {
                 const exams = response.data.exams;
                 if (!exams || exams.length === 0) {
                     console.log("No active created exams found for this term/role");
+                    setShowReportInstance(false);
                     return;
                 }
 
-                const examEntry = exams[exams.length - 1];
-                setCreatedExam(examEntry);
+                const today = new Date();
+                const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                console.log("[REPORT-DEBUG] Today string:", todayStr, "| Total exams received:", exams.length);
 
-                const reportDeadlineRaw = examEntry?.ReportDeadline;
-                const announcedDateRaw = examEntry?.AnnouncedDate;
-
-                console.log("Exam found:", examEntry?.ExamType?.examName);
-
-                if (announcedDateRaw && reportDeadlineRaw) {
-                    // Use UTC date strings (YYYY-MM-DD) to avoid timezone issues
-                    const announcedStr = announcedDateRaw.split('T')[0];
-                    const deadlineStr = reportDeadlineRaw.split('T')[0];
-                    const todayStr = new Date().toISOString().split('T')[0];
-
-                    console.log("Date comparison (UTC strings) - Announced:", announcedStr, "Deadline:", deadlineStr, "Today:", todayStr);
-
-                    if (announcedStr <= todayStr && todayStr <= deadlineStr) {
-                        console.log("✅ Report Submission VISIBLE — within date window");
-                        setShowReportInstance(true);
-                        setReportDeadline(convertToDDMMYYYY(deadlineStr));
-                    } else {
-                        console.log("⚠️ Report Submission HIDDEN — outside date window. Announced:", announcedStr, "Deadline:", deadlineStr, "Today:", todayStr);
-                        setShowReportInstance(false);
+                // Step 1: Exclude Attendance exams and filter by date window
+                const eligibleExams = exams.filter(exam => {
+                    // Exclude Attendance — no report submission needed for attendance
+                    if (exam.portalCategory === "Attendance") {
+                        console.log("Skipping Attendance exam:", exam.ExamType?.examName);
+                        return false;
                     }
-                } else {
-                    console.log("✅ Report Submission VISIBLE — exam exists, no date restriction");
+                    const announced = exam.AnnouncedDate?.split('T')[0];
+                    const deadline = exam.ReportDeadline?.split('T')[0];
+                    if (announced && deadline) {
+                        const inWindow = announced <= todayStr && todayStr <= deadline;
+                        if (!inWindow) {
+                            console.log("Exam outside date window:", exam.ExamType?.examName, "Announced:", announced, "Deadline:", deadline, "Today:", todayStr);
+                        }
+                        return inWindow;
+                    }
+                    // If no date restrictions set, consider it active if announced
+                    if (announced && !deadline) return announced <= todayStr;
+                    return true;
+                });
+
+                console.log("Eligible exams (non-Attendance, within date window):", eligibleExams.length);
+
+                if (eligibleExams.length === 0) {
+                    console.log("No eligible exams within date window");
+                    setShowReportInstance(false);
+                    return;
+                }
+
+                // Step 2: Check which exams don't have a submitted (pending/approved) report yet
+                const fypDataStr = localStorage.getItem("FYPData");
+                let groupId = null;
+                if (fypDataStr) {
+                    groupId = JSON.parse(fypDataStr)._id;
+                }
+
+                let unreportedExams = eligibleExams;
+                if (groupId) {
+                    try {
+                        const reportsRes = await axios.get(
+                            `/api/StudentReport/gettingGroupReports/${groupId}`, config
+                        );
+                        const existingReports = reportsRes?.data?.reports || [];
+                        console.log("Existing reports for group:", existingReports.length);
+
+                        unreportedExams = eligibleExams.filter(exam => {
+                            const examTypeId = exam.ExamType?._id || exam.ExamType;
+                            const matchingReport = existingReports.find(r => {
+                                const reportExamId = r.Exam?._id || r.Exam;
+                                return reportExamId === examTypeId;
+                            });
+
+                            if (!matchingReport) {
+                                // No report exists — needs submission
+                                return true;
+                            }
+                            if (matchingReport.status === 'rejected') {
+                                // Report was rejected — store feedback and allow resubmission
+                                exam._rejectionFeedback = matchingReport.supervisorFeedback || 'Your report was denied. Please fix the issues and resubmit.';
+                                return true;
+                            }
+                            // Report is pending or approved — already submitted, skip
+                            console.log("Report already submitted for exam:", exam.ExamType?.examName, "Status:", matchingReport.status);
+                            return false;
+                        });
+                    } catch (reportErr) {
+                        console.log("Could not check existing reports (group may have none):", reportErr?.response?.status);
+                        // If reports check fails, show form for all eligible exams
+                    }
+                }
+
+                console.log("Unreported exams needing submission:", unreportedExams.length);
+
+                // Step 3: Queue all unreported exams and show the first one
+                if (unreportedExams.length > 0) {
+                    setPendingExamsQueue(unreportedExams);
+                    const firstExam = unreportedExams[0];
+                    setCreatedExam(firstExam);
+
+                    // Handle rejection feedback for the first exam
+                    if (firstExam._rejectionFeedback) {
+                        setRejectionFeedback(firstExam._rejectionFeedback);
+                        setIsReportRejected(true);
+                    } else {
+                        setRejectionFeedback('');
+                        setIsReportRejected(false);
+                    }
+
                     setShowReportInstance(true);
-                    if (reportDeadlineRaw) setReportDeadline(convertToDDMMYYYY(reportDeadlineRaw.split('T')[0]));
+                    if (firstExam.ReportDeadline) {
+                        setReportDeadline(convertToDDMMYYYY(firstExam.ReportDeadline.split('T')[0]));
+                    }
+                    console.log("✅ Report Submission VISIBLE for exam:", firstExam.ExamType?.examName, "| Queue size:", unreportedExams.length);
+                } else {
+                    console.log("All reports already submitted — hiding form");
+                    setShowReportInstance(false);
                 }
             }
         } catch (error) {
-            if (error.response && error.response.status === 404) {
-                console.log("No active created exams for this student's term — report not available yet");
-                setShowReportInstance(false);
-            } else {
-                console.error('Error fetching created exam for report trigger:', error);
-            }
+            console.error('Error fetching created exam for report trigger:', error);
+            setShowReportInstance(false);
         }
     };
-
-    useEffect(() => {
-        const currentDate = new Date();
-
-        if (ReportDeadline) {
-            const ReportDeadlineDate = new Date(ReportDeadline);
-
-            currentDate.setHours(0, 0, 0, 0);
-            ReportDeadlineDate.setHours(0, 0, 0, 0);
-
-            console.log("First Checking Report Deadline", ReportDeadlineDate);
-            console.log("First Checking Current Date", currentDate);
-
-            if (ReportDeadlineDate < currentDate) {
-                // Only hide the form if the report is NOT rejected
-                // A rejected report must always be re-submittable
-                if (!isReportRejected) {
-                    console.log("Deadline passed and report not rejected — hiding form");
-                    setShowReportInstance(false);
-                } else {
-                    console.log("Deadline passed BUT report is rejected — keeping form open for resubmission");
-                }
-            }
-        }
-    }, [ReportDeadline, isReportRejected]);
 
 
 
@@ -956,8 +1022,36 @@ const StdViewProject = () => {
 
 
     const handleRepInstance = () => {
-        console.log("Hanlde SUccess Responseeeeeeeeeeee Calleddddddddddddddddddddd");
-        setShowReportInstance(false);
+        console.log("Report submitted successfully — checking for next exam in queue");
+        // Remove the just-submitted exam from queue
+        const remaining = pendingExamsQueue.slice(1);
+        setPendingExamsQueue(remaining);
+
+        if (remaining.length > 0) {
+            // Show the next exam's report form
+            const nextExam = remaining[0];
+            setCreatedExam(nextExam);
+
+            // Handle rejection feedback for next exam
+            if (nextExam._rejectionFeedback) {
+                setRejectionFeedback(nextExam._rejectionFeedback);
+                setIsReportRejected(true);
+            } else {
+                setRejectionFeedback('');
+                setIsReportRejected(false);
+            }
+
+            if (nextExam.ReportDeadline) {
+                setReportDeadline(convertToDDMMYYYY(nextExam.ReportDeadline.split('T')[0]));
+            }
+            setShowReportInstance(true);
+            console.log("➡️ Advancing to next exam:", nextExam.ExamType?.examName, "| Remaining:", remaining.length);
+        } else {
+            // All reports submitted — show normal project page
+            setCreatedExam(null);
+            setShowReportInstance(false);
+            console.log("✅ All reports submitted — showing project details");
+        }
     };
 
     const BackToPrevious = () => {
@@ -978,6 +1072,7 @@ const StdViewProject = () => {
             }
         }
     }, []);
+    console.log("[RENDER-DEBUG] loadingSpinner:", loadingSpinner, "| showUploadedReports:", showUploadedReports, "| showReportInstance:", showReportInstance, "| createdExam:", createdExam?.ExamType?.examName || 'none', "| pendingQueue:", pendingExamsQueue.length);
     return (
         <>
             {loadingSpinner ? (
@@ -988,7 +1083,7 @@ const StdViewProject = () => {
                 <ShowAllUploadedReports accordionId={206} handleBack={BackToPrevious} FetchedGroupReports={FetchedGroupReports} />
             ) :
                 showReportInstance ? (
-                    <ReportSubmissionComponent accordionId={202} onGoBack={handleGoBackFromRep} createdExam={createdExam} ReportInst={handleRepInstance} rejectionFeedback={rejectionFeedback} />
+                    <ReportSubmissionComponent accordionId={202} onGoBack={handleGoBackFromRep} createdExam={createdExam} ReportInst={handleRepInstance} rejectionFeedback={rejectionFeedback} currentIndex={pendingExamsQueue.length > 0 ? pendingExamsQueue.indexOf(createdExam) + 1 : 1} totalExams={pendingExamsQueue.length} />
                 ) : (
                     <div className='bg-slate-100 w-full h-full'>
                         {showDetails && (<div className='mx-10 pt-12 flex flex-col gap-3' >
@@ -1018,80 +1113,90 @@ const StdViewProject = () => {
                         </div>)}
                         {showProjectDetails && (
                             <div className='mx-10 pt-12 flex flex-col gap-3 relative'>
-                                <div class="mb-4 border-b border-gray-200 font-semibold">
-                                    <ul class="flex flex-wrap -mb-px justify-around text-sm font-medium text-center" id="default-tab" data-tabs-toggle="#default-tab-content" role="tablist">
-                                        <li class="me-2" role="presentation">
-                                            <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300" id="part1-tab" data-tabs-target="#part1" type="button" role="tab" aria-controls="part1" aria-selected="false" onClick={() => handlePartStatus("part-I")}>Part 1</button>
+                                <div className="mb-4 border-b border-gray-200 font-semibold">
+                                    <ul className="flex flex-wrap -mb-px justify-around text-sm font-medium text-center" role="tablist">
+                                        <li role="presentation">
+                                            <button 
+                                                className={`inline-block p-4 border-b-2 rounded-t-lg transition-all duration-200 ${
+                                                    currentPartStatus === "part-I"
+                                                        ? "text-[#514B96] border-[#514B96] font-bold"
+                                                        : "text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300"
+                                                }`}
+                                                type="button" 
+                                                role="tab" 
+                                                aria-selected={currentPartStatus === "part-I"}
+                                                onClick={() => handlePartStatus("part-I")}
+                                            >
+                                                Part 1
+                                            </button>
                                         </li>
                                         <li role="presentation">
-                                            <button class={`inline-block p-4 border-b-2 rounded-t-lg ${(groupData && groupData[0] && groupData[0].partStatus !== 'part-II') ? 'text-gray-400 border-gray-300 cursor-not-allowed' : 'hover:text-gray-600 hover:border-gray-300'}`}
-                                                id="part2-tab"
-                                                data-tabs-target="#part2"
+                                            <button 
+                                                className={`inline-block p-4 border-b-2 rounded-t-lg transition-all duration-200 ${
+                                                    (groupData && groupData[0] && groupData[0].partStatus !== 'part-II') 
+                                                        ? 'text-gray-400 border-transparent cursor-not-allowed' 
+                                                        : currentPartStatus === "part-II"
+                                                        ? "text-[#514B96] border-[#514B96] font-bold"
+                                                        : "text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300"
+                                                }`}
                                                 type="button"
                                                 role="tab"
-                                                aria-controls="part2" aria-selected="false" onClick={() => groupData && groupData[0] && groupData[0].partStatus === 'part-II' && handlePartStatus("part-II")}
+                                                aria-selected={currentPartStatus === "part-II"}
+                                                onClick={() => groupData && groupData[0] && groupData[0].partStatus === 'part-II' && handlePartStatus("part-II")}
                                                 disabled={groupData && groupData[0] && groupData[0].partStatus !== 'part-II'}
-
-                                            >Part 2</button>
+                                            >
+                                                Part 2
+                                            </button>
                                         </li>
                                         <li role="presentation">
                                             <button
-                                                className={`inline-block p-4 border-b-2 rounded-t-lg ${(groupData && groupData[0] && groupData[0].partStatus !== 'part-II') ? 'text-gray-400 border-gray-300 cursor-not-allowed' : 'hover:text-gray-600 hover:border-gray-300'}`}
-                                                id="overall-tab"
-                                                data-tabs-target="#overall"
+                                                className={`inline-block p-4 border-b-2 rounded-t-lg transition-all duration-200 ${
+                                                    currentPartStatus === "all"
+                                                        ? "text-[#514B96] border-[#514B96] font-bold"
+                                                        : "text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300"
+                                                }`}
                                                 type="button"
                                                 role="tab"
-                                                aria-controls="overall"
-                                                aria-selected="false"
-                                                onClick={() => groupData && groupData[0] && groupData[0].partStatus === 'part-II' && handlePartStatus("all")}
-                                                disabled={groupData && groupData[0] && groupData[0].partStatus !== 'part-II'}
+                                                aria-selected={currentPartStatus === "all"}
+                                                onClick={() => handlePartStatus("all")}
                                             >
                                                 Overall
                                             </button>
                                         </li>
                                     </ul>
-
                                 </div>
-                                <div id="default-tab-content  w-full h-full">
-                                    <div class="hidden rounded-lg bg-gray-50" id="part1" role="tabpanel" aria-labelledby="part1-tab">
+                                <div className="w-full h-full">
+                                    <div className={`rounded-lg bg-gray-50 ${currentPartStatus === "part-I" ? "" : "hidden"}`} role="tabpanel">
                                         <div className="partOneDetails flex flex-col gap-3">
-
                                             <ProjectInfo accordionId={14} data={projectInfoData} />
                                             <GroupDetails accordionId={1} data={groupData} />
                                             {studentForAttendence && (<SupAttendanceDetailsofStd data={studentForAttendence} accordionId={16} handleViewClick={handleViewClickStdAttendanceDetailsP1} accordText="Attendance I Details" />)}
                                             {selectedStudent && (<AttendanceTable accordionId={2} data={selectedStudent} accordText="Attendance I Details" />)}
                                             {penalData && (<PanelDetails accordionId={3} data={penalData} />)}
-                                            {/* it was below proposal */}
                                             {OrientationData && <OrientationEvaluation accordionId={4} data={OrientationData} />}
                                             {ProposalData && <ProposalEvaluation accordionId={5} data={ProposalData} accordText="Proposal Evaluation" />}
                                             {Mid_1_data && <MidEvaluation accordionId={7} data={Mid_1_data} accordText="Mid I Evaluation" />}
                                             {Final_1_data && <FinalEvaluation accordionId={8} data={Final_1_data} accordText="Final I Evaluation" />}
-                                            {/* 
-                            <OverallEvaluationI accordionId={9} data={Data.overallEvaluationDataP1} stdData={selectedGroup} /> */}
-
                                         </div>
                                     </div>
 
-                                    <div class="hidden rounded-lg bg-gray-50 " id="part2" role="tabpanel" aria-labelledby="part2-tab">
+                                    <div className={`rounded-lg bg-gray-50 ${currentPartStatus === "part-II" ? "" : "hidden"}`} role="tabpanel">
                                         <div className="partTwoDetails flex flex-col gap-3">
                                             <SupAttendanceDetailsofStd data={studentForAttendence} accordionId={17} handleViewClick={handleViewClickStdAttendanceDetailsP2} accordText="Attendance II Details" />
                                             {selectedStudent && (<AttendanceTable accordionId={10} data={selectedStudent} accordText="Attendance II Details" />)}
                                             {Mid_2_data && <MidEvaluation accordionId={11} data={Mid_2_data} accordText="Mid II Evaluation" />}
                                             {Final_2_data && <FinalEvaluation accordionId={12} data={Final_2_data} accordText="Final II Evaluation" />}
-                                            {/* 
-                                    <OverallEvaluationII accordionId={13} data={Data.overallEvaluationDataP2} stdData={selectedGroup} /> */}
                                         </div>
                                     </div>
 
-                                    <div class="hidden rounded-lg bg-gray-50 " id="overall" role="tabpanel" aria-labelledby="overall-tab">
-                                        <div className="OverallEvaluationDetails flex flex-col gap-3 click-event-hidden">
-                                            {overallResultData && <OverAll accordionId={21} data={overallResultData} />}
+                                    <div className={`rounded-lg bg-gray-50 ${currentPartStatus === "all" ? "" : "hidden"}`} role="tabpanel">
+                                        <div className="OverallEvaluationDetails flex flex-col gap-3">
+                                            <StdOverAllReport />
                                         </div>
-
                                     </div>
                                 </div>
                                 <div className='flex flex-row justify-end mt-5'>
-                                    <button className="text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg" onClick={handleGoBack}>Back</button>
+                                    <button className="text-white bg-primary hover:bg-[#3c3773] transition-all duration-200 border-0 py-2.5 px-7 focus:outline-none rounded-lg text-lg shadow-md font-medium" onClick={handleGoBack}>Back</button>
                                 </div>
                             </div>
                         )}

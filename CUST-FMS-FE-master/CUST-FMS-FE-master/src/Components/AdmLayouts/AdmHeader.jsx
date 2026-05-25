@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { IoIosNotificationsOutline } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import { baseUrl } from '../config/config';
 
 const Header = ({AdmDataProp}) => {
   const navigate = useNavigate();
@@ -93,10 +94,13 @@ const Header = ({AdmDataProp}) => {
             <div className="text-gray-400 w-full h-full"><IoIosNotificationsOutline /></div>
           </div>
           {/* Rounded Picture */}
-          <div className="bg-gray-300 w-8 h-8 rounded-full flex items-center justify-center">
+          <div className="bg-gray-300 w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
             {/* Replace the following line with your actual image */}
             <img alt="Profile" className="w-full h-full object-fill rounded-full" 
-            src={`/uploads/${AdmData.image}`}
+              src={AdmData?.image && AdmData.image !== "undefined" && AdmData.image !== "" ? `/uploads/${AdmData.image}` : '/assets/images/CardImg.png'}
+              onError={(e) => {
+                e.target.src = '/assets/images/CardImg.png';
+              }}
             />
           </div>
         </div>

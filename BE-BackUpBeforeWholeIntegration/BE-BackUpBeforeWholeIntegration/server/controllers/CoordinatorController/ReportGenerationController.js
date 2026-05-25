@@ -619,9 +619,168 @@ const generateProjectWiseReport = async (req, res) => {
     }
 };
 
+/**
+ * Get a single student's Overall FYP Report
+ * Only returns real data when ALL exams in both Part I & Part II are:
+ *   - status === "Completed"
+ *   - Total weightage for each part === 100
+ *
+ * Route: GET /api/EvaluateExamRoutes/student-overall-report/:termId/:studentId
+ */
+const getStudentOverallReport = async (req, res) => {
+    try {
+        const { termId, studentId } = req.params;
+
+        // Security: student may only fetch their own report
+        if (req.user_id && req.user_id.toString() !== studentId.toString()) {
+            return res.status(403).json({ success: false, error: 'Forbidden: you may only view your own report' });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(termId) || !mongoose.Types.ObjectId.isValid(studentId)) {
+            return res.status(400).json({ success: false, error: 'Invalid ID format' });
+        }
+
+        // ── 1. Load the term ────────────────────────────────────────────────
+        const term = await FYPTerm.findById(termId);
+        if (!term) {
+            return res.status(404).json({ success: false, error: 'Term not found' });
+        }
+
+        // ── 2. Load ALL created exams for this term ──────────────────────────
+        const allCreatedExams = await CreatedExam.find({ Term: termId })
+            .populate('ExamType', 'examName examTypeFor');
+
+        const partIExams  = allCreatedExams.filter(e => e.partStatus === 'Part-I');
+        const partIIExams = allCreatedExams.filter(e => e.partStatus === 'Part-II');
+
+        // ── 3. Gate check ────────────────────────────────────────────────────
+        const partIWeightage   = partIExams.reduce((s, e) => s + (e.ExamWeightage || 0), 0);
+        const partIIWeightage  = partIIExams.reduce((s, e) => s + (e.ExamWeightage || 0), 0);
+
+        const partICompleted   = partIExams.every(e => e.status === 'Completed');
+        const partIICompleted  = partIIExams.every(e => e.status === 'Completed');
+
+        const partIReady  = partICompleted  && partIWeightage  === 100;
+        const partIIReady = partIICompleted && partIIWeightage === 100;
+
+        const pendingPartI  = partIExams.filter(e => e.status !== 'Completed').map(e => e.ExamType?.examName || 'Unknown');
+        const pendingPartII = partIIExams.filter(e => e.status !== 'Completed').map(e => e.ExamType?.examName || 'Unknown');
+
+        if (!partIReady || !partIIReady) {
+            return res.status(200).json({
+                ready: false,
+                message: 'Results not yet finalized. All exams must be completed with 100% weightage.',
+                partIStatus: {
+                    totalWeightage: partIWeightage,
+                    isWeightageComplete: partIWeightage === 100,
+                    allExamsCompleted: partICompleted,
+                    completedExams: partIExams.filter(e => e.status === 'Completed').length,
+                    totalExams: partIExams.length,
+                    pendingExams: pendingPartI
+                },
+                partIIStatus: {
+                    totalWeightage: partIIWeightage,
+                    isWeightageComplete: partIIWeightage === 100,
+                    allExamsCompleted: partIICompleted,
+                    completedExams: partIIExams.filter(e => e.status === 'Completed').length,
+                    totalExams: partIIExams.length,
+                    pendingExams: pendingPartII.length > 0 ? pendingPartII : (partIIExams.length === 0 ? ['Not started yet'] : [])
+                }
+            });
+        }
+
+        // ── 4. Fetch evaluation data for this student ────────────────────────
+        const evaluationDocs = await Evaluation.find({ 'terms.termId': termId })
+            .populate({
+                path: 'terms.exams.examId',
+                select: 'ExamWeightage ExamType partStatus',
+                populate: { path: 'ExamType', select: 'examName' }
+            })
+            .populate({
+                path: 'terms.exams.fypGroups.students.studentId',
+                select: 'name registrationNumber'
+            });
+
+        // Aggregate all exams for this term across docs
+        const allExamEntries = [];
+        evaluationDocs.forEach(doc => {
+            const termEntry = doc.terms.find(t => t.termId.toString() === termId);
+            if (termEntry && termEntry.exams) {
+                allExamEntries.push(...termEntry.exams);
+            }
+        });
+
+        // Build student mark map: examName → obtainedAverage
+        const studentMarksByExam = {};
+        let studentName = 'Unknown';
+        let studentRegNo = 'N/A';
+
+        allExamEntries.forEach(exam => {
+            const examName    = exam.examId?.ExamType?.examName || exam.examName || 'Unknown';
+            const examPart    = exam.examId?.partStatus || '';
+            const examWeight  = exam.examId?.ExamWeightage || 0;
+
+            exam.fypGroups.forEach(group => {
+                group.students.forEach(s => {
+                    const sId = s.studentId?._id ? s.studentId._id.toString() : s.studentId?.toString();
+                    if (sId !== studentId.toString()) return;
+
+                    // Grab student info once
+                    if (studentName === 'Unknown' && s.studentId?.name) {
+                        studentName = s.studentId.name;
+                        studentRegNo = s.studentId.registrationNumber || 'N/A';
+                    }
+
+                    studentMarksByExam[examName] = {
+                        marks: Math.round((s.obtainedAverage || 0) * 100) / 100,
+                        weightage: examWeight,
+                        part: examPart
+                    };
+                });
+            });
+        });
+
+        // ── 5. Build part totals and exam arrays ─────────────────────────────
+        const partIExamResults = partIExams.map(e => ({
+            name: e.ExamType?.examName || 'Unknown',
+            weightage: e.ExamWeightage,
+            marks: studentMarksByExam[e.ExamType?.examName]?.marks ?? 0
+        }));
+
+        const partIIExamResults = partIIExams.map(e => ({
+            name: e.ExamType?.examName || 'Unknown',
+            weightage: e.ExamWeightage,
+            marks: studentMarksByExam[e.ExamType?.examName]?.marks ?? 0
+        }));
+
+        const totalPartI  = Math.round(partIExamResults.reduce((s, e) => s + e.marks, 0) * 100) / 100;
+        const totalPartII = Math.round(partIIExamResults.reduce((s, e) => s + e.marks, 0) * 100) / 100;
+        const overallPercentage = Math.round(((totalPartI + totalPartII) / 2) * 100) / 100;
+
+        const passingCriteria = await getPassingCriteriaForTerm(termId);
+        const passFail = overallPercentage >= passingCriteria ? 'PASS' : 'FAIL';
+
+        return res.status(200).json({
+            ready: true,
+            student: { name: studentName, registrationNumber: studentRegNo },
+            termName: term.sessionTerm,
+            partI: { total: totalPartI, exams: partIExamResults },
+            partII: { total: totalPartII, exams: partIIExamResults },
+            overallPercentage,
+            passFail,
+            passingCriteria
+        });
+
+    } catch (error) {
+        console.error('Error fetching student overall report:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error', message: error.message });
+    }
+};
+
 module.exports = {
     generatePortalReport,
     generateOverallFYPResult,
     checkPartIIStatus,
-    generateProjectWiseReport
+    generateProjectWiseReport,
+    getStudentOverallReport
 };

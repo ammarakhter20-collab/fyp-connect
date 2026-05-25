@@ -5,7 +5,7 @@ const SupAttendanceDetailsofStd = (props) => {
     const { data, accordionId, handleViewClick, accordText } = props;
 
     const course = data?.[0]?.Course || 'N/A';
-    const meetings = data?.[0]?.Meetings || 'N/A';
+    const meetings = (data?.[0]?.Meetings !== undefined && data?.[0]?.Meetings !== null) ? data[0].Meetings : 'N/A';
     const members = data?.[0]?.members || [];
 
     return (

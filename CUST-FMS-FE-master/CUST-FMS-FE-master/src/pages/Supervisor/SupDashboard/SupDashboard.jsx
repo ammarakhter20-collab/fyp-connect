@@ -480,7 +480,7 @@ const Dashboard = () => {
         const userData = JSON.parse(localStorage.getItem("user"));
         const Role = userData.role;
         let role = '';
-        if (Role === 'faculty' || Role === 'hod' || Role === 'coordinator') {
+        if (Role === 'faculty') {
           role = 'supervisor'
         }
         console.log("Checking Role of Studenttttttttt", role);

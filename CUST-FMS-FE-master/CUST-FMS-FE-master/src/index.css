@@ -65,3 +65,10 @@ body {
   }
   
 
+/* Active Tab overrides to match portal brand color (purple #514B96) */
+#default-tab button[aria-selected="true"],
+#default-tab button.text-blue-600,
+#default-tab button.text-blue-500 {
+  color: #514B96 !important;
+  border-color: #514B96 !important;
+}

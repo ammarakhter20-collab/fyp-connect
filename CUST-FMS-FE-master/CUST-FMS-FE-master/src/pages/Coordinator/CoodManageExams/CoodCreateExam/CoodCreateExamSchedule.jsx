@@ -79,7 +79,8 @@ const CoodCreateExamSchedule = (props) => {
         setErrors((prevErrors) => ({ ...prevErrors, venue: '' }));
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = (e) => {
+        if (e) e.preventDefault();
         // Check if panel is defined
         if (!panel) {
             alert('Select Panel');
@@ -143,7 +144,6 @@ const CoodCreateExamSchedule = (props) => {
     const CreateExamSchedule = async (panel, ExamDate, ExamTime, Venue, CreatedExam) => {
         try {
             setLoadingSpinner(true);
-            // ... (logs)
             const userData = localStorage.getItem('user');
             const parsedUserData = JSON.parse(userData);
             const coordinatorId = parsedUserData._id;
@@ -152,7 +152,6 @@ const CoodCreateExamSchedule = (props) => {
             const nkey = localStorage.getItem('key');
             const token = JSON.parse(nkey);
 
-            // ... (fetch)
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
@@ -168,10 +167,18 @@ const CoodCreateExamSchedule = (props) => {
                     coordinatorId,
                 }),
             });
-            // ...
+
+            const data = await response.json();
+            if (response.ok) {
+                alert(data.message || 'Exam schedule created successfully!');
+                fetchExamSchedule();
+            } else {
+                alert(data.error || 'Failed to create schedule');
+            }
         }
         catch (error) {
             console.error('Error Creating Schedule: ', error);
+            alert('An error occurred while creating schedule');
         } finally {
             setLoadingSpinner(false);
         }
@@ -315,7 +322,7 @@ const CoodCreateExamSchedule = (props) => {
                                 </button>
                                 <div>
                                     <h4 className='flex justify-center text-indigo-950 my-6 text-2xl'>Create Schedule</h4>
-                                    <form>
+                                    <form onSubmit={(e) => e.preventDefault()}>
                                         <div className="my-4">
                                             <label className="block text-md font-semibold text-gray-700">Panel
                                                 <Select
@@ -372,7 +379,7 @@ const CoodCreateExamSchedule = (props) => {
                                             </label>
                                         </div>
                                         <div className="col-span-1 flex justify-center my-2">
-                                            <Simple text="Add" type="Submit" onClick={handleSubmit} />
+                                            <Simple text="Add" type="button" onClick={handleSubmit} />
                                         </div>
                                     </form>
                                 </div>

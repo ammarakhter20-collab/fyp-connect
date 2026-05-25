@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import Simple from '../../../../Components/Buttons/Simple';
 import Select from 'react-select';
 
-const CoodExamCreation = ({ onclose, saveExamClick, dataToEdit, examTypes, termData }) => {
+const CoodExamCreation = ({ onclose, saveExamClick, dataToEdit, examTypes, termData, programOptions, departmentData }) => {
     const [term, setTerm] = useState(dataToEdit ? dataToEdit.term : '');
+    const [department, setDepartment] = useState(dataToEdit ? dataToEdit.department : '');
+    const [program, setProgram] = useState(dataToEdit ? dataToEdit.program : '');
     const [examType, setExamType] = useState(dataToEdit ? dataToEdit.examType : '');
     const [examWeightage, setExamWeightage] = useState(dataToEdit ? dataToEdit.examWeightage : '');
     const [announcedDate, setAnnouncedDate] = useState(dataToEdit ? dataToEdit.announcedDate : '');
@@ -11,6 +13,7 @@ const CoodExamCreation = ({ onclose, saveExamClick, dataToEdit, examTypes, termD
     const [portalCategory, setPortalCategory] = useState(dataToEdit ? dataToEdit.portalCategory : null);
     const [partStatus, setPartStatus] = useState(dataToEdit ? dataToEdit.partStatus : null);
     const [errors, setErrors] = useState({});
+    const [filteredPrograms, setFilteredPrograms] = useState([]);
 
     const portalCategoryOptions = [
         { value: 'Attendance', label: 'Attendance' },
@@ -22,14 +25,37 @@ const CoodExamCreation = ({ onclose, saveExamClick, dataToEdit, examTypes, termD
 
     const partStatusOptions = [
         { value: 'Part-I', label: 'Part-I' },
-        { value: 'Part-II', label: 'Part-II' },
-        { value: 'General', label: 'General' }
+        { value: 'Part-II', label: 'Part-II' }
     ];
+
+    useEffect(() => {
+        if (department) {
+            const filtered = programOptions.filter(p => String(p.department) === String(department.value));
+            setFilteredPrograms(filtered);
+        } else {
+            setFilteredPrograms([]);
+        }
+    }, [department, programOptions]);
 
     const handleTermChange = (selectedOption) => {
         setTerm(selectedOption);
         if (errors.term) {
             setErrors(prevErrors => ({ ...prevErrors, term: null }));
+        }
+    };
+
+    const handleDepartmentChange = (selectedOption) => {
+        setDepartment(selectedOption);
+        setProgram(''); // Reset program when department changes
+        if (errors.department) {
+            setErrors(prevErrors => ({ ...prevErrors, department: null }));
+        }
+    };
+
+    const handleProgramChange = (selectedOption) => {
+        setProgram(selectedOption);
+        if (errors.program) {
+            setErrors(prevErrors => ({ ...prevErrors, program: null }));
         }
     };
 
@@ -82,6 +108,8 @@ const CoodExamCreation = ({ onclose, saveExamClick, dataToEdit, examTypes, termD
 
         const newErrors = {};
         if (!term) newErrors.term = 'Term is required';
+        if (!department) newErrors.department = 'Department is required';
+        if (!program) newErrors.program = 'Program is required';
         if (!examType) newErrors.examType = 'Exam Type is required';
         if (!examWeightage) newErrors.examWeightage = 'Exam Weightage is required';
         if (!announcedDate) newErrors.announcedDate = 'Announced Date is required';
@@ -97,6 +125,8 @@ const CoodExamCreation = ({ onclose, saveExamClick, dataToEdit, examTypes, termD
 
         const data = {
             Term: term.value,
+            department: department.value,
+            program: program.value,
             ExamType: examType.value,
             ExamWeightage: examWeightage,
             AnnouncedDate: announcedDate,
@@ -108,6 +138,8 @@ const CoodExamCreation = ({ onclose, saveExamClick, dataToEdit, examTypes, termD
         console.log("Submitting Exam Data:", data);
         saveExamClick(data);
         setTerm('');
+        setDepartment('');
+        setProgram('');
         setExamType('');
         setExamWeightage('');
         setAnnouncedDate('');
@@ -120,7 +152,7 @@ const CoodExamCreation = ({ onclose, saveExamClick, dataToEdit, examTypes, termD
     const currentDate = new Date().toISOString().split('T')[0];
 
     return (
-        <div ref={cardRef} className="bg-white shadow-md rounded-lg p-6 w-[30%] h-auto relative">
+        <div ref={cardRef} className="bg-white shadow-md rounded-lg p-6 w-[30%] h-auto relative overflow-y-auto max-h-[90vh]">
             <button className="absolute top-2 right-2 text-gray-600 focus:outline-none" onClick={onclose}>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -142,6 +174,36 @@ const CoodExamCreation = ({ onclose, saveExamClick, dataToEdit, examTypes, termD
                                 placeholder='Select or type'
                             />
                             {errors.term && <p className="text-red-500 text-sm">{errors.term}</p>}
+                        </label>
+                    </div>
+                    <div className="my-4">
+                        <label htmlFor='department' className="block text-md font-semibold text-gray-700">Department
+                            <Select
+                                id='department'
+                                name='department'
+                                className={`bg-white border ${errors.department ? 'border-red-500' : 'border-gray-300'} text-black text-sm rounded-2xl block w-full p-2.5`}
+                                options={departmentData}
+                                isSearchable
+                                onChange={handleDepartmentChange}
+                                value={department}
+                                placeholder='Select Department'
+                            />
+                            {errors.department && <p className="text-red-500 text-sm">{errors.department}</p>}
+                        </label>
+                    </div>
+                    <div className="my-4">
+                        <label htmlFor='program' className="block text-md font-semibold text-gray-700">Program
+                            <Select
+                                id='program'
+                                name='program'
+                                className={`bg-white border ${errors.program ? 'border-red-500' : 'border-gray-300'} text-black text-sm rounded-2xl block w-full p-2.5`}
+                                options={filteredPrograms}
+                                isSearchable
+                                onChange={handleProgramChange}
+                                value={program}
+                                placeholder='Select Program'
+                            />
+                            {errors.program && <p className="text-red-500 text-sm">{errors.program}</p>}
                         </label>
                     </div>
                     <div className="my-4">

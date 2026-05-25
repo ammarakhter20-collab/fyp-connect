@@ -28,6 +28,7 @@ const AddedExamTable = (props) => {
                   <tr className='border-b text-center'>
                     <th className="px-6 py-3 w-32">Serial no.</th>
                     <th className="px-6 py-3 w-32">Term</th>
+                    <th className="px-6 py-3 w-32">Program</th>
                     <th className="px-6 py-3 w-32">Exam Type</th>
                     <th className="px-6 py-3 w-36">Exam Weightage</th>
                     <th className="px-6 py-3 w-36">Announced Date</th>
@@ -44,6 +45,7 @@ const AddedExamTable = (props) => {
                       <tr key={index} className="text-center">
                         <td className="px-6 py-4 font-semibold">{serialCounter++}</td>
                         <td className="px-6 py-4 font-semibold">{item.Term?.sessionTerm}</td>
+                        <td className="px-6 py-4 font-semibold">{item.program?.programTitle || "N/A"}</td>
                         <td className="px-6 py-4 font-semibold">{item.ExamType?.examName}</td>
                         <td className="px-6 py-4 font-semibold">{item.ExamWeightage}</td>
                         <td className="px-6 py-4 font-semibold">{formatDate(item.AnnouncedDate)}</td>

@@ -1,6 +1,22 @@
 const GenUser = require("../../models/AdminModels/GenUserModel");
+const Program = require("../../models/AdminModels/program");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
+// Cascading deletion dependent models
+const FypRegistration = require("../../models/StudentModels/fypRegModel");
+const FYPGroupAttendance = require("../../models/SupervisorModels/FYPAttendanceModel");
+const ExamMarks = require("../../models/SupervisorModels/examMarksAssignment");
+const TaskAssignment = require("../../models/SupervisorModels/TaskAssigmentModel");
+const StudentReport = require("../../models/CoordinatorModels/StudentReportsModel");
+const FYPTopicChangeRequest = require("../../models/StudentModels/TopicReqModel");
+const FYPTechnologyChangeRequest = require("../../models/StudentModels/TechReqModel");
+const FypChangeRequest = require("../../models/SupervisorModels/changeRequest");
+const Feedback = require("../../models/SupervisorModels/FeedbackModel");
+const Evaluation = require("../../models/CoordinatorModels/EvaluateExamModel");
+const Result = require("../../models/CoordinatorModels/ResultsModel");
+const Timetable = require("../../models/StudentModels/StdTimetableModel");
+const ExamAssignment = require("../../models/CoordinatorModels/ExamAssignment");
 
 // Use environment variable directly or load from a configuration file
 const secretKey = process.env.TOKEN_KEY;
@@ -50,15 +66,15 @@ const createGenUser = async (req, res) => {
   console.log("joininDate", joiningDate);
 
   try {
-    if (role && program && (role.toLowerCase() === "hod" || role.toLowerCase() === "coordinator")) {
+    if (role && department && (role.toLowerCase() === "hod" || role.toLowerCase() === "coordinator")) {
       const existingRoleUser = await GenUser.findOne({
         role: new RegExp(`^${role}$`, "i"),
-        program: program,
+        department: department,
       });
 
       if (existingRoleUser) {
         return res.status(400).json({
-          error: `A ${role} for this program already exists.`,
+          error: `A ${role} for this department already exists.`,
         });
       }
     }
@@ -284,6 +300,7 @@ const updateStudentData = async (req, res) => {
     department,
     program,
     term,
+    partStatus,
   } = req.body;
 
   try {
@@ -303,6 +320,24 @@ const updateStudentData = async (req, res) => {
       program,
       term,
     };
+
+    if (partStatus !== undefined) {
+      updateFields.partStatus = partStatus;
+    }
+
+    // Auto-reset failed/part-II status to 'part-I' if term is being changed/updated
+    const existingUser = await GenUser.findById(studentId);
+    if (existingUser) {
+      const currentTermId = existingUser.term ? existingUser.term.toString() : null;
+      const newTermId = term ? term.toString() : null;
+
+      // If registered in a different term (e.g. re-registering for a new term, or from null to a term)
+      if (newTermId && currentTermId !== newTermId) {
+        if (existingUser.partStatus === "failed-part-I" || existingUser.partStatus === "part-II") {
+          updateFields.partStatus = "part-I";
+        }
+      }
+    }
 
     // If password is provided, hash it before saving
     if (password) {
@@ -354,16 +389,16 @@ const updateFacultyData = async (req, res) => {
   } = req.body;
 
   try {
-    if (role && program && (role.toLowerCase() === "hod" || role.toLowerCase() === "coordinator")) {
+    if (role && department && (role.toLowerCase() === "hod" || role.toLowerCase() === "coordinator")) {
       const existingRoleUser = await GenUser.findOne({
         _id: { $ne: facId },
         role: new RegExp(`^${role}$`, "i"),
-        program: program,
+        department: department,
       });
 
       if (existingRoleUser) {
         return res.status(400).json({
-          error: `A ${role} for this program already exists.`,
+          error: `A ${role} for this department already exists.`,
         });
       }
     }
@@ -418,8 +453,112 @@ const deleteStudent = async (req, res) => {
     console.log("Check id passed in body", req.body.studentId);
     const studentId = req.body.studentId; // Extract studentId from request body
     console.log("Checking id in variable ", studentId);
-    // console.log("Student id inside delete", studentId);
-    const deletedStudent = await GenUser.findByIdAndDelete(studentId);
+
+    const mongoose = require("mongoose");
+    if (!mongoose.Types.ObjectId.isValid(studentId)) {
+      return res.status(400).json({ message: "Invalid Student ID." });
+    }
+
+    const studentObjectId = new mongoose.Types.ObjectId(studentId);
+
+    // 1. Find all FypRegistration groups where the student is a member
+    const groups = await FypRegistration.find({ "groupMembers._id": studentObjectId });
+    console.log(`Found ${groups.length} groups containing student ${studentId}`);
+
+    for (const group of groups) {
+      const groupId = group._id;
+      // Filter out the student from groupMembers array
+      const initialMemberCount = group.groupMembers.length;
+      const updatedMembers = group.groupMembers.filter(
+        (m) => m._id.toString() !== studentObjectId.toString()
+      );
+
+      if (updatedMembers.length === 0) {
+        // Group becomes empty: delete group and all group-dependent data
+        console.log(`Group ${groupId} became empty. Performing cascading group deletion.`);
+
+        await FYPGroupAttendance.deleteMany({ fypgroup: groupId });
+        await ExamMarks.deleteMany({ groupId: groupId });
+        await TaskAssignment.deleteMany({ groupId: groupId });
+        await StudentReport.deleteMany({ FYPGroup: groupId });
+        await FYPTopicChangeRequest.deleteMany({ groupId: groupId });
+        await FYPTechnologyChangeRequest.deleteMany({ groupId: groupId });
+        await FypChangeRequest.deleteMany({ fypGroup: groupId });
+        await Feedback.deleteMany({ groupId: groupId });
+        await ExamAssignment.deleteMany({ groupId: groupId });
+
+        // Pull group from Evaluation
+        await Evaluation.updateMany(
+          { "terms.exams.fypGroups.groupId": groupId },
+          { $pull: { "terms.$[].exams.$[].fypGroups": { groupId: groupId } } }
+        );
+
+        // Delete the group itself
+        await FypRegistration.findByIdAndDelete(groupId);
+      } else {
+        // Group has other members: update groupMembers and shift exam submitBy if necessary
+        console.log(`Group ${groupId} still has other members. Updating group.`);
+        
+        // If the deleted student was the submitBy on ExamAssignment, reassign to next member
+        const nextSubmitterId = updatedMembers[0]._id;
+        await ExamAssignment.updateMany(
+          { groupId: groupId, submitBy: studentObjectId },
+          { $set: { submitBy: nextSubmitterId } }
+        );
+
+        group.groupMembers = updatedMembers;
+        await group.save();
+      }
+    }
+
+    // 2. Perform direct student record cleanup
+    // Timetable
+    await Timetable.deleteMany({ user: studentObjectId });
+
+    // Direct Student Reports
+    await StudentReport.deleteMany({ uploadedBy: studentObjectId });
+
+    // Topic Change Requests
+    await FYPTopicChangeRequest.deleteMany({ user: studentObjectId });
+
+    // Technology Change Requests
+    await FYPTechnologyChangeRequest.deleteMany({ user: studentObjectId });
+
+    // Supervisor Change Requests
+    await FypChangeRequest.deleteMany({ requestedBy: studentObjectId });
+
+    // Reset TaskAssignment submissions
+    await TaskAssignment.updateMany(
+      { SubmittedBy: studentObjectId },
+      { $unset: { SubmittedBy: "" }, $set: { status: "pending", submitPdf: "" } }
+    );
+
+    // Attendance
+    await FYPGroupAttendance.updateMany(
+      { "partStatus.meetings.memberAttendances.member": studentObjectId },
+      { $pull: { "partStatus.$[].meetings.$[].memberAttendances": { member: studentObjectId } } }
+    );
+
+    // Exam marks
+    await ExamMarks.updateMany(
+      { "examiners.marks.student": studentObjectId },
+      { $pull: { "examiners.$[].marks": { student: studentObjectId } } }
+    );
+
+    // Evaluation
+    await Evaluation.updateMany(
+      { "terms.exams.fypGroups.students.studentId": studentObjectId },
+      { $pull: { "terms.$[].exams.$[].fypGroups.$[].students": { studentId: studentObjectId } } }
+    );
+
+    // Result
+    await Result.updateMany(
+      { "terms.students.studentId": studentObjectId },
+      { $pull: { "terms.$[].students": { studentId: studentObjectId } } }
+    );
+
+    // 3. Finally, delete the student itself
+    const deletedStudent = await GenUser.findByIdAndDelete(studentObjectId);
 
     if (!deletedStudent) {
       return res.status(404).json({ message: "Student not found." });
@@ -428,6 +567,7 @@ const deleteStudent = async (req, res) => {
     console.log("Student deleted successfully:", deletedStudent._id);
     res.status(200).json({ message: "Student deleted successfully" });
   } catch (error) {
+    console.error("Error in deleteStudent controller:", error);
     res.status(400).json({ error: error.message });
   }
 };
@@ -607,11 +747,18 @@ const fetchFacultyOfProgram = async (req, res) => {
 
     console.log("Program ID:", programId);
 
-    // Fetch faculty members based on program
-    const facultyMembers = await GenUser.find({
-      role: { $regex: /^(faculty|coordinator|hod)$/i },
-      program: programId,
-    })
+    const programObj = await Program.findById(programId);
+    const departmentId = programObj ? programObj.department : null;
+
+    const query = { role: { $regex: /^faculty$/i } };
+    if (departmentId) {
+      query.department = departmentId;
+    } else {
+      query.program = programId;
+    }
+
+    // Fetch faculty members based on department of program
+    const facultyMembers = await GenUser.find(query)
       .populate("department")
       .populate("program");
 

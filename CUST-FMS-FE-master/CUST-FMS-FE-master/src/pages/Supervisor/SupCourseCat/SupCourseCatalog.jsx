@@ -6,6 +6,7 @@ import GenAccor from "../../../Components/Accordians/GenAccor";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import LoadingSpinner from '../../../Components/LoadingSpinner/LoadingSpinner';
+import { baseUrl } from '../../../Components/config/config';
 
 const CourseCatalog = ({ accordionId }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,7 +40,7 @@ const CourseCatalog = ({ accordionId }) => {
       setLoadingSpinner(true);
       const user = localStorage.getItem('user');
       const userData = JSON.parse(user);
-      const programId = userData.program;
+      const departmentId = userData.department;
       const token = JSON.parse(localStorage.getItem('key'));
 
       const config = {
@@ -48,7 +49,7 @@ const CourseCatalog = ({ accordionId }) => {
         }
       };
 
-      const response = await axios.get(`/api/coursecat/fetchCourseCat/${programId}`, config);
+      const response = await axios.get(`/api/coursecat/fetchCourseCatOfParticularDep/${departmentId}`, config);
 
       if (response.status === 200) {
         setCourseCat(response.data);
@@ -144,7 +145,7 @@ const CourseCatalog = ({ accordionId }) => {
                               <td className="px-6 py-4 font-semibold flex items-center justify-center">
                                 {item.pdfFile && (
                                   <a
-                                    href={`/${item.pdfFile.replace(/\\/g, '/')}`}
+                                    href={`${baseUrl}/${item.pdfFile.replace(/\\/g, '/')}`}
                                     download={`file_${serialCounter}.pdf`} // Use serialCounter for dynamic filename
                                     target="_blank"
                                     rel="noopener noreferrer"

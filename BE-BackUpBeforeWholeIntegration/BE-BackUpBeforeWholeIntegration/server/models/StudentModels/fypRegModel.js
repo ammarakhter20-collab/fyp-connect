@@ -32,6 +32,10 @@ const GroupMemberSchema = new Schema({
   creditHours: Number,
   cgpa: Number,
   gpa: Number,
+  memberStatus: {
+    type: String,
+    default: "active"
+  },
   __v: Number,
 });
 

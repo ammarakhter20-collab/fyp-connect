@@ -23,6 +23,7 @@ const CoodManageClo = () => {
   const [examTypeData, setExamTypeData] = useState([]);
   const [CloData, setCloData] = useState([]);
   const [programsData, setProgramsData] = useState([]);
+  const [departmentsData, setDepartmentsData] = useState([]);
   const [closofSelectedCLO, setclosofSelectedCLO] = useState([]);
   const [examCloDataToEdit, setexamCloDataToEdit] = useState(null);
   const [selectedExamCLOtoAddCLO, setSelectedExamCLOtoAddCLO] = useState(null);
@@ -470,6 +471,36 @@ const handleQuestionDescClose = () => {
     }
   };
 
+  const fetchDepartments = async () => {
+    try {
+      setLoadingSpinner(true);
+      const nkey = localStorage.getItem('key');
+      const token = JSON.parse(nkey);
+      const response = await fetch(`/api/auth/fetchDepartmentData`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch Departments');
+      }
+      const data = await response.json();
+      console.log(data, 'fetched Departments');
+      const deptData = data.departments.map((dept, index) => ({
+        value: dept._id,
+        label: dept.departmentName,
+        ...dept,
+      }));
+      setDepartmentsData(deptData);
+    } catch (error) {
+      console.error('Error fetching Departments:', error.message);
+    } finally {
+      setLoadingSpinner(false);
+    }
+  };
+
   const handleDeleteClickinCLOTable = async (id) => {
         console.log("Deleting CLO For Exam", id)
         try {
@@ -556,6 +587,7 @@ const handleQuestionDescClose = () => {
 
   useEffect(() => {
     fetchExamTypes();
+    fetchDepartments();
     fetchPrograms();
     fetchCLOs();
     fetchExamCLOs();
@@ -599,6 +631,7 @@ const handleQuestionDescClose = () => {
                 dataToEdit={examCloDataToEdit}
                 examTypes={examTypeData}
                 programs={programsData}
+                departments={departmentsData}
               />
 
 

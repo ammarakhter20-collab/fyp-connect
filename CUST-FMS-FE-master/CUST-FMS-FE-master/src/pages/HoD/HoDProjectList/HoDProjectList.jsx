@@ -13,7 +13,8 @@ const HoDProjectList = ({ accordionId }) => {
   const [ProjData, setProjData] = useState([]);
   const [TermData, setTermData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [loadingSpinner, setLoadingSpinner] = useState(false);
+  const [loadingProjects, setLoadingProjects] = useState(false);
+  const [loadingTerms, setLoadingTerms] = useState(false);
 
 
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ const HoDProjectList = ({ accordionId }) => {
   useEffect(() => {
     const AllProjectData = async () => {
       try {
-        setLoadingSpinner(true);
+        setLoadingProjects(true);
 
         const apiUrl = '/api/fyp/getAllfypdata';
         const nkey = localStorage.getItem('key');
@@ -67,13 +68,13 @@ const HoDProjectList = ({ accordionId }) => {
       } catch (error) {
         console.error('Error fetching Projects:', error);
       } finally {
-        setLoadingSpinner(false);
+        setLoadingProjects(false);
       }
     };
 
     const TermDataGet = async () => {
       try {
-        setLoadingSpinner(true);
+        setLoadingTerms(true);
 
         const apiUrl = '/api/auth/getTermdata';
         const nkey = localStorage.getItem('key');
@@ -95,7 +96,7 @@ const HoDProjectList = ({ accordionId }) => {
       } catch (error) {
         console.error('Error fetching Term Data:', error);
       } finally {
-        setLoadingSpinner(false);
+        setLoadingTerms(false);
       }
     };
 
@@ -111,7 +112,7 @@ const HoDProjectList = ({ accordionId }) => {
       const filtered = ProjData.filter(proj => {
         console.log('proj.term:', proj.term);
         console.log('option.label:', option.label);
-        return proj.term.sessionTerm === option.label;
+        return proj.term?.sessionTerm === option.label;
       });
       console.log("Filtered data", filtered);
       setFilteredData(filtered);
@@ -125,9 +126,11 @@ const HoDProjectList = ({ accordionId }) => {
   ];
   console.log("dropdownOptionsTerm", dropdownOptionsWithAll);
 
+  const isLoading = loadingProjects || loadingTerms;
+
   return (
     <>
-      {loadingSpinner ? (
+      {isLoading ? (
         <LoadingSpinner />
       ) : (
         <div className='mt-10 mx-16'>
@@ -159,15 +162,15 @@ const HoDProjectList = ({ accordionId }) => {
                           filteredData.map((st, index) => (
                             <tr key={st._id} className='text-center font-normal'>
                               <td className='px-6 py-4'>{index + 1}</td>
-                              <td className='px-6 py-4'>{st.topicData.topic}</td>
+                              <td className='px-6 py-4'>{st.topicData?.topic || 'N/A'}</td>
                               <td className='px-6 py-4'>
-                                {st.groupMembers.map((member, idx) => (
+                                {st.groupMembers?.map((member, idx) => (
                                   <div key={idx}>{member.name} ({member.registrationNumber})</div>
-                                ))}
+                                )) || 'N/A'}
                               </td>
                               <td className='px-6 py-4'>{st.assignedPanel ? st.assignedPanel.panelCode : 'Not assigned yet'}</td>
                               <td className='px-6 py-4'>{st.reqStatus}</td>
-                              <td className='px-6 py-4'>{st.selectedOption.name}</td>
+                              <td className='px-6 py-4'>{st.selectedOption?.name || 'N/A'}</td>
                               <td className='px-6 py-4 '><button className="underline mx-2" onClick={() => viewDetails(st)}>View</button></td>
                             </tr>
                           ))

@@ -31,7 +31,7 @@ const CreateExamSchema = new mongoose.Schema({
   },
   partStatus: {
     type: String,
-    enum: ["Part-I", "Part-II", "General"],
+    enum: ["Part-I", "Part-II"],
     required: true,
   },
   portalCategory: {
@@ -43,6 +43,16 @@ const CreateExamSchema = new mongoose.Schema({
     type: String,
     enum: ["Active", "Completed", "Pending"],
     default: "Active",
+  },
+  department: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Department",
+    required: true,
+  },
+  program: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Program",
+    required: true,
   },
 });
 

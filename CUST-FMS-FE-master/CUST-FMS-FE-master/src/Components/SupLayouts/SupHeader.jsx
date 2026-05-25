@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { IoIosNotificationsOutline } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
+import { baseUrl } from '../config/config';
 
 const Header = () => {
 
@@ -80,9 +81,15 @@ const Header = () => {
             <div className="text-gray-400 w-full h-full"><IoIosNotificationsOutline /></div>
           </div>
           {/* Rounded Picture */}
-          <div className="bg-gray-300 w-8 h-8 rounded-full flex items-center justify-center">
+          <div className="bg-gray-300 w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
             {/* Replace the following line with your actual image */}
-            <img src={`/uploads/${DashData.image}`} alt="Profile" className="w-full h-full object-cover rounded-full" />
+            <img src={DashData?.image && DashData.image !== "undefined" && DashData.image !== "" ? `/uploads/${DashData.image}` : '/assets/images/CardImg.png'} 
+              alt="Profile" 
+              className="w-full h-full object-cover rounded-full"
+              onError={(e) => {
+                e.target.src = '/assets/images/CardImg.png';
+              }} 
+            />
           </div>
         </div>
       </div>

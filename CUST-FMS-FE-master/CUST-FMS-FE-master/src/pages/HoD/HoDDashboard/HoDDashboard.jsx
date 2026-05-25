@@ -10,6 +10,7 @@ const HoDDashboard = () => {
   const [PanelCount, setPanelCount] = useState('');
   const [StudCount, setStudCount] = useState('');
   const [ProjCount, setProjCount] = useState('');
+  const [ResultCount, setResultCount] = useState('');
 
   useEffect(() => {
     // Fetch data from local storage
@@ -23,24 +24,48 @@ const HoDDashboard = () => {
       // Set the parsed user data to the state
       setHoDData(parsedUserData);
     }
+
+    // Fetch fresh user data from backend to ensure profile picture and other info is synchronized in real-time
+    const fetchFreshUserData = async () => {
+      const key = localStorage.getItem("key") ? JSON.parse(localStorage.getItem("key")) : null;
+      if (!key) return;
+      try {
+        const config = { headers: { Accept: 'application/json', Authorization: `Bearer ${key}` } };
+        const response = await axios.get('/api/auth/GenUserData', config);
+        if (response.status !== 497 && response.data && response.data.user) {
+          setHoDData(response.data.user);
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+        }
+      } catch (error) {
+        console.error('Error fetching fresh user data:', error);
+      }
+    };
+
+    fetchFreshUserData();
   }, []);
 
 
   const handleViewExamPanels = () => {
-    navigate('/HoDExaminerPanels');
+    navigate('/HoDExaminerPanel');
   };
 
   const handleViewStudents = () => {
     navigate('/HoDStudentList');
-  }
+  };
+
+  const handleViewProjects = () => {
+    navigate('/HoDProjectList');
+  };
+
   const handleViewResults = () => {
     navigate('/HoDResults');
-  }
+  };
 
   useEffect(() => {
     fetchExaminerPanelCount();
     fetchStudentCount();
     fetchProjectCount();
+    fetchResultCount();
   }, [])
 
   const fetchExaminerPanelCount = async () => {
@@ -50,16 +75,20 @@ const HoDDashboard = () => {
       const key = JSON.parse(localStorage.getItem("key"));
       const config = { headers: { Accept: 'application/json', Authorization: `Bearer ${key}` } };
       const userData = JSON.parse(localStorage.getItem("user"));
-      const depId = userData.department;
+      const depId = userData?.department?._id || userData?.department;
 
+      if (!depId) {
+        console.warn('No department ID found for examiner panel count fetch');
+        return;
+      }
 
-      // Construct the URL with partStatus, supervisorId, and coordinatorId
+      // Construct the URL with department ID string
       const url = `/api/manageexampanels/getPanelCount/${depId}`;
 
       const response = await axios.get(url, config);
 
       if (response.status !== 497) {
-        if (!response.data || !response.data) {
+        if (!response.data) {
           console.error('Error fetching Examiner Panel Count:', response.statusText);
           return;
         }
@@ -82,14 +111,16 @@ const HoDDashboard = () => {
       setIsLoading(true);
       const key = JSON.parse(localStorage.getItem("key"));
       const config = { headers: { Accept: 'application/json', Authorization: `Bearer ${key}` } };
+      const userData = JSON.parse(localStorage.getItem("user"));
+      const depId = userData?.department?._id || userData?.department;
 
-      // Construct the URL with partStatus, supervisorId, and coordinatorId
-      const url = '/api/fyp/GetStudentCount';
+      // Construct the URL with department ID parameter
+      const url = depId ? `/api/fyp/GetStudentCount/${depId}` : '/api/fyp/GetStudentCount/all';
 
       const response = await axios.get(url, config);
 
       if (response.status !== 497) {
-        if (!response.data || !response.data) {
+        if (!response.data) {
           console.error('Error fetching Student Count:', response.statusText);
           return;
         }
@@ -114,13 +145,13 @@ const HoDDashboard = () => {
       const key = JSON.parse(localStorage.getItem("key"));
       const config = { headers: { Accept: 'application/json', Authorization: `Bearer ${key}` } };
 
-      // Construct the URL with partStatus, supervisorId, and coordinatorId
+      // Construct the URL
       const url = '/api/fyp/GetProjectCount';
 
       const response = await axios.get(url, config);
 
       if (response.status !== 497) {
-        if (!response.data || !response.data) {
+        if (!response.data) {
           console.error('Error fetching Project Count:', response.statusText);
           return;
         }
@@ -138,6 +169,20 @@ const HoDDashboard = () => {
     }
   };
 
+  const fetchResultCount = async () => {
+    try {
+      const key = JSON.parse(localStorage.getItem("key"));
+      const config = { headers: { Accept: 'application/json', Authorization: `Bearer ${key}` } };
+      const response = await axios.get('/api/ExamType/GetCreatedExamType', config);
+      if (response.data && Array.isArray(response.data)) {
+        // dynamic count of created exams + 1 (Overall Result)
+        setResultCount(response.data.length + 1);
+      }
+    } catch (error) {
+      console.error('Error fetching Result Count:', error);
+    }
+  };
+
   return (
     <>
       {isLoading ? (
@@ -152,12 +197,21 @@ const HoDDashboard = () => {
               <a href='#'>
                 <img className='rounded-t-lg h-24 w-full object-cover' src='/assets/images/CardBg.png' alt='Cards background' />
               </a>
-              <div className='h-[5.625rem] mt-[-4.0625rem] rounded-full'>
-                <img
-                  className='rounded-full w-24 h-24 object-fill mx-auto'
-                  src={`/uploads/${HoDData.image}`}
-                  alt='Card Image'
-                />
+              <div className='h-[5.625rem] mt-[-4.0625rem] rounded-full relative z-20'>
+                {HoDData?.image && HoDData.image !== "undefined" && HoDData.image !== "" ? (
+                  <img
+                    className='rounded-full w-24 h-24 object-fill mx-auto border-white border-4 shadow-md bg-white'
+                    src={`/uploads/${HoDData.image}`}
+                    alt='Card Image'
+                    onError={(e) => {
+                      e.target.src = '/assets/images/CardImg.png';
+                    }}
+                  />
+                ) : (
+                  <div className='rounded-full w-24 h-24 mx-auto border-white border-4 shadow-md bg-gradient-to-tr from-primary to-indigo-600 flex items-center justify-center text-white text-3xl font-bold uppercase'>
+                    {HoDData?.name ? HoDData.name.charAt(0).toUpperCase() : 'H'}
+                  </div>
+                )}
               </div>
               <div className='p-5 '>
                 <div className='AdmName'>
@@ -228,7 +282,7 @@ const HoDDashboard = () => {
               </div>
 
               <div className='FYPSessionCard max-w-3xl w-96 h-52 '>
-                <a href='/CoodCreateExam' className='block w-full px-6 py-4 bg-white border border-gray-200 rounded-2xl shadow hover:bg-gray-100 ' >
+                <a href='/HoDProjectList' className='block w-full px-6 py-4 bg-white border border-gray-200 rounded-2xl shadow hover:bg-gray-100 ' >
                   <div className='ml-3 text-white'>
                     <div className='TitleAndApprovedStatus flex flex-row justify-between'>
                       <h5 className='mb-2 text-lg font-normal tracking-tight text-black'>Projects</h5>
@@ -238,7 +292,7 @@ const HoDDashboard = () => {
                     <button
                       type='button'
                       className='text-white py-2 px-12 mt-6 bg-primary hover:bg-slate-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm focus:outline-none'
-                    // onClick={handleCreateExam}
+                      onClick={handleViewProjects}
                     >
                       View
                     </button>
@@ -246,12 +300,12 @@ const HoDDashboard = () => {
                 </a>
               </div>
               <div className='DepartmentCard max-w-3xl w-96 h-52 '>
-                <a href='/AdmCreateDepartment' className='block w-full px-6 py-4 bg-white border border-gray-200 rounded-2xl shadow hover:bg-gray-100 ' >
+                <a href='/HoDResults' className='block w-full px-6 py-4 bg-white border border-gray-200 rounded-2xl shadow hover:bg-gray-100 ' >
                   <div className='ml-3 text-white'>
                     <div className='TitleAndApprovedStatus flex flex-row justify-between'>
                       <h5 className='mb-2 text-lg font-normal tracking-tight text-black'>Results</h5>
                     </div>
-                    <p className='font-bold text-3xl text-primary '>1</p>
+                    <p className='font-bold text-3xl text-primary '>{ResultCount || 0}</p>
 
                     <button
                       type='button'

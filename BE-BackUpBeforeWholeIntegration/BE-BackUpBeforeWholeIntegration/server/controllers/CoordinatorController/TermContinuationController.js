@@ -13,7 +13,7 @@ const promoteGroupsToPartII = async (req, res) => {
     try {
         const { termId } = req.body;
 
-        // Validate term ID
+        // 1. Validate term ID
         if (!mongoose.Types.ObjectId.isValid(termId)) {
             return res.status(400).json({
                 success: false,
@@ -45,7 +45,59 @@ const promoteGroupsToPartII = async (req, res) => {
             });
         }
 
-        // Fetch all approved groups from Part I (current term, part-I)
+        // 2. Fetch Passing Criteria (defaults to 50)
+        const PassFailCriteria = require("../../models/CoordinatorModels/PassFailCriteriaModel");
+        const criteriaRecord = await PassFailCriteria.findOne({ term: termId });
+        const passingCriteria = criteriaRecord ? criteriaRecord.passingCriteria : 50;
+
+        // 3. Fetch all Evaluations for Part-I exams in this term
+        const Evaluation = require("../../models/CoordinatorModels/EvaluateExamModel");
+        const evaluationDocs = await Evaluation.find({ "terms.termId": termId })
+            .populate({
+                path: 'terms.exams.examId',
+                select: 'ExamWeightage ExamType partStatus portalCategory',
+                populate: { path: 'ExamType', select: 'examName examTypeFor' }
+            });
+
+        // 4. Calculate accumulated Part-I marks for all students
+        const studentMarksMap = {};
+        evaluationDocs.forEach(doc => {
+            const t = doc.terms.find(termEntry => termEntry.termId.toString() === termId);
+            if (t && t.exams) {
+                t.exams.forEach(exam => {
+                    const dbPartStatus = exam.examId?.partStatus;
+                    const examTypeFor = exam.examId?.ExamType?.examTypeFor;
+                    const examName = (exam.examId?.ExamType?.examName || exam.examName || "").toLowerCase();
+
+                    // Check if it is a Part-I exam
+                    let isPartI = false;
+                    if (dbPartStatus === 'Part-I' || examTypeFor === 'part-I' || examTypeFor === 'part-i') {
+                        isPartI = true;
+                    } else if (!dbPartStatus && !examTypeFor) {
+                        isPartI = examName.includes('proposal') || 
+                                  (examName.includes('attendance') && !examName.includes('ii')) || 
+                                  (examName.includes('mid') && !examName.includes('ii')) || 
+                                  (examName.includes('final') && !examName.includes('ii'));
+                    }
+
+                    if (isPartI) {
+                        exam.fypGroups.forEach(group => {
+                            group.students.forEach(student => {
+                                const studentId = student.studentId?._id ? student.studentId._id.toString() : student.studentId?.toString();
+                                if (!studentId) return;
+
+                                if (!studentMarksMap[studentId]) {
+                                    studentMarksMap[studentId] = 0;
+                                }
+                                studentMarksMap[studentId] += (student.obtainedAverage || 0);
+                            });
+                        });
+                    }
+                });
+            }
+        });
+
+        // 5. Fetch all approved Part I groups
         const partIGroups = await FypRegistration.find({
             term: termId,
             partStatus: 'part-I',
@@ -59,31 +111,72 @@ const promoteGroupsToPartII = async (req, res) => {
             });
         }
 
-        // UPDATE existing documents in-place: just change partStatus from part-I to part-II
-        const updateResult = await FypRegistration.updateMany(
-            {
-                term: termId,
-                partStatus: 'part-I',
-                reqStatus: 'approved'
-            },
-            {
-                $set: { partStatus: 'part-II' }
-            }
-        );
+        const GenUser = require("../../models/AdminModels/GenUserModel");
+        const promotedGroups = [];
+        const unregisteredStudents = [];
 
-        console.log(`✓ Successfully promoted ${updateResult.modifiedCount} groups in term ${term.sessionTerm} to Part II (in-place update, no duplication)`);
+        // 6. Process each group individually
+        for (const group of partIGroups) {
+            let hasPassingMember = false;
+
+            for (const member of group.groupMembers) {
+                const studentIdStr = member._id.toString();
+                const totalMarks = Math.round((studentMarksMap[studentIdStr] || 0) * 100) / 100;
+
+                if (totalMarks >= passingCriteria) {
+                    // STUDENT PASSED: Keep active in group, update status to part-II
+                    member.memberStatus = 'active';
+                    hasPassingMember = true;
+                    await GenUser.findByIdAndUpdate(member._id, { $set: { partStatus: 'part-II' } });
+                } else {
+                    // STUDENT FAILED: Set memberStatus to failed-part-I, unregister them from active term
+                    member.memberStatus = 'failed-part-I';
+                    unregisteredStudents.push({
+                        studentId: studentIdStr,
+                        name: member.name,
+                        registrationNumber: member.registrationNumber,
+                        marks: totalMarks,
+                        groupId: group._id
+                    });
+                    
+                    await GenUser.findByIdAndUpdate(member._id, { 
+                        $set: { 
+                            partStatus: 'failed-part-I',
+                            term: null 
+                        } 
+                    });
+                }
+            }
+
+            // 7. Update Group Status (retaining all members in the list for history)
+            if (!hasPassingMember) {
+                // ALL MEMBERS FAILED: Set group status to failed-part-I
+                group.partStatus = 'failed-part-I';
+            } else {
+                // SOME or ALL MEMBERS PASSED: Set group status to part-II
+                group.partStatus = 'part-II';
+                promotedGroups.push(group);
+            }
+            group.markModified("groupMembers");
+            await group.save();
+        }
+
+        console.log(`✓ Successfully completed promotion. Promoted ${promotedGroups.length} groups. Unregistered ${unregisteredStudents.length} failed students.`);
 
         res.status(200).json({
             success: true,
-            message: `Successfully promoted ${updateResult.modifiedCount} groups to Part II`,
-            promotedCount: updateResult.modifiedCount,
+            message: `Promotion phase complete. Promoted ${promotedGroups.length} groups to Part II. Unregistered ${unregisteredStudents.length} failed students.`,
             term: term.sessionTerm,
-            promotedGroups: partIGroups.map(g => ({
+            passingCriteria,
+            promotedCount: promotedGroups.length,
+            unregisteredCount: unregisteredStudents.length,
+            promotedGroups: promotedGroups.map(g => ({
                 id: g._id,
                 supervisor: g.selectedOption,
                 topic: g.topicData.topic,
                 memberCount: g.groupMembers.length
-            }))
+            })),
+            unregisteredStudents
         });
 
     } catch (error) {

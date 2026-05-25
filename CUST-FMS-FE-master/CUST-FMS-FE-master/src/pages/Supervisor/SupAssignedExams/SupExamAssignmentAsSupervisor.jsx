@@ -20,21 +20,21 @@ const ExamAssignmentAsSupervisor = ({ accordionId, groupData, onReportClick, onM
     return `${day}-${month}-${year}`;
   }, []);
 
-  const fetchCreatedExam1Details = React.useCallback(async (termId) => {
+  const fetchCreatedExam1Details = React.useCallback(async (termId, programId) => {
     try {
       const nkey = localStorage.getItem('key');
       const token = JSON.parse(nkey);
       const userData = localStorage.getItem('user');
       const parsedUserData = JSON.parse(userData);
       let role = parsedUserData.role;
-      if (role === "faculty" || role === "hod" || role === "coordinator") {
+      if (role === "faculty") {
         role = "Supervisor"
       }
 
       console.log(role, "Roleeeeee");
       console.log("Checking Term", termId);
 
-      const response = await fetch(`${baseUrl}/api/ExamCreationRoutes/getParticularExam?role=${role}&termId=${termId}`, {
+      const response = await fetch(`${baseUrl}/api/ExamCreationRoutes/getParticularExam?role=${role}&termId=${termId}&programId=${programId || ''}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -58,23 +58,54 @@ const ExamAssignmentAsSupervisor = ({ accordionId, groupData, onReportClick, onM
       }
 
       const ExamsData = data.exams.map(exm => {
-        let DateStr;
+        const examTypeName = exm.ExamType?.examName || '';
+        const isAttendance = examTypeName.toLowerCase().includes('attendance');
+
+        let DateStr = "N/A";
+        let scheduledDateTime = null;
+
         if (data.schedule && data.schedule.length > 0) {
           DateStr = convertToNormalDateFormat(data.schedule[0].ExamDate);
-        } else {
-          DateStr = "N/A"
+
+          // Parse scheduled date + time into a single Date object
+          const rawDate = new Date(data.schedule[0].ExamDate);
+          const rawTime = data.schedule[0].ExamTime || ''; // e.g. "10:30 AM"
+          const timeMatch = rawTime.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+          if (timeMatch) {
+            let hours = parseInt(timeMatch[1], 10);
+            const minutes = parseInt(timeMatch[2], 10);
+            const period = timeMatch[3].toUpperCase();
+            if (period === 'PM' && hours !== 12) hours += 12;
+            if (period === 'AM' && hours === 12) hours = 0;
+            scheduledDateTime = new Date(rawDate);
+            scheduledDateTime.setHours(hours, minutes, 0, 0);
+          } else {
+            // No time parseable — treat as start of scheduled day
+            scheduledDateTime = new Date(rawDate);
+            scheduledDateTime.setHours(0, 0, 0, 0);
+          }
         }
-        const examType = exm.ExamType.examName
+
         const examWeightage = exm?.ExamWeightage || null;
+        const now = new Date();
+
+        // For Attendance: always visible (no schedule required)
+        // For others: only visible if schedule exists AND scheduled datetime has arrived
+        if (!isAttendance) {
+          if (!scheduledDateTime || now < scheduledDateTime) {
+            // Not yet time — exclude from list
+            return null;
+          }
+        }
 
         return {
-          _id: exm._id, // IMPORTANT: Keeping ID for fetchEvalStat
-          examType: examType,
+          _id: exm._id,
+          examType: examTypeName,
           examDate: DateStr,
           examWeightage: examWeightage,
-          rawExamData: data // Keep full data reference if needed
-        }
-      })
+          rawExamData: data
+        };
+      }).filter(Boolean); // Remove nulls (exams not yet due)
 
       return ExamsData;
     } catch (error) {
@@ -89,7 +120,7 @@ const ExamAssignmentAsSupervisor = ({ accordionId, groupData, onReportClick, onM
     if (!groups) return;
     try {
       const updatedDataPromises = groups.map(async (group) => {
-        const CreatedExam = await fetchCreatedExam1Details(group.termId);
+        const CreatedExam = await fetchCreatedExam1Details(group.termId, group.programId);
         console.log(CreatedExam, "createdexamdata fetched by group termId");
 
         // If we have exam data, use the first one found
@@ -110,7 +141,10 @@ const ExamAssignmentAsSupervisor = ({ accordionId, groupData, onReportClick, onM
       });
 
       const updatedData = await Promise.all(updatedDataPromises);
-      setUpdatedData(updatedData);
+      
+      // Filter out groups that don't have an active exam to evaluate
+      const filteredData = updatedData.filter(group => group.examType !== "No Exam");
+      setUpdatedData(filteredData);
 
       // FIX: Set global exam state based on the first available exam if needed for initial view,
       // but ideally this should be driven by user selection.

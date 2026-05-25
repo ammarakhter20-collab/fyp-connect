@@ -9,7 +9,8 @@ const HoDStudentList = ({ accordionId }) => {
   const [StudData, setStudData] = useState([]);
   const [TermData, setTermData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [loadingSpinner, setLoadingSpinner] = useState(false);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [loadingTerms, setLoadingTerms] = useState(false);
 
   useEffect(() => {
     initFlowbite();
@@ -26,7 +27,7 @@ const HoDStudentList = ({ accordionId }) => {
   useEffect(() => {
     const AllStudentData = async () => {
       try {
-        setLoadingSpinner(true);
+        setLoadingStudents(true);
 
         const apiUrl = '/api/auth/fetchStudentData';
         const nkey = localStorage.getItem('key');
@@ -49,13 +50,13 @@ const HoDStudentList = ({ accordionId }) => {
       } catch (error) {
         console.error('Error fetching Student:', error);
       } finally {
-        setLoadingSpinner(false);
+        setLoadingStudents(false);
       }
     };
 
     const TermDataGet = async () => {
       try {
-        setLoadingSpinner(true);
+        setLoadingTerms(true);
 
         const apiUrl = '/api/auth/getTermdata';
         const nkey = localStorage.getItem('key');
@@ -77,7 +78,7 @@ const HoDStudentList = ({ accordionId }) => {
       } catch (error) {
         console.error('Error fetching Term Data:', error);
       } finally {
-        setLoadingSpinner(false);
+        setLoadingTerms(false);
       }
     };
 
@@ -93,7 +94,7 @@ const HoDStudentList = ({ accordionId }) => {
       const filtered = StudData.filter(proj => {
         console.log('proj.term:', proj.term);
         console.log('option.label:', option.label);
-        return proj.term.sessionTerm === option.label;
+        return proj.term?.sessionTerm === option.label;
       });
       console.log("Filtered data", filtered);
       setFilteredData(filtered);
@@ -107,9 +108,11 @@ const HoDStudentList = ({ accordionId }) => {
   ];
   console.log("dropdownOptionsTerm", dropdownOptionsWithAll);
 
+  const isLoading = loadingStudents || loadingTerms;
+
   return (
     <>
-      {loadingSpinner ? (
+      {isLoading ? (
         <LoadingSpinner />
       ) : (
         <div className='mt-10 mx-16'>

@@ -454,19 +454,10 @@ const AdmCreateStudent = ({ accordionId }) => {
   const handleSubmit = (e) => {
     console.log('Handle Submit Called in Student Creation');
     e.preventDefault();
-    // console.log('Registration Number:', registrationNumber);
-    // console.log('Student Name:', studentName);
-    // console.log('Phone Number:', phoneNumber);
-    // console.log('Credit Hours:', creditHours);
-    // console.log('CGPA:', cgpa);
-    // console.log('GPA:', gpa);
-    // console.log('Email:', email);
-    // console.log("Passowrd", password);
-    // console.log('CNIC:', cnic);
-    // console.log('Selected Department:', selectedDepartment.label);
-    // console.log('Selected Program:', selectedProgram.value);
-    // console.log("Selected Term", selectedTerm);
-
+    if (!validateForm()) {
+      console.log('Form has validation errors. Please fix them.');
+      return;
+    }
 
     if (selectedStudent) {
       const studentId = selectedStudent;
@@ -995,10 +986,34 @@ const AdmCreateStudent = ({ accordionId }) => {
     if (!cgpa) {
       isValid = false;
       errors.cgpa = 'Please enter cgpa.';
+    } else {
+      const cgpaNum = parseFloat(cgpa);
+      if (isNaN(cgpaNum) || !/^\d+(\.\d+)?$/.test(cgpa)) {
+        isValid = false;
+        errors.cgpa = 'Only numeric values are allowed.';
+      } else if (cgpaNum > 4) {
+        isValid = false;
+        errors.cgpa = 'Please enter a value of 4 or less than 4.';
+      } else if (cgpaNum < 0) {
+        isValid = false;
+        errors.cgpa = 'CGPA cannot be less than 0.';
+      }
     }
     if (!gpa) {
       isValid = false;
       errors.gpa = 'Please enter gpa.';
+    } else {
+      const gpaNum = parseFloat(gpa);
+      if (isNaN(gpaNum) || !/^\d+(\.\d+)?$/.test(gpa)) {
+        isValid = false;
+        errors.gpa = 'Only numeric values are allowed.';
+      } else if (gpaNum > 4) {
+        isValid = false;
+        errors.gpa = 'Please enter a value of 4 or less than 4.';
+      } else if (gpaNum < 0) {
+        isValid = false;
+        errors.gpa = 'GPA cannot be less than 0.';
+      }
     }
     if (!email) {
       isValid = false;
@@ -1178,7 +1193,12 @@ const AdmCreateStudent = ({ accordionId }) => {
                         type='text'
                         id='cgpa'
                         name='cgpa'
-                        onChange={(e) => handleInputChange(e, setCgpa)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                            handleInputChange(e, setCgpa);
+                          }
+                        }}
                         value={cgpa}
                         pattern='\d*\.?\d*' // Numeric with optional decimal pattern
                         placeholder='0.0'
@@ -1197,7 +1217,12 @@ const AdmCreateStudent = ({ accordionId }) => {
                         type='text'
                         id='gpa'
                         name='gpa'
-                        onChange={(e) => handleInputChange(e, setGpa)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                            handleInputChange(e, setGpa);
+                          }
+                        }}
                         value={gpa}
                         pattern='\d*\.?\d*' // Numeric with optional decimal pattern
                         placeholder='0.0'
@@ -1418,9 +1443,9 @@ const AdmCreateStudent = ({ accordionId }) => {
                 {/* Timetable Table */}
                 <div className="table-container overflow-x-auto relative h-72 overflow-y-auto">
                   <div className='bg-white text-sm'>
-                    <p className='text-base font-semibold ml-7 mb-4 sticky top-0'>Term: {TermForAccor}</p>
+                    {/* <p className='text-base font-semibold ml-7 mb-4 sticky top-0'>Term: {TermForAccor}</p> */}
                     <table className="w-full text-sm text-left rtl:text-center text-black bg-white   border-collapse border border-gray-300">
-                      <thead className="text-xs text-indigo-900 uppercase bg-white     sticky top-8">
+                      <thead className="text-xs text-indigo-900 uppercase bg-white     sticky top-0">
                         <tr className='border-b text-center'>
                           <th className='px-6 py-3'>Sr. No</th>
                           <th className='px-6 py-3'>Name</th>

@@ -75,10 +75,15 @@ app.use("/api/PassFailCriteria", PassFailCriteriaRoutes);
 const staticFiles = require("./staticFiles");
 app.use("/uploads", staticFiles);
 
+const { runSelfHealingCleanup } = require("./server/utils/dbCleanup");
+
 mongoose.set('strictQuery', false);
 mongoose
   .connect(process.env.MONGO_URL)
-  .then(() => {
+  .then(async () => {
+    // Run database self-healing check on start
+    await runSelfHealingCleanup();
+
     app.listen(process.env.PORT || 5000, () => {
       console.log(`Server is running on - http://localhost:${process.env.PORT || 5000}`);
     });

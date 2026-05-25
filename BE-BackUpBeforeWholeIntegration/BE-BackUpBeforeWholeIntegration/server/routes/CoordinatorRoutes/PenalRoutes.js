@@ -54,7 +54,7 @@ router.get(
 );
 
 router.get(
-  "/evaluationStatus/:termId/:examName",
+  "/evaluationStatus/:termId/:examName?",
   authMiddleware,
   panelDetailsController.getEvaluationStatusByPanel
 );

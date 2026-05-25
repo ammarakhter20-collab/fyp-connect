@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const CourseCatalog = require("../../models/CoordinatorModels/CourseCatModel");
 const GenUser = require("../../models/AdminModels/GenUserModel");
 const Program = require("../../models/AdminModels/program");
@@ -36,8 +37,14 @@ exports.getAllCourseCatalogs = async (req, res) => {
     req.params.programId
   );
   try {
+    const { programId } = req.params;
+    if (!programId || !mongoose.Types.ObjectId.isValid(programId)) {
+      console.log("Invalid program ID passed, returning empty array");
+      return res.status(200).json([]);
+    }
+
     const courseCatalogs = await CourseCatalog.find({
-      program: req.params.programId,
+      program: programId,
     })
       .populate("program")
       .populate("genUser")
@@ -108,6 +115,11 @@ exports.fetchAllProgramsCourseCat = async (req, res) => {
   try {
     const { departmentId } = req.params;
     console.log("Department Id", departmentId);
+
+    if (!departmentId || !mongoose.Types.ObjectId.isValid(departmentId)) {
+      console.log("Invalid department ID passed, returning empty array");
+      return res.status(200).json([]);
+    }
 
     // Find all programs within the specified department
     const programs = await Program.find({ department: departmentId });

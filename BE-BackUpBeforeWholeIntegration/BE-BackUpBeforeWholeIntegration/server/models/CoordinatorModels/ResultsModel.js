@@ -17,8 +17,8 @@ const PartSchema = new Schema({
 // Define the schema for student results
 const StudentResultSchema = new Schema({
     studentId: { type: Schema.Types.ObjectId, ref: 'GenUser', required: true },
-    part_1: {PartSchema},
-    part_2: {PartSchema},
+    part_1: [PartSchema],
+    part_2: [PartSchema],
 });
 
 // Define the schema for terms

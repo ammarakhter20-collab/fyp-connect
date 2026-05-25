@@ -3,11 +3,34 @@ import Simple from '../../../../../Components/Buttons/Simple';
 import Select from 'react-select';
 
 const CoodCreateClosCard = (props) => {
-    const { onclose, saveCloClick, programs } = props;
+    const { onclose, saveCloClick, programs, departments } = props;
     const [clo, setClo] = useState('');
     const [title, setTitle] = useState('');
+    const [department, setDepartment] = useState('');
     const [program, setProgram] = useState('');
+    const [filteredPrograms, setFilteredPrograms] = useState([]);
     const [errors, setErrors] = useState({});
+
+    const handleDepartmentChange = (selectedOption) => {
+        setDepartment(selectedOption);
+        // Reset program selection when department changes
+        setProgram('');
+        if (errors.department) {
+            setErrors(prevErrors => ({ ...prevErrors, department: null }));
+        }
+
+        // Filter programs that belong to the selected department
+        if (selectedOption) {
+            const filtered = programs.filter(prog => {
+                // department field can be a populated object or a string ID
+                const progDeptId = prog.department?._id || prog.department;
+                return progDeptId === selectedOption.value;
+            });
+            setFilteredPrograms(filtered);
+        } else {
+            setFilteredPrograms([]);
+        }
+    };
 
     const handleProgramChange = (selectedOption) => {
         setProgram(selectedOption);
@@ -36,6 +59,7 @@ const CoodCreateClosCard = (props) => {
         const newErrors = {};
         if (!clo) newErrors.clo = 'CLO is required';
         if (!title) newErrors.title = 'Title is required';
+        if (!department) newErrors.department = 'Department is required';
         if (!program) newErrors.program = 'Program is required';
 
         if (Object.keys(newErrors).length > 0) {
@@ -51,8 +75,10 @@ const CoodCreateClosCard = (props) => {
 
         saveCloClick(data);
         setClo('');
+        setDepartment('');
         setProgram('');
         setTitle('');
+        setFilteredPrograms([]);
         onclose();
     };
 
@@ -111,16 +137,33 @@ const CoodCreateClosCard = (props) => {
                     </div>
 
                     <div className="my-4">
+                        <label htmlFor='department' className="block text-md font-semibold text-gray-700">Department
+                            <Select
+                                id='department'
+                                name='department'
+                                className={`bg-white border border-gray-300 text-black text-sm rounded-2xl block w-full p-2.5 ${errors.department ? 'border-red-500' : ''}`}
+                                options={departments}
+                                isSearchable
+                                onChange={handleDepartmentChange}
+                                value={department}
+                                placeholder='Select Department'
+                            />
+                            {errors.department && <p className="text-red-500 text-sm">{errors.department}</p>}
+                        </label>
+                    </div>
+
+                    <div className="my-4">
                         <label htmlFor='program' className="block text-md font-semibold text-gray-700">Program
                             <Select
                                 id='program'
                                 name='program'
                                 className={`bg-white border border-gray-300 text-black text-sm rounded-2xl block w-full p-2.5 ${errors.program ? 'border-red-500' : ''}`}
-                                options={programs}
+                                options={filteredPrograms}
                                 isSearchable
                                 onChange={handleProgramChange}
                                 value={program}
-                                placeholder='Select or type'
+                                placeholder={department ? 'Select Program' : 'Select Department first'}
+                                isDisabled={!department}
                             />
                             {errors.program && <p className="text-red-500 text-sm">{errors.program}</p>}
                         </label>

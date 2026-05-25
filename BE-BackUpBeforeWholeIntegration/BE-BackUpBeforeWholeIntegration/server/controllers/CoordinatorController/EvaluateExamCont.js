@@ -300,6 +300,25 @@ const addEvaluationMarks = async (req, res) => {
 
     const groupReg = await FypRegistration.findById(groupId);
     if (!groupReg) return res.status(404).json({ error: "FYP Group registration not found" });
+
+    // Guard: Prevent failed Part-I students from being evaluated in Part-II exams
+    if (exam.partStatus === "Part-II" || (exam.ExamType && exam.ExamType.defaultPart === "Part-II")) {
+      const failedStudentIds = groupReg.groupMembers
+        .filter(m => m.memberStatus === "failed-part-I")
+        .map(m => m._id.toString());
+      
+      const containsFailedStudent = (evaluations || []).some(item => {
+        const sId = item.studentId || item.student;
+        return failedStudentIds.includes(String(sId));
+      });
+
+      if (containsFailedStudent) {
+        return res.status(400).json({
+          error: "Failed students from Part-I cannot be evaluated in Part-II exams."
+        });
+      }
+    }
+
     const supervisorId = groupReg.selectedOption;
 
     // Note: "Already Marked" check removed — the update-if-exists logic in
@@ -437,7 +456,8 @@ const fetchAllExamOfGroup = async (req, res) => {
 
     const evaluations = await Evaluation.find({ "terms.termId": termId })
       .populate("terms.exams.examId")
-      .populate("terms.exams.fypGroups.students.studentId");
+      .populate("terms.exams.fypGroups.students.studentId")
+      .populate("terms.exams.fypGroups.students.evaluationsByExaminers.examinerId");
 
     console.log(`[DEBUG] Found ${evaluations.length} evaluation documents matching term`);
 

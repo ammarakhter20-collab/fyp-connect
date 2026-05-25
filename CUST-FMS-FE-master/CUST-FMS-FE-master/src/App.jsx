@@ -87,6 +87,25 @@ import CoodCourseCat from "./pages/Coordinator/CoodCourseCat/CoodCourseCat";
 import CoordAddAnnouncement from "./pages/Coordinator/CoordAnnouncement/CoordAddAnnouncement";
 import CoodEvaluationStatuses from "./pages/Coordinator/CoodEvaluationStatuses/CoodEvaluationStatuses";
 import CoodViewProjectDetails from "./pages/Coordinator/CoodViewProjectDetails/CoodViewProjectDetails";
+
+// Suppress harmless ResizeObserver errors from causing the full-screen error overlay in dev mode
+const originalError = console.error;
+console.error = (...args) => {
+  if (args[0] && typeof args[0] === 'string' && args[0].includes('ResizeObserver')) {
+    return;
+  }
+  originalError.call(console, ...args);
+};
+
+window.addEventListener('error', function(e) {
+  if (e.message === 'ResizeObserver loop completed with undelivered notifications.' || e.message === 'ResizeObserver loop limit exceeded') {
+    const resizeObserverErrDiv = document.getElementById('webpack-dev-server-client-overlay-div');
+    const resizeObserverErr = document.getElementById('webpack-dev-server-client-overlay');
+    if (resizeObserverErr) resizeObserverErr.setAttribute('style', 'display: none');
+    if (resizeObserverErrDiv) resizeObserverErrDiv.setAttribute('style', 'display: none');
+  }
+});
+
 function App() {
   const [isFYPRegistered, setIsFYPRegistered] = useState(false); // Default to true
   const [isLoading, setIsLoading] = useState(false);
@@ -187,7 +206,8 @@ function App() {
         console.error('Error during fetchFypDetails:', error);
         if (error.response && (error.response.status === 401 || error.response.status === 497)) {
           localStorage.clear();
-          // window.location.href = '/login'; 
+          setUserRole('');
+          window.location.href = '/login'; 
         }
       } finally {
         setIsLoading(false);
@@ -552,54 +572,6 @@ function App() {
                   </CoodLayout>
                 } />
 
-                {/* Coordinator Supervision Routes — Reusing Supervisor page components */}
-                <Route path="/CoodUploadFYPTopic" element={
-                  <CoodLayout>
-                    <SupUploadFYPtopic />
-                  </CoodLayout>
-                } />
-
-                <Route path="/CoodSupRequest" element={
-                  <CoodLayout>
-                    <SupRequest />
-                  </CoodLayout>
-                } />
-
-                <Route path="/CoodMyProjects" element={
-                  <CoodLayout>
-                    <SupPrevSupervisedProj />
-                  </CoodLayout>
-                } />
-
-                <Route path="/CoodSupAssignedExam" element={
-                  <CoodLayout>
-                    <SupAssignedExam />
-                  </CoodLayout>
-                } />
-
-                <Route path="/CoodPanelDetails" element={
-                  <CoodLayout>
-                    <SupPanelDetails />
-                  </CoodLayout>
-                } />
-
-                <Route path="/CoodTimetable" element={
-                  <CoodLayout>
-                    <SupTimetable />
-                  </CoodLayout>
-                } />
-
-                <Route path="/CoodAttendance" element={
-                  <CoodLayout>
-                    <SupAttendance />
-                  </CoodLayout>
-                } />
-
-                <Route path="/CoodSupAnnouncements" element={
-                  <CoodLayout>
-                    <SupAnnouncements />
-                  </CoodLayout>
-                } />
               </>
 
             )}
@@ -700,54 +672,6 @@ function App() {
                   </HoDLayout>
                 } />
 
-                {/* HoD Supervision Routes — Reusing Supervisor page components */}
-                <Route path="/HoDUploadFYPTopic" element={
-                  <HoDLayout>
-                    <SupUploadFYPtopic />
-                  </HoDLayout>
-                } />
-
-                <Route path="/HoDSupRequest" element={
-                  <HoDLayout>
-                    <SupRequest />
-                  </HoDLayout>
-                } />
-
-                <Route path="/HoDMyProjects" element={
-                  <HoDLayout>
-                    <SupPrevSupervisedProj />
-                  </HoDLayout>
-                } />
-
-                <Route path="/HoDAssignedExam" element={
-                  <HoDLayout>
-                    <SupAssignedExam />
-                  </HoDLayout>
-                } />
-
-                <Route path="/HoDPanelDetails" element={
-                  <HoDLayout>
-                    <SupPanelDetails />
-                  </HoDLayout>
-                } />
-
-                <Route path="/HoDTimetable" element={
-                  <HoDLayout>
-                    <SupTimetable />
-                  </HoDLayout>
-                } />
-
-                <Route path="/HoDAttendance" element={
-                  <HoDLayout>
-                    <SupAttendance />
-                  </HoDLayout>
-                } />
-
-                <Route path="/HoDAnnouncements" element={
-                  <HoDLayout>
-                    <SupAnnouncements />
-                  </HoDLayout>
-                } />
               </>
 
             )}

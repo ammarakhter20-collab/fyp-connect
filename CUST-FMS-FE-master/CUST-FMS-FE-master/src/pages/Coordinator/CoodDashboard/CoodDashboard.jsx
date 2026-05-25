@@ -76,6 +76,24 @@ const [departmentCount, setDepartmentCount] = useState(null);
       // Set the parsed user data to the state
       setCoordinatorData(parsedUserData);
     }
+
+    // Fetch fresh user data from backend to ensure profile picture is synchronized in real-time
+    const fetchFreshUserData = async () => {
+      const key = JSON.parse(localStorage.getItem("key"));
+      if (!key) return;
+      try {
+        const config = { headers: { Accept: 'application/json', Authorization: `Bearer ${key}` } };
+        const response = await axios.get('/api/auth/GenUserData', config);
+        if (response.status !== 497 && response.data && response.data.user) {
+          setCoordinatorData(response.data.user);
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+        }
+      } catch (error) {
+        console.error('Error fetching fresh user data:', error);
+      }
+    };
+
+    fetchFreshUserData();
   }, []); 
 
   const fetchExaminerPanelCount = async () => {
@@ -188,41 +206,45 @@ useEffect(() => {
     
             
                 
-                <div className='max-w-lg bg-white border border-gray-200 rounded-lg shadow     absolute inset-0 mx-auto h-60 mt-28'>
+                <div className='max-w-lg bg-white border border-gray-200 rounded-lg shadow-xl absolute inset-0 mx-auto h-60 mt-28 z-10'>
                   <a href='#'>
-                    <img className='rounded-t-lg h-24' src='/assets/images/CardBg.png' alt='Cards backgrounds' />
+                    <img className='rounded-t-lg h-24 w-full object-cover' src='/assets/images/CardBg.png' alt='Cards backgrounds' />
                   </a>
-                  <div className='h-[5.625rem] mt-[-4.0625rem] rounded-full'>
-                    <img
-                     className='rounded-full w-24 h-24 object-fill mx-auto'  
-                     src={`/uploads/${CoordinatorData.image}`}
-                      alt='Card Image' />
+                  <div className='h-[5.625rem] mt-[-4.0625rem] rounded-full relative z-20'>
+                    {CoordinatorData?.image && CoordinatorData.image !== "undefined" && CoordinatorData.image !== "" ? (
+                      <img
+                        className='rounded-full w-24 h-24 object-fill mx-auto border-white border-4 shadow-md'
+                        src={`/uploads/${CoordinatorData.image}`}
+                        alt='Card Image'
+                      />
+                    ) : (
+                      <div className='rounded-full w-24 h-24 mx-auto border-white border-4 shadow-md bg-gradient-to-tr from-primary to-indigo-600 flex items-center justify-center text-white text-3xl font-bold uppercase'>
+                        {CoordinatorData?.name ? CoordinatorData.name.charAt(0).toUpperCase() : 'C'}
+                      </div>
+                    )}
                   </div>
-                  <div className='p-5 '>
-                    <div className='AdmName'>
-                      <h1 className='font-bold text-center'>{CoordinatorData ? CoordinatorData?.name: 'Loading...'}</h1>
-                      <p className='font-light text-sm text-center'>{CoordinatorData ? CoordinatorData.role: 'Loading...'}</p>
+                  <div className='p-5 pt-0'>
+                    <div className='AdmName mt-[-0.25rem]'>
+                      <h1 className='font-bold text-base text-center text-slate-800'>{CoordinatorData ? CoordinatorData?.name : 'Loading...'}</h1>
+                      <p className='font-light text-xs text-center text-slate-400 uppercase tracking-widest'>{CoordinatorData ? CoordinatorData.role : 'Loading...'}</p>
                     </div>
-                    <div className='regCgpa flex flex-row justify-center space-x-10 text-xs ml-1 mt-2'>
-                      <div className='text-center'>
-                        <h1 className='font-bold'>CNIC</h1>
-                        <p className='font-light'>{CoordinatorData ? CoordinatorData.cnic: 'Loading...'}</p>
+                    <div className='regCgpa grid grid-cols-4 gap-2 text-center text-[11px] mt-3 px-2 border-t border-gray-100 pt-3'>
+                      <div className='overflow-hidden'>
                         <h1 className='font-bold text-slate-800'>CNIC</h1>
-                        <p className='font-light text-slate-600'>{CoordinatorData ? CoordinatorData.cnic: 'Loading...'}</p>
+                        <p className='font-light text-slate-600 mt-0.5 break-words'>{CoordinatorData ? CoordinatorData.cnic : 'Loading...'}</p>
                       </div>
-                      <div className='text-center'>
+                      <div className='overflow-hidden col-span-1'>
                         <h1 className='font-bold text-slate-800'>Email</h1>
-                        <p className='font-light text-slate-600'>{CoordinatorData ? CoordinatorData.email: 'Loading...'}</p>
+                        <p className='font-light text-slate-600 mt-0.5 truncate' title={CoordinatorData?.email || ''}>{CoordinatorData ? CoordinatorData.email : 'Loading...'}</p>
                       </div>
-                      <div className='absolute inset-0 bg-white opacity-10 pointer-events-none'></div>
-            <div className='announcement pl-20 md:pl-10 pt-14 bg-slate-50 pr-20 md:pr-10'>
-              <h1 className='font-bold text-4xl mt-20 lg:mt-28 text-primary uppercase tracking-tight'>Announcements</h1>
-                        <p className='font-light text-slate-600'>{CoordinatorData ? CoordinatorData.phoneNumber: 'Loading...'}</p>
+                      <div className='overflow-hidden'>
+                        <h1 className='font-bold text-slate-800'>Phone no.</h1>
+                        <p className='font-light text-slate-600 mt-0.5 break-words'>{CoordinatorData ? CoordinatorData.phoneNumber : 'Loading...'}</p>
                       </div>
-                      {/* <div className='text-center'>
-                        <h1 className='font-bold'>ID</h1>
-                        <p className='font-light'>{AdmData ? AdmData.facultyId: 'Loading...'}</p>
-                      </div> */}
+                      <div className='overflow-hidden'>
+                        <h1 className='font-bold text-slate-800'>ID</h1>
+                        <p className='font-light text-slate-600 mt-0.5 break-words'>{CoordinatorData ? CoordinatorData.facultyId : 'Loading...'}</p>
+                      </div>
                     </div>
                   </div>
                 </div>

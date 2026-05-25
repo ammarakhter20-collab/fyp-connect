@@ -450,13 +450,12 @@ const AssignedExam = () => {
   const handleDetailsClickAsExm = (id) => {
     console.log(id, "consoled");
     const selectedAssignment = examDetailsAsExaminer.find(item => item._id === id);
-    if (selectedAssignment && selectedAssignment.groupId) {
-      const groupId = selectedAssignment.groupId._id;
+    if (selectedAssignment) {
       const user = JSON.parse(localStorage.getItem('user'));
       const basePath = user?.role === 'hod' ? '/HoDMyProjects'
                      : user?.role === 'coordinator' ? '/CoodMyProjects'
                      : '/SupPrevSupProj';
-      navigate(`${basePath}?id=${groupId}`);
+      navigate(`${basePath}?id=${selectedAssignment._id}`);
     } else {
       console.error("Group ID not found for assignment", id);
       alert("Error: Could not find group details.");
@@ -761,6 +760,7 @@ const AssignedExam = () => {
         members: reports.groupMembers || [],
         supervisor: reports.selectedOption?.name || "N/A",
         Program: reports.groupMembers?.[0]?.program?.programTitle || "N/A",
+        programId: reports.groupMembers?.[0]?.program?._id || reports.groupMembers?.[0]?.program || null,
         term: reports.term?.sessionTerm || "N/A",
         termId: reports.term?._id,
         panelId: reports.assignedPanel?._id
@@ -775,6 +775,7 @@ const AssignedExam = () => {
         members: reports.groupMembers || [],
         supervisor: reports.selectedOption?.name || "N/A",
         Program: reports.groupMembers?.[0]?.program?.programTitle || "N/A",
+        programId: reports.groupMembers?.[0]?.program?._id || reports.groupMembers?.[0]?.program || null,
         term: reports.term?.sessionTerm || "N/A",
         termId: reports.term?._id,
         panelId: reports.assignedPanel?._id

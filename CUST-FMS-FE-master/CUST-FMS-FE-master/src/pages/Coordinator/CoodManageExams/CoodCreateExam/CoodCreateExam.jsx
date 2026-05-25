@@ -75,6 +75,9 @@ const CoodCreateExam = () => {
   const [showPassFailCriteria, setShowPassFailCriteria] = useState(false);
   const [passFailCriteriaData, setPassFailCriteriaData] = useState([]);
   const [selectedCriteriaForEdit, setSelectedCriteriaForEdit] = useState(null);
+  const [departmentPrograms, setDepartmentPrograms] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [allPrograms, setAllPrograms] = useState([]);
 
 
   const handleGoBack = () => {
@@ -308,9 +311,8 @@ const CoodCreateExam = () => {
       //     _id: data._id
       //   };
       // });
-      // console.log(exmData, "Seeeeeeeeee")
-      setExamData(data.exams);
-
+      const activeExams = data.exams.filter(exam => exam.Term && exam.Term.status === 'activated');
+      setExamData(activeExams);
     } catch (error) {
       console.error('Error fetching Data:', error.message);
     } finally {
@@ -362,10 +364,81 @@ const CoodCreateExam = () => {
     }
   };
 
+  const fetchDepartments = async () => {
+    try {
+      setLoadingSpinner(true);
+      const nkey = localStorage.getItem('key');
+      const token = JSON.parse(nkey);
+      const response = await fetch(`/api/auth/fetchDepartmentData`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch Department Data');
+      }
+      const data = await response.json();
+      const mapped = data.departments.map(dept => ({
+        label: dept.departmentName,
+        value: dept._id
+      }));
+      setDepartments(mapped);
+    } catch (error) {
+      console.error('Error fetching departments:', error.message);
+    } finally {
+      setLoadingSpinner(false);
+    }
+  };
 
+  const fetchDepartmentPrograms = async () => {
+    try {
+      setLoadingSpinner(true);
+      const nkey = localStorage.getItem('key');
+      const token = JSON.parse(nkey);
+      const userData = localStorage.getItem('user');
+      const user = JSON.parse(userData);
+      const coordDeptId = user?.department?._id || user?.department;
 
+      const response = await fetch(`/api/auth/fetchProgramData`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
 
+      if (!response.ok) {
+        throw new Error('Failed to fetch Program Data');
+      }
 
+      const data = await response.json();
+
+      const allProgs = data.programs.map(p => ({
+        label: p.programTitle,
+        value: p._id,
+        department: p.department?._id || p.department
+      }));
+      setAllPrograms(allProgs);
+
+      const filtered = data.programs
+        .filter(p => {
+          const deptId = p.department?._id || p.department;
+          return String(deptId) === String(coordDeptId);
+        })
+        .map(p => ({
+          label: p.programTitle,
+          value: p._id
+        }));
+
+      setDepartmentPrograms(filtered);
+    } catch (error) {
+      console.error('Error fetching department programs:', error.message);
+    } finally {
+      setLoadingSpinner(false);
+    }
+  };
 
   useEffect(() => {
     fetchTermData()
@@ -374,6 +447,8 @@ const CoodCreateExam = () => {
     fetchExamCLOs()
     fetchExamSchedule()
     fetchPassFailCriteria()
+    fetchDepartmentPrograms()
+    fetchDepartments()
     //handleDeleteExam()
   }, [])
 
@@ -576,8 +651,10 @@ const CoodCreateExam = () => {
     const ReportDeadline = data.ReportDeadline
     const portalCategory = data.portalCategory
     const partStatus = data.partStatus
+    const program = data.program
+    const department = data.department
     console.log(data, "examData")
-    createExam(Term, ExamType, ExamWeightage, AnnouncedDate, ReportDeadline, portalCategory, partStatus)
+    createExam(Term, ExamType, ExamWeightage, AnnouncedDate, ReportDeadline, portalCategory, partStatus, program, department)
   }
 
 
@@ -625,7 +702,7 @@ const CoodCreateExam = () => {
     }
   }
 
-  const createExam = async (Term, ExamType, ExamWeightage, AnnouncedDate, ReportDeadline, portalCategory, partStatus) => {
+  const createExam = async (Term, ExamType, ExamWeightage, AnnouncedDate, ReportDeadline, portalCategory, partStatus, program, department) => {
 
     try {
       setLoadingSpinner(true); // Show loading spinner while processing
@@ -645,7 +722,7 @@ const CoodCreateExam = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          Term, ExamType, ExamWeightage, AnnouncedDate, ReportDeadline, portalCategory, partStatus
+          Term, ExamType, ExamWeightage, AnnouncedDate, ReportDeadline, portalCategory, partStatus, program, department
         }),
       });
       if (response.ok) {
@@ -744,6 +821,8 @@ const CoodCreateExam = () => {
                 //dataToEdit={examCloDataToEdit}
                 termData={termData}
                 examTypes={examTypeData}
+                departmentData={departments}
+                programOptions={allPrograms}
               />
 
 

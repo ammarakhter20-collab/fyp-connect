@@ -10,21 +10,20 @@ const ExamAssignmentAsExaminer = ({ accordionId, groupData, onReportClick, onDet
   const [newGroupData, SetNewGroupData] = useState(null);
 
 
-  const fetchCreatedExam1Details = async (termId) => {
+  const fetchCreatedExam1Details = async (termId, programId) => {
     try {
       const nkey = localStorage.getItem('key');
       const token = JSON.parse(nkey);
       const userData = localStorage.getItem('user');
       const parsedUserData = JSON.parse(userData);
-      let role = parsedUserData.role;
-      // Note: We do NOT override role to "Supervisor" here because this is the EXAMINER view.
-      // Keeping it as "faculty", "Coordinator", etc. ensures the backend only returns exams 
-      // marked for "All" (or for their specific role if applicable).
+      let role = "Examiner";
+      // This ensures the backend only returns exams 
+      // marked for "All" panel members.
 
       console.log(role, "Roleeeeee");
       console.log("Checking Term", termId);
 
-      const response = await fetch(`${baseUrl}/api/ExamCreationRoutes/getParticularExam?role=${role}&termId=${termId}`, {
+      const response = await fetch(`${baseUrl}/api/ExamCreationRoutes/getParticularExam?role=${role}&termId=${termId}&programId=${programId || ''}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -47,22 +46,51 @@ const ExamAssignmentAsExaminer = ({ accordionId, groupData, onReportClick, onDet
 
 
       const ExamsData = data.exams.map(exm => {
-        let DateStr;
+        const examTypeName = exm.ExamType?.examName || '';
+        const isAttendance = examTypeName.toLowerCase().includes('attendance');
+
+        let DateStr = "N/A";
+        let scheduledDateTime = null;
+
         if (data.schedule && data.schedule.length > 0) {
           DateStr = convertToNormalDateFormat(data.schedule[0].ExamDate);
-        }
-        else {
-          DateStr = "N/A"
-        }
-        const examType = exm.ExamType.examName
-        const examWeightage = exm?.ExamWeightage || null;
 
-        setExamWeightage(examWeightage)
-        return {
-          examType: examType,
-          examDate: DateStr
+          // Parse scheduled date + time into a single Date object
+          const rawDate = new Date(data.schedule[0].ExamDate);
+          const rawTime = data.schedule[0].ExamTime || '';
+          const timeMatch = rawTime.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+          if (timeMatch) {
+            let hours = parseInt(timeMatch[1], 10);
+            const minutes = parseInt(timeMatch[2], 10);
+            const period = timeMatch[3].toUpperCase();
+            if (period === 'PM' && hours !== 12) hours += 12;
+            if (period === 'AM' && hours === 12) hours = 0;
+            scheduledDateTime = new Date(rawDate);
+            scheduledDateTime.setHours(hours, minutes, 0, 0);
+          } else {
+            // No parseable time — treat as start of scheduled day
+            scheduledDateTime = new Date(rawDate);
+            scheduledDateTime.setHours(0, 0, 0, 0);
+          }
         }
-      })
+
+        const examWeightage = exm?.ExamWeightage || null;
+        const now = new Date();
+        setExamWeightage(examWeightage);
+
+        // Attendance: always visible immediately after creation
+        // All others: only visible once the scheduled date+time has arrived
+        if (!isAttendance) {
+          if (!scheduledDateTime || now < scheduledDateTime) {
+            return null; // Not yet time — exclude
+          }
+        }
+
+        return {
+          examType: examTypeName,
+          examDate: DateStr,
+        };
+      }).filter(Boolean); // Remove nulls
 
       return ExamsData;
     } catch (error) {
@@ -169,7 +197,7 @@ const ExamAssignmentAsExaminer = ({ accordionId, groupData, onReportClick, onDet
       // Map over the groups and fetch exam details for each termId
       const updatedDataPromises = groups.map(async (group) => {
         // Fetch created exam details for the given termId
-        const CreatedExam = await fetchCreatedExam1Details(group.termId);
+        const CreatedExam = await fetchCreatedExam1Details(group.termId, group.programId);
         console.log(CreatedExam, "createdexamdata fetched by group termId");
 
         return {
@@ -179,10 +207,11 @@ const ExamAssignmentAsExaminer = ({ accordionId, groupData, onReportClick, onDet
         };
       });
 
-      // Wait for all promises to resolve
+      // Wait for all promises to resolve to get the updated group data
       const updatedData = await Promise.all(updatedDataPromises);
-      // Filter out rows where no exam is assigned for this role
-      const filteredData = updatedData.filter(item => item.examType !== "No Exam");
+
+      // Filter out groups that don't have an active exam to evaluate
+      const filteredData = updatedData.filter(group => group.examType !== "No Exam");
       setUpdatedData(filteredData);
     } catch (error) {
       console.error('Error fetching all exam details:', error.message);

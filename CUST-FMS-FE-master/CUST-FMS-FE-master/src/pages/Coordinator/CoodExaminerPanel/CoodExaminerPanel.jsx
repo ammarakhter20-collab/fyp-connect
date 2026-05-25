@@ -433,6 +433,7 @@ const CoodExaminerPanel = () => {
         index: index + 1,
         label: faculty.name,
         department: faculty.department?.departmentName || "N/A",
+        departmentId: faculty.department?._id || faculty.department,
         program: faculty.program,
         role: faculty.role?.toLowerCase(),
       }));

@@ -182,6 +182,7 @@ router.get(
   FYPtermController.findActivatedStatus
 );
 router.put("/deactivate", authMiddleware, FYPtermController.deactivateTerm);
+router.delete("/deleteTerm/:id", authMiddleware, FYPtermController.deleteFYPterm);
 router.get(
   "/fetchTermCount",
   authMiddleware,

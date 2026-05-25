@@ -324,7 +324,7 @@ const getExamsForFaculty = async (req, res) => {
     // Extract role from query
     let { role } = req.query;
     console.log("Checking Role", role);
-    if (role === "faculty" || role === "hod" || role === "coordinator") {
+    if (role === "faculty") {
       console.log("Inside If");
       role = "Supervisor";
     }
@@ -367,7 +367,7 @@ const getSpecificScheduledExam11 = async (req, res) => {
   try {
     let { role, termId } = req.params;
     console.log(termId, "Term ID received");
-    if (role === "faculty" || role === "hod" || role === "coordinator") {
+    if (role === "faculty") {
       role = "Supervisor";
     }
     console.log(role, "ROLEEEE");

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import LoadingSpinner from '../../../Components/LoadingSpinner/LoadingSpinner';
 import { initFlowbite } from 'flowbite';
 import CardOnebutton from '../../../Components/Cards/CardOnebutton';
@@ -17,6 +18,7 @@ const options = [
   ];
 
 const CoordAddAnnouncement = ({accordionId}) => {
+    const location = useLocation();
  
     const [loadingSpinner, setLoadingSpinner] = useState(false);
     const [showCreateAnnoun, setShowCreateAnnoun] = useState(false);
@@ -367,6 +369,15 @@ const handleViewAnnoun = (an) => {
  setAnnouncementDetailsVisible(true);
  setSelectedAnnouncement(an);
 };
+
+useEffect(() => {
+    if (Array.isArray(announData) && announData.length > 0 && location.state?.selectedAnnouncementId) {
+        const found = announData.find(a => a._id === location.state.selectedAnnouncementId);
+        if (found) {
+            handleViewAnnoun(found);
+        }
+    }
+}, [announData, location.state]);
 
 const handleEditAnnoun = (an) => {
     setAnnounFor({ label: an.announFor, value: an.announFor }); // Corrected line

@@ -16,6 +16,7 @@ import FinalEvaluation from './StdFinalEvaluation';
 import OverallEvaluationI from './StdOverallEvaluationI';
 import OverallEvaluationII from './StdOverallEvaluationII';
 import OverAll from './StdOverAll';
+import StdOverAllReport from './StdOverAllReport';
 import StudentProjectDetails from './StdStudentProjectDetails';
 import ButbgPrimary from '../../Components/Buttons/ButbgPrimary';
 import ReportSubmissionComponent from './ReportSubmissionComponent'; // Import the new component
@@ -31,7 +32,7 @@ const ProjectDetails = ({ data }) => {
   const [createdExam, setCreatedExam] = useState('');
   const [showReportInstance, setShowReportInstance] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [FetchedGroupReports, setFetchedGroupReports] = useState('');
+  const [FetchedGroupReports, setFetchedGroupReports] = useState([]);
   const [ReportDeadline, setReportDeadline] = useState('');
   const [rejectionFeedback, setRejectionFeedback] = useState('');
   const [isReportRejected, setIsReportRejected] = useState(false);
@@ -58,13 +59,13 @@ const ProjectDetails = ({ data }) => {
   }, []);
 
   useEffect(() => {
-    const fypData = JSON.parse(localStorage.getItem("FypData"));
-    if (fypData && fypData.partStatus !== "part-II") {
-      setIsPart2Disabled(true);
+    const fypData = JSON.parse(localStorage.getItem("FYPData") || localStorage.getItem("FypData"));
+    if (fypData && fypData.partStatus === "part-II") {
+      setIsPart2Disabled(false); // Do not disable Part-2 if they are in Part-II
     } else {
-      setIsPart2Disabled(false);
+      setIsPart2Disabled(true);  // Disable Part-2 if they are in Part-I
     }
-  }, [localStorage.getItem("FypData")]);
+  }, []);
 
   useEffect(() => {
     fetchCreatedExamReport();
@@ -92,15 +93,13 @@ const ProjectDetails = ({ data }) => {
   // }, [ReportDeadline]);
 
   useEffect(() => {
-    const currentDate = new Date();
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-    if (ReportDeadline) {
-      const ReportDeadlineDate = new Date(ReportDeadline);
+    if (createdExam && createdExam.ReportDeadline) {
+      const deadlineStr = createdExam.ReportDeadline.split('T')[0];
 
-      currentDate.setHours(0, 0, 0, 0);
-      ReportDeadlineDate.setHours(0, 0, 0, 0);
-
-      if (ReportDeadlineDate < currentDate) {
+      if (deadlineStr < todayStr) {
         // Only hide the form if the report is NOT in rejected state
         if (!isReportRejected) {
           console.log("Deadline passed and not rejected — hiding form");
@@ -110,7 +109,7 @@ const ProjectDetails = ({ data }) => {
         }
       }
     }
-  }, [ReportDeadline, isReportRejected]);
+  }, [createdExam, isReportRejected]);
 
 
   console.log("Checking is Part 2 status enabled", isPart2Disabled);
@@ -157,70 +156,118 @@ const ProjectDetails = ({ data }) => {
       setIsLoading(true);
       const user = JSON.parse(localStorage.getItem("user"));
       const FYPData = JSON.parse(localStorage.getItem("FYPData"));
-      console.log("Userrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr", FYPData);
+      console.log("User FYPData:", FYPData);
+      
+      if (!FYPData || !FYPData.assignedPanel) {
+        console.log("No panel assigned to this group yet.");
+        setShowReportInstance(false);
+        return;
+      }
+      
       const panelId = FYPData.assignedPanel;
-      console.log("PanelIddddddddddddddddddddddddddddd", panelId);
+      console.log("PanelId:", panelId);
       console.log("Checking User Role", user.role);
       
-      // Extract the term from user.term
-      const termId = user.term;
-      console.log("Checking Term", termId);
       const config = { headers: { Accept: 'application/json', Authorization: `Bearer ${key}` } };
-      console.log("Request Sent");
+      
+      // Fetch already submitted reports for the group
+      let reports = [];
+      try {
+        const reportsResponse = await axios.get(`/api/StudentReport/gettingGroupReports/${FYPData._id}`, config);
+        if (reportsResponse.status === 200) {
+          reports = reportsResponse.data.reports || [];
+        }
+      } catch (err) {
+        console.log("No reports found or error fetching reports:", err.message);
+      }
+      
+      console.log("Requesting scheduled exams...");
       const response = await axios.get(`/api/ScheduleExamRoutes/scheduled/specific/${panelId}?role=${user.role}`, config);
   
-      if (response.status === 200) {
-        console.log("Fetched Examsssssssssssssssssss", response.data.exams[0].CreatedExam);
-        setCreatedExam(response.data.exams[0].CreatedExam);
-        // setReportDeadline(response.data.exams[0].CreatedExam.AnnouncedDate)
-        // console.log("Checking Announced Date", response.data.exams[0].CreatedExam.AnnouncedDate);
-        // console.log("Checking Report Deadline", response.data.exams[0].CreatedExam.ReportDeadline);
-        // console.log("CHecking Deeeeeeeeeeeeaaaaaaaaaaadlddddddddlineeeeeee", response.data.exams[0].ReportDeadline)
-        // setReportDeadline(response.data.exams[0].CreatedExam.ReportDeadline)
-        // const formattedReportDeadline = response.data.exams[0].CreatedExam.ReportDeadline.split('T')[0];
-        const formattedReportDeadline = convertToDDMMYYYY(response.data.exams[0].CreatedExam.ReportDeadline.split('T')[0]); // Assuming ReportDeadline is an ISO date string
+      if (response.status === 200 && response.data && response.data.exams) {
+        console.log("Fetched scheduled exams:", response.data.exams);
+        
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        
+        let activeExam = null;
+        let activeReportStatus = null;
+        let activeFeedback = '';
 
-        console.log("formattedReportDeadline", formattedReportDeadline)
-    setReportDeadline(formattedReportDeadline);
+        for (const exam of response.data.exams) {
+          const examEntry = exam.CreatedExam;
+          if (!examEntry || !examEntry.ExamType) continue;
 
-    const formattedAnnouncedDate = response.data.exams[0].CreatedExam.AnnouncedDate.split('T')[0];
-    const currentDate = new Date().toLocaleDateString('en-GB');
-console.log("Checking Current Date:", currentDate);
-    
+          const examId = examEntry.ExamType._id;
+          const matchingReport = reports.find(r => r.Exam?._id === examId || r.Exam === examId);
+          const reportStatus = matchingReport ? matchingReport.status : null;
 
-    console.log("Checking Announced Date", formattedAnnouncedDate);
-    console.log("Checking Report Deadline Date", formattedReportDeadline);
-    // console.log("Checking Current Date", currentDate);
-    // const currentDate = new Date();
-    // const currentDate = new Date();
-// const localDate = new Date(currentDate.getTime() - currentDate.getTimezoneOffset() * 60000).toISOString().split('T')[0];
-// console.log("Checking Current Date", localDate);
+          const announcedDateRaw = examEntry.AnnouncedDate;
+          const reportDeadlineRaw = examEntry.ReportDeadline;
+          
+          let isWindowOpen = false;
+          if (announcedDateRaw && reportDeadlineRaw) {
+            const announcedStr = announcedDateRaw.split('T')[0];
+            const deadlineStr = reportDeadlineRaw.split('T')[0];
+            isWindowOpen = announcedStr <= todayStr && todayStr <= deadlineStr;
+          } else {
+            isWindowOpen = true; 
+          }
 
-// // If you need the date in DD/MM/YYYY format
-// const [year, month, day] = localDate.split('-');
-// const formattedDate = `${day}/${month}/${year}`;
-// console.log("Checking Current Date (Formatted)", formattedDate);
+          console.log(`Exam: ${examEntry.ExamType.examName}, status: ${reportStatus}, window: ${isWindowOpen}`);
 
+          // Trigger report submission if:
+          // 1. Report is rejected (requires resubmission)
+          // 2. No report exists yet and the submission window is active
+          if (reportStatus === 'rejected') {
+            activeExam = examEntry;
+            activeReportStatus = 'rejected';
+            activeFeedback = matchingReport.supervisorFeedback || 'Your report was denied. Please fix the issues and resubmit.';
+            break;
+          } else if (!reportStatus && isWindowOpen) {
+            activeExam = examEntry;
+            activeReportStatus = null;
+            break;
+          }
+        }
 
+        if (activeExam) {
+          console.log("Setting active exam for report submission:", activeExam.ExamType.examName);
+          setCreatedExam(activeExam);
+          
+          const reportDeadlineRaw = activeExam.ReportDeadline;
+          if (reportDeadlineRaw) {
+            const formattedReportDeadline = convertToDDMMYYYY(reportDeadlineRaw.split('T')[0]);
+            setReportDeadline(formattedReportDeadline);
+          }
 
-// Split the ISO date and rearrange it to 'DD/MM/YYYY' format
-const [year, month, day] = formattedAnnouncedDate.split('-');
-const formattedDate = `${day}/${month}/${year}`;
-console.log("Checking FormattedDate", formattedDate);
-console.log("Again Checking current Date", currentDate);
-
-console.log("Formatted Report Deadline Newly", formattedReportDeadline);
-
-// Compare the dates
-if ((formattedDate === currentDate || formattedDate < currentDate) && formattedReportDeadline >= currentDate) {
-    console.log("Show Report Check Running");
-    setShowReportInstance(true);
-}
+          if (activeReportStatus === 'rejected') {
+            setRejectionFeedback(activeFeedback);
+            setIsReportRejected(true);
+          } else {
+            setRejectionFeedback('');
+            setIsReportRejected(false);
+          }
+          setShowReportInstance(true);
+        } else {
+          console.log("No active exam requires report submission.");
+          const defaultExam = response.data.exams[0]?.CreatedExam || '';
+          setCreatedExam(defaultExam);
+          if (defaultExam && defaultExam.ReportDeadline) {
+            const formattedReportDeadline = convertToDDMMYYYY(defaultExam.ReportDeadline.split('T')[0]);
+            setReportDeadline(formattedReportDeadline);
+          }
+          setRejectionFeedback('');
+          setIsReportRejected(false);
+          setShowReportInstance(false);
+        }
       } else {
-        console.log('Error fetching Exam data');
+        console.log('No exams returned or error fetching exam data');
+        setShowReportInstance(false);
       }
     } catch (error) {
       console.error('Error fetching Exam data:', error);
+      setShowReportInstance(false);
     } finally {
       setIsLoading(false);
     }
@@ -338,7 +385,7 @@ if ((formattedDate === currentDate || formattedDate < currentDate) && formattedR
               </div>
             </div>
           </Tabs.Item>
-          <Tabs.Item title="Part-2" className='border-b-2 border-transparent' disabled={!isPart2Disabled}>
+          <Tabs.Item title="Part-2" className='border-b-2 border-transparent' disabled={isPart2Disabled}>
             <div className="partTwoDetails flex flex-col gap-3">
               <MidEvaluation accordionId={11} data={Data.midIIEvaluationData} remarksData={Data.proposalRemarksData} accordText="Mid II Evaluation" perc="(30)" />
               <FinalEvaluation accordionId={12} data={Data.finalEvaluationData} remarksData={Data.proposalRemarksData} accordText="Final II Evaluation" />
@@ -348,9 +395,9 @@ if ((formattedDate === currentDate || formattedDate < currentDate) && formattedR
               </div>
             </div>
           </Tabs.Item>
-          <Tabs.Item title="Over All" className='border-b-2 border-transparent' disabled={!isPart2Disabled}>
+          <Tabs.Item title="Overall" className='border-b-2 border-transparent'>
             <div className="OverallEvaluationDetails flex flex-col gap-3">
-              <OverAll accordionId={14} data={Data.OverAllData} />
+              <StdOverAllReport />
             </div>
             <div className='flex flex-row justify-end mr-5 mt-5'>
               <ButbgPrimary text="Back" onClick={handleGoBack} />

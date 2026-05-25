@@ -47,7 +47,7 @@ const ShowAllUploadedReports = ({accordionId, handleBack, FetchedGroupReports}) 
                     </tr>
                   </thead>
                   <tbody>
-                  {FetchedGroupReports.map((report, index) => (
+                  {(Array.isArray(FetchedGroupReports) ? FetchedGroupReports : []).map((report, index) => (
                     <tr key={report._id} className='border-b text-center'>
                       <td className="px-6 py-3">{index + 1}</td>
                       <td className="px-6 py-3 text-left">{report.FYPGroup.topicData.topic}</td>
